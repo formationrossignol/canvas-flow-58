@@ -8,51 +8,78 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Core Colors - Inspired by Apple/Sonos minimalism */
+    --background: 0 0% 99%;
+    --foreground: 220 15% 15%;
 
+    /* Canvas & Cards */
+    --canvas: 0 0% 98%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 220 15% 15%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    /* Primary - Deep sophisticated blue */
+    --primary: 224 45% 42%;
+    --primary-glow: 224 55% 65%;
+    --primary-foreground: 0 0% 100%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Secondary - Warm sage green */
+    --secondary: 150 25% 82%;
+    --secondary-dark: 150 35% 45%;
+    --secondary-foreground: 150 40% 25%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Accent - Soft coral */
+    --accent: 15 85% 75%;
+    --accent-dark: 15 70% 55%;
+    --accent-foreground: 15 50% 25%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Neutral tones */
+    --muted: 220 10% 96%;
+    --muted-foreground: 220 10% 45%;
+    --border: 220 15% 92%;
+    --input: 220 15% 94%;
+    --ring: 224 45% 42%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Semantic colors */
+    --destructive: 0 75% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --warning: 45 95% 65%;
+    --warning-foreground: 45 30% 25%;
+    --success: 140 60% 50%;
+    --success-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Canvas tools */
+    --tool-active: 224 55% 65%;
+    --tool-hover: 220 15% 95%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(224 45% 42%), hsl(224 55% 65%));
+    --gradient-warm: linear-gradient(135deg, hsl(15 85% 75%), hsl(45 95% 80%));
+    --gradient-cool: linear-gradient(135deg, hsl(224 55% 65%), hsl(150 45% 65%));
+    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(220 15% 98%));
 
-    --radius: 0.5rem;
+    /* Shadows */
+    --shadow-soft: 0 2px 20px -2px hsl(220 15% 15% / 0.08);
+    --shadow-float: 0 8px 30px -8px hsl(220 15% 15% / 0.15);
+    --shadow-glow: 0 0 30px hsl(224 55% 65% / 0.3);
 
-    --sidebar-background: 0 0% 98%;
+    /* Radius */
+    --radius: 0.75rem;
+    --radius-sm: 0.5rem;
+    --radius-lg: 1rem;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-spring: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Sidebar */
+    --sidebar-background: 220 15% 98%;
+    --sidebar-foreground: 220 15% 35%;
+    --sidebar-primary: 224 45% 42%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 15% 95%;
+    --sidebar-accent-foreground: 220 15% 25%;
+    --sidebar-border: 220 15% 90%;
+    --sidebar-ring: 224 45% 42%;
   }
 
   .dark {
@@ -100,6 +127,56 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+    overflow: hidden; /* Prevent page scrolling for canvas app */
+  }
+
+  /* Canvas utilities */
+  .canvas-cursor-grab {
+    cursor: grab;
+  }
+  
+  .canvas-cursor-grabbing {
+    cursor: grabbing;
+  }
+
+  /* Custom animations */
+  .animate-float-in {
+    animation: float-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .animate-scale-in {
+    animation: scale-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Micro-interactions */
+  .tool-button {
+    @apply transition-all duration-200 ease-out hover:scale-105 active:scale-95;
+  }
+  
+  .floating-element {
+    @apply shadow-[var(--shadow-float)] backdrop-blur-sm;
+  }
+}
+
+@keyframes float-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes scale-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
   }
 }
