@@ -1,7 +1,12 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import { CanvasToolbar } from "./CanvasToolbar";
 import { CanvasObject } from "./CanvasObject";
+import { CanvasHeader } from "./CanvasHeader";
+import { PropertyPanel } from "./PropertyPanel";
+import { SelectionBox } from "./SelectionBox";
+import { ResizeHandles } from "./ResizeHandles";
 import { useCanvasInteraction } from "./hooks/useCanvasInteraction";
+import { useSelection } from "./hooks/useSelection";
 
 export interface CanvasElement {
   id: string;
@@ -14,6 +19,10 @@ export interface CanvasElement {
   content?: string;
   fontSize?: number;
   borderRadius?: number;
+  opacity?: number;
+  rotation?: number;
+  locked?: boolean;
+  zIndex?: number;
 }
 
 export const Canvas = () => {
@@ -21,15 +30,35 @@ export const Canvas = () => {
   const [elements, setElements] = useState<CanvasElement[]>([]);
   const [selectedTool, setSelectedTool] = useState<string>('select');
   const [selectedColor, setSelectedColor] = useState('#FFE066');
+  const [boardTitle, setBoardTitle] = useState('Tableau sans titre');
+  const [isPropertyPanelVisible, setIsPropertyPanelVisible] = useState(false);
   
   const {
     canvasTransform,
     isSpacePressed,
-    handleMouseDown,
-    handleMouseMove,
-    handleMouseUp,
+    handleMouseDown: canvasMouseDown,
+    handleMouseMove: canvasMouseMove,
+    handleMouseUp: canvasMouseUp,
     handleWheel,
   } = useCanvasInteraction(containerRef);
+
+  const {
+    selection,
+    selectElement,
+    selectMultiple,
+    clearSelection,
+    startSelectionBox,
+    updateSelectionBox,
+    endSelectionBox,
+    isSelected,
+  } = useSelection();
+
+  // Mock collaborators data
+  const collaborators = [
+    { id: '1', name: 'Vous', avatar: '', color: '#6366F1' },
+    { id: '2', name: 'Alice Martin', avatar: '', color: '#10B981' },
+    { id: '3', name: 'Bob Dupont', avatar: '', color: '#F59E0B' },
+  ];
 
   const handleAddElement = useCallback((type: CanvasElement['type']) => {
     const newElement: CanvasElement = {
@@ -56,46 +85,120 @@ export const Canvas = () => {
     setElements(prev => prev.filter(el => el.id !== id));
   }, []);
 
+  const handleElementDuplicate = useCallback((id: string) => {
+    const element = elements.find(el => el.id === id);
+    if (!element) return;
+
+    const newElement: CanvasElement = {
+      ...element,
+      id: `${element.type}-${Date.now()}`,
+      x: element.x + 20,
+      y: element.y + 20,
+    };
+    
+    setElements(prev => [...prev, newElement]);
+  }, [elements]);
+
+  // Enhanced selection and interaction handlers
+  const handleCanvasMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (selectedTool === 'select' && !isSpacePressed) {
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+
+      const x = (e.clientX - rect.left - canvasTransform.x) / canvasTransform.scale;
+      const y = (e.clientY - rect.top - canvasTransform.y) / canvasTransform.scale;
+
+      // Start selection box
+      startSelectionBox(x, y);
+      clearSelection();
+    } else {
+      canvasMouseDown(e);
+    }
+  }, [selectedTool, isSpacePressed, canvasTransform, startSelectionBox, clearSelection, canvasMouseDown]);
+
+  const handleCanvasMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (selection.selectionBox.isActive) {
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+
+      const x = (e.clientX - rect.left - canvasTransform.x) / canvasTransform.scale;
+      const y = (e.clientY - rect.top - canvasTransform.y) / canvasTransform.scale;
+      
+      updateSelectionBox(x, y);
+    } else {
+      canvasMouseMove(e);
+    }
+  }, [selection.selectionBox.isActive, canvasTransform, updateSelectionBox, canvasMouseMove]);
+
+  const handleCanvasMouseUp = useCallback(() => {
+    if (selection.selectionBox.isActive) {
+      // Find elements within selection box
+      const box = selection.selectionBox;
+      const selectedElements = elements.filter(element => {
+        const elementRight = element.x + element.width;
+        const elementBottom = element.y + element.height;
+        const boxLeft = Math.min(box.startX, box.endX);
+        const boxTop = Math.min(box.startY, box.endY);
+        const boxRight = Math.max(box.startX, box.endX);
+        const boxBottom = Math.max(box.startY, box.endY);
+
+        return (
+          element.x < boxRight &&
+          elementRight > boxLeft &&
+          element.y < boxBottom &&
+          elementBottom > boxTop
+        );
+      });
+
+      selectMultiple(selectedElements.map(el => el.id));
+      endSelectionBox();
+    } else {
+      canvasMouseUp();
+    }
+  }, [selection.selectionBox, elements, selectMultiple, endSelectionBox, canvasMouseUp]);
+
+  const handleElementClick = useCallback((id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const isMultiSelect = e.ctrlKey || e.metaKey;
+    selectElement(id, isMultiSelect);
+  }, [selectElement]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Delete' || e.key === 'Backspace') {
-        // TODO: Delete selected elements
+        selection.selectedIds.forEach(id => handleElementDelete(id));
+        clearSelection();
+      } else if (e.key === 'Escape') {
+        clearSelection();
+      } else if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+        e.preventDefault();
+        selection.selectedIds.forEach(id => handleElementDuplicate(id));
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [selection.selectedIds, handleElementDelete, handleElementDuplicate, clearSelection]);
 
+  const selectedElements = elements.filter(el => isSelected(el.id));
   const cursor = isSpacePressed ? 'canvas-cursor-grabbing' : selectedTool === 'select' ? 'canvas-cursor-grab' : 'crosshair';
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-canvas">
       {/* Header */}
-      <header className="absolute top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border">
-        <div className="flex items-center justify-between px-6 py-3">
-          <div className="flex items-center gap-4">
-            <h1 className="text-xl font-semibold text-foreground">CollabBoard</h1>
-            <div className="text-sm text-muted-foreground">Tableau sans titre</div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-gradient-primary flex items-center justify-center text-white text-sm font-medium">
-                U
-              </div>
-              <span className="text-sm text-muted-foreground">Vous</span>
-            </div>
-          </div>
-        </div>
-      </header>
+      <CanvasHeader
+        boardTitle={boardTitle}
+        onTitleChange={setBoardTitle}
+        collaborators={collaborators}
+      />
 
       {/* Canvas Container */}
       <div
         ref={containerRef}
         className={`absolute inset-0 pt-16 ${cursor}`}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
+        onMouseDown={handleCanvasMouseDown}
+        onMouseMove={handleCanvasMouseMove}
+        onMouseUp={handleCanvasMouseUp}
         onWheel={handleWheel}
         style={{ cursor: cursor === 'canvas-cursor-grab' ? 'grab' : cursor === 'canvas-cursor-grabbing' ? 'grabbing' : cursor }}
       >
@@ -119,15 +222,29 @@ export const Canvas = () => {
             }}
           />
 
+          {/* Selection Box */}
+          <SelectionBox {...selection.selectionBox} />
+
           {/* Canvas Elements */}
           {elements.map(element => (
-            <CanvasObject
-              key={element.id}
-              element={element}
-              onUpdate={handleElementUpdate}
-              onDelete={handleElementDelete}
-              isSelected={false}
-            />
+            <div key={element.id} className="relative">
+              <CanvasObject
+                element={element}
+                onUpdate={handleElementUpdate}
+                onDelete={handleElementDelete}
+                onClick={handleElementClick}
+                isSelected={isSelected(element.id)}
+              />
+              
+              {/* Resize Handles */}
+              {isSelected(element.id) && (
+                <ResizeHandles
+                  element={element}
+                  onUpdate={handleElementUpdate}
+                  isVisible={true}
+                />
+              )}
+            </div>
           ))}
         </div>
       </div>
@@ -141,15 +258,35 @@ export const Canvas = () => {
         onAddElement={handleAddElement}
       />
 
+      {/* Property Panel */}
+      <PropertyPanel
+        selectedElements={selectedElements}
+        onUpdate={handleElementUpdate}
+        onDelete={handleElementDelete}
+        onDuplicate={handleElementDuplicate}
+        isVisible={isPropertyPanelVisible}
+        onToggle={() => setIsPropertyPanelVisible(!isPropertyPanelVisible)}
+      />
+
       {/* Zoom Controls */}
       <div className="absolute bottom-6 right-6 flex flex-col gap-2 bg-card/95 backdrop-blur-sm rounded-lg border border-border p-2 shadow-float">
-        <button className="w-10 h-10 rounded-md bg-muted hover:bg-tool-hover flex items-center justify-center transition-colors">
+        <button 
+          className="w-10 h-10 rounded-md bg-muted hover:bg-tool-hover flex items-center justify-center transition-colors"
+          onClick={() => {
+            // TODO: Implement zoom in
+          }}
+        >
           <span className="text-lg font-medium">+</span>
         </button>
         <div className="text-xs text-center text-muted-foreground py-1">
           {Math.round(canvasTransform.scale * 100)}%
         </div>
-        <button className="w-10 h-10 rounded-md bg-muted hover:bg-tool-hover flex items-center justify-center transition-colors">
+        <button 
+          className="w-10 h-10 rounded-md bg-muted hover:bg-tool-hover flex items-center justify-center transition-colors"
+          onClick={() => {
+            // TODO: Implement zoom out
+          }}
+        >
           <span className="text-lg font-medium">−</span>
         </button>
       </div>

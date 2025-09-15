@@ -6,10 +6,11 @@ interface CanvasObjectProps {
   element: CanvasElement;
   onUpdate: (id: string, updates: Partial<CanvasElement>) => void;
   onDelete: (id: string) => void;
+  onClick: (id: string, e: React.MouseEvent) => void;
   isSelected: boolean;
 }
 
-export const CanvasObject = ({ element, onUpdate, onDelete, isSelected }: CanvasObjectProps) => {
+export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected }: CanvasObjectProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(element.content || '');
@@ -18,12 +19,13 @@ export const CanvasObject = ({ element, onUpdate, onDelete, isSelected }: Canvas
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
+    onClick(element.id, e);
     setIsDragging(true);
     dragStart.current = {
       x: e.clientX - element.x,
       y: e.clientY - element.y,
     };
-  }, [element.x, element.y]);
+  }, [element.x, element.y, element.id, onClick]);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isDragging) return;
@@ -83,6 +85,8 @@ export const CanvasObject = ({ element, onUpdate, onDelete, isSelected }: Canvas
       cursor: isDragging ? 'grabbing' : 'grab',
       transition: isDragging ? 'none' : 'transform 0.2s ease-out',
       transform: isSelected ? 'scale(1.02)' : 'scale(1)',
+      opacity: element.opacity || 1,
+      zIndex: element.zIndex || 1,
     };
 
     switch (element.type) {
