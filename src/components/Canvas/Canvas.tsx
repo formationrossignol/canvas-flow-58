@@ -6,6 +6,7 @@ import { PropertyPanel } from "./PropertyPanel";
 import { SelectionBox } from "./SelectionBox";
 import { ResizeHandles } from "./ResizeHandles";
 import { TemplatePanel } from "./TemplatePanel";
+import { ExportImportModal } from "./ExportImportModal";
 import { useCanvasInteraction } from "./hooks/useCanvasInteraction";
 import { useSelection } from "./hooks/useSelection";
 
@@ -35,6 +36,7 @@ export const Canvas = () => {
   const [boardTitle, setBoardTitle] = useState('Tableau sans titre');
   const [isPropertyPanelVisible, setIsPropertyPanelVisible] = useState(false);
   const [isTemplatePanelVisible, setIsTemplatePanelVisible] = useState(false);
+  const [isExportModalVisible, setIsExportModalVisible] = useState(false);
   
   const {
     canvasTransform,
@@ -138,6 +140,11 @@ export const Canvas = () => {
     clearSelection();
   }, [clearSelection]);
 
+  const handleImportElements = useCallback((importedElements: CanvasElement[]) => {
+    setElements(importedElements);
+    clearSelection();
+  }, [clearSelection]);
+
   // Enhanced selection and interaction handlers
   const handleCanvasMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (selectedTool === 'select' && !isSpacePressed) {
@@ -230,6 +237,7 @@ export const Canvas = () => {
         onTitleChange={setBoardTitle}
         collaborators={collaborators}
         onOpenTemplates={() => setIsTemplatePanelVisible(true)}
+        onOpenExport={() => setIsExportModalVisible(true)}
       />
 
       {/* Canvas Container */}
@@ -253,12 +261,23 @@ export const Canvas = () => {
         >
           {/* Grid Background */}
           <div 
-            className="absolute inset-0 opacity-30"
+            className="absolute inset-0"
             style={{
               backgroundImage: `
-                radial-gradient(circle at 1px 1px, hsl(var(--muted-foreground) / 0.3) 1px, transparent 0)
+                linear-gradient(to right, hsl(var(--border)) 1px, transparent 1px),
+                linear-gradient(to bottom, hsl(var(--border)) 1px, transparent 1px)
               `,
-              backgroundSize: '20px 20px',
+              backgroundSize: '24px 24px',
+            }}
+          />
+          <div 
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `
+                linear-gradient(to right, hsl(var(--muted-foreground) / 0.2) 1px, transparent 1px),
+                linear-gradient(to bottom, hsl(var(--muted-foreground) / 0.2) 1px, transparent 1px)
+              `,
+              backgroundSize: '120px 120px',
             }}
           />
 
@@ -313,6 +332,15 @@ export const Canvas = () => {
         isVisible={isTemplatePanelVisible}
         onClose={() => setIsTemplatePanelVisible(false)}
         onApplyTemplate={handleApplyTemplate}
+      />
+
+      {/* Export/Import Modal */}
+      <ExportImportModal
+        isOpen={isExportModalVisible}
+        onClose={() => setIsExportModalVisible(false)}
+        elements={elements}
+        onImport={handleImportElements}
+        canvasTransform={canvasTransform}
       />
 
       {/* Zoom Controls */}

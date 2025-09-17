@@ -7,13 +7,15 @@ interface CanvasHeaderProps {
   onTitleChange: (title: string) => void;
   collaborators: Array<{ id: string; name: string; avatar: string; color: string }>;
   onOpenTemplates: () => void;
+  onOpenExport: () => void;
 }
 
 export const CanvasHeader = ({ 
   boardTitle, 
   onTitleChange, 
   collaborators,
-  onOpenTemplates
+  onOpenTemplates,
+  onOpenExport
 }: CanvasHeaderProps) => {
   return (
     <header className="absolute top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border shadow-soft">
@@ -86,7 +88,7 @@ export const CanvasHeader = ({
             Templates
           </Button>
           
-          <Button variant="ghost" size="sm" className="gap-2">
+          <Button variant="ghost" size="sm" className="gap-2" onClick={onOpenExport}>
             <Download size={16} />
             Export
           </Button>
