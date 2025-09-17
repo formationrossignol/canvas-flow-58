@@ -1,4 +1,4 @@
-import { Square, Circle, Type, StickyNote, MousePointer2, ArrowRight, Palette } from "lucide-react";
+import { Square, Circle, Type, StickyNote, MousePointer2, ArrowRight, Palette, Image, Layout } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CanvasElement } from "./Canvas";
 
@@ -16,6 +16,7 @@ const tools = [
   { id: 'text', icon: Type, label: 'Texte', shortcut: 'T' },
   { id: 'rectangle', icon: Square, label: 'Rectangle', shortcut: 'R' },
   { id: 'circle', icon: Circle, label: 'Cercle', shortcut: 'C' },
+  { id: 'image', icon: Image, label: 'Image', shortcut: 'I' },
   { id: 'arrow', icon: ArrowRight, label: 'Flèche', shortcut: 'A' },
 ];
 

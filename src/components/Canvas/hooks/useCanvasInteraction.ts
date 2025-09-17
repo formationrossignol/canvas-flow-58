@@ -105,5 +105,6 @@ export const useCanvasInteraction = (containerRef: React.RefObject<HTMLDivElemen
     handleMouseMove,
     handleMouseUp,
     handleWheel,
+    setCanvasTransform,
   };
 };

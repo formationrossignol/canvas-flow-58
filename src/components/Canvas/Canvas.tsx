@@ -5,12 +5,13 @@ import { CanvasHeader } from "./CanvasHeader";
 import { PropertyPanel } from "./PropertyPanel";
 import { SelectionBox } from "./SelectionBox";
 import { ResizeHandles } from "./ResizeHandles";
+import { TemplatePanel } from "./TemplatePanel";
 import { useCanvasInteraction } from "./hooks/useCanvasInteraction";
 import { useSelection } from "./hooks/useSelection";
 
 export interface CanvasElement {
   id: string;
-  type: 'sticky' | 'text' | 'rectangle' | 'circle' | 'arrow';
+  type: 'sticky' | 'text' | 'rectangle' | 'circle' | 'arrow' | 'image';
   x: number;
   y: number;
   width: number;
@@ -23,6 +24,7 @@ export interface CanvasElement {
   rotation?: number;
   locked?: boolean;
   zIndex?: number;
+  imageUrl?: string;
 }
 
 export const Canvas = () => {
@@ -32,6 +34,7 @@ export const Canvas = () => {
   const [selectedColor, setSelectedColor] = useState('#FFE066');
   const [boardTitle, setBoardTitle] = useState('Tableau sans titre');
   const [isPropertyPanelVisible, setIsPropertyPanelVisible] = useState(false);
+  const [isTemplatePanelVisible, setIsTemplatePanelVisible] = useState(false);
   
   const {
     canvasTransform,
@@ -40,6 +43,7 @@ export const Canvas = () => {
     handleMouseMove: canvasMouseMove,
     handleMouseUp: canvasMouseUp,
     handleWheel,
+    setCanvasTransform,
   } = useCanvasInteraction(containerRef);
 
   const {
@@ -61,6 +65,36 @@ export const Canvas = () => {
   ];
 
   const handleAddElement = useCallback((type: CanvasElement['type']) => {
+    if (type === 'image') {
+      // Trigger file input for image upload
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const imageUrl = event.target?.result as string;
+            const newElement: CanvasElement = {
+              id: `image-${Date.now()}`,
+              type: 'image',
+              x: Math.random() * 400 + 100,
+              y: Math.random() * 300 + 100,
+              width: 200,
+              height: 150,
+              color: selectedColor,
+              imageUrl,
+            };
+            setElements(prev => [...prev, newElement]);
+          };
+          reader.readAsDataURL(file);
+        }
+      };
+      input.click();
+      return;
+    }
+
     const newElement: CanvasElement = {
       id: `${type}-${Date.now()}`,
       type,
@@ -98,6 +132,11 @@ export const Canvas = () => {
     
     setElements(prev => [...prev, newElement]);
   }, [elements]);
+
+  const handleApplyTemplate = useCallback((templateElements: CanvasElement[]) => {
+    setElements(templateElements);
+    clearSelection();
+  }, [clearSelection]);
 
   // Enhanced selection and interaction handlers
   const handleCanvasMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -190,6 +229,7 @@ export const Canvas = () => {
         boardTitle={boardTitle}
         onTitleChange={setBoardTitle}
         collaborators={collaborators}
+        onOpenTemplates={() => setIsTemplatePanelVisible(true)}
       />
 
       {/* Canvas Container */}
@@ -268,12 +308,20 @@ export const Canvas = () => {
         onToggle={() => setIsPropertyPanelVisible(!isPropertyPanelVisible)}
       />
 
+      {/* Template Panel */}
+      <TemplatePanel
+        isVisible={isTemplatePanelVisible}
+        onClose={() => setIsTemplatePanelVisible(false)}
+        onApplyTemplate={handleApplyTemplate}
+      />
+
       {/* Zoom Controls */}
       <div className="absolute bottom-6 right-6 flex flex-col gap-2 bg-card/95 backdrop-blur-sm rounded-lg border border-border p-2 shadow-float">
         <button 
           className="w-10 h-10 rounded-md bg-muted hover:bg-tool-hover flex items-center justify-center transition-colors"
           onClick={() => {
-            // TODO: Implement zoom in
+            const newScale = Math.min(3, canvasTransform.scale * 1.2);
+            setCanvasTransform(prev => ({ ...prev, scale: newScale }));
           }}
         >
           <span className="text-lg font-medium">+</span>
@@ -284,10 +332,20 @@ export const Canvas = () => {
         <button 
           className="w-10 h-10 rounded-md bg-muted hover:bg-tool-hover flex items-center justify-center transition-colors"
           onClick={() => {
-            // TODO: Implement zoom out
+            const newScale = Math.max(0.1, canvasTransform.scale * 0.8);
+            setCanvasTransform(prev => ({ ...prev, scale: newScale }));
           }}
         >
           <span className="text-lg font-medium">−</span>
+        </button>
+        <button 
+          className="w-10 h-10 rounded-md bg-muted hover:bg-tool-hover flex items-center justify-center transition-colors"
+          onClick={() => {
+            setCanvasTransform({ x: 0, y: 0, scale: 1 });
+          }}
+          title="Réinitialiser le zoom"
+        >
+          <span className="text-xs font-medium">1:1</span>
         </button>
       </div>
     </div>

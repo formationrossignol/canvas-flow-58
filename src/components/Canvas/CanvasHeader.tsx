@@ -6,12 +6,14 @@ interface CanvasHeaderProps {
   boardTitle: string;
   onTitleChange: (title: string) => void;
   collaborators: Array<{ id: string; name: string; avatar: string; color: string }>;
+  onOpenTemplates: () => void;
 }
 
 export const CanvasHeader = ({ 
   boardTitle, 
   onTitleChange, 
-  collaborators 
+  collaborators,
+  onOpenTemplates
 }: CanvasHeaderProps) => {
   return (
     <header className="absolute top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border shadow-soft">
@@ -79,9 +81,9 @@ export const CanvasHeader = ({
             Chat
           </Button>
           
-          <Button variant="ghost" size="sm" className="gap-2">
+          <Button variant="ghost" size="sm" className="gap-2" onClick={onOpenTemplates}>
             <Timer size={16} />
-            Timer
+            Templates
           </Button>
           
           <Button variant="ghost" size="sm" className="gap-2">

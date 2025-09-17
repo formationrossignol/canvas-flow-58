@@ -119,12 +119,31 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected 
           border: '1px dashed rgba(0,0,0,0.2)',
         };
       
+      case 'image':
+        return {
+          ...baseStyle,
+          backgroundColor: 'transparent',
+          borderRadius: 8,
+          overflow: 'hidden',
+        };
+      
       default:
         return baseStyle;
     }
   };
 
   const renderContent = () => {
+    if (element.type === 'image' && element.imageUrl) {
+      return (
+        <img
+          src={element.imageUrl}
+          alt="Canvas image"
+          className="w-full h-full object-cover"
+          draggable={false}
+        />
+      );
+    }
+
     if (isEditing && (element.type === 'sticky' || element.type === 'text')) {
       return (
         <textarea
