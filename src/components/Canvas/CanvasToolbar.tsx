@@ -8,6 +8,8 @@ interface CanvasToolbarProps {
   onToolSelect: (tool: string) => void;
   onColorSelect: (color: string) => void;
   onAddElement: (type: CanvasElement['type']) => void;
+  isConnecting: boolean;
+  onToggleConnecting: () => void;
 }
 
 const tools = [
@@ -18,6 +20,7 @@ const tools = [
   { id: 'circle', icon: Circle, label: 'Cercle', shortcut: 'C' },
   { id: 'image', icon: Image, label: 'Image', shortcut: 'I' },
   { id: 'arrow', icon: ArrowRight, label: 'Flèche', shortcut: 'A' },
+  { id: 'connect', icon: ArrowRight, label: 'Connecter', shortcut: 'L' },
 ];
 
 const colors = [
@@ -37,13 +40,19 @@ export const CanvasToolbar = ({
   onToolSelect,
   onColorSelect,
   onAddElement,
+  isConnecting,
+  onToggleConnecting,
 }: CanvasToolbarProps) => {
   const handleToolClick = (toolId: string) => {
-    onToolSelect(toolId);
-    
-    // Auto-add element for certain tools
-    if (toolId !== 'select') {
-      onAddElement(toolId as CanvasElement['type']);
+    if (toolId === 'connect') {
+      onToggleConnecting();
+    } else {
+      onToolSelect(toolId);
+      
+      // Auto-add element for certain tools
+      if (toolId !== 'select') {
+        onAddElement(toolId as CanvasElement['type']);
+      }
     }
   };
 
@@ -54,7 +63,7 @@ export const CanvasToolbar = ({
         <div className="flex flex-col gap-2 mb-4">
           {tools.map((tool) => {
             const Icon = tool.icon;
-            const isSelected = selectedTool === tool.id;
+            const isSelected = selectedTool === tool.id || (tool.id === 'connect' && isConnecting);
             
             return (
               <Button

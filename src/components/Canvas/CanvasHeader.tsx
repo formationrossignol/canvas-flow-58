@@ -1,6 +1,7 @@
 import { Settings, Download, Share2, Users, MessageCircle, Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 
 interface CanvasHeaderProps {
   boardTitle: string;
@@ -17,12 +18,13 @@ export const CanvasHeader = ({
   onOpenTemplates,
   onOpenExport
 }: CanvasHeaderProps) => {
+  const navigate = useNavigate();
   return (
     <header className="absolute top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border shadow-soft">
       <div className="flex items-center justify-between px-6 py-3">
         {/* Left Section */}
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => navigate('/')}>
             <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
               <span className="text-sm font-bold text-white">CB</span>
             </div>

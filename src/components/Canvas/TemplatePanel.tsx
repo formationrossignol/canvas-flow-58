@@ -1,13 +1,16 @@
 import { useState } from "react";
-import { X, Lightbulb, Target, ArrowRight, Users, Zap, Layout } from "lucide-react";
+import { X, Lightbulb, Target, ArrowRight, Users, Zap, Layout, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { CanvasElement } from "./Canvas";
 
 interface TemplatePanelProps {
   isVisible: boolean;
   onClose: () => void;
   onApplyTemplate: (elements: CanvasElement[]) => void;
+  currentElements?: CanvasElement[];
 }
 
 const templates = [
@@ -347,8 +350,12 @@ const templates = [
   },
 ];
 
-export const TemplatePanel = ({ isVisible, onClose, onApplyTemplate }: TemplatePanelProps) => {
+export const TemplatePanel = ({ isVisible, onClose, onApplyTemplate, currentElements = [] }: TemplatePanelProps) => {
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+  const [newTemplateName, setNewTemplateName] = useState('');
+  const [newTemplateDescription, setNewTemplateDescription] = useState('');
+  const [customTemplates, setCustomTemplates] = useState<typeof templates>([]);
 
   if (!isVisible) return null;
 
@@ -356,6 +363,26 @@ export const TemplatePanel = ({ isVisible, onClose, onApplyTemplate }: TemplateP
     onApplyTemplate(template.elements);
     onClose();
   };
+
+  const handleCreateTemplate = () => {
+    if (!newTemplateName.trim() || currentElements.length === 0) return;
+    
+    const newTemplate = {
+      id: `custom-${Date.now()}`,
+      name: newTemplateName,
+      description: newTemplateDescription || 'Template personnalisé',
+      icon: Layout,
+      color: '#6366F1',
+      elements: currentElements.map(el => ({ ...el, id: `${el.type}-${Date.now()}-${Math.random()}` })) as any,
+    };
+    
+    setCustomTemplates(prev => [...prev, newTemplate] as any);
+    setIsCreating(false);
+    setNewTemplateName('');
+    setNewTemplateDescription('');
+  };
+
+  const allTemplates = [...templates, ...customTemplates];
 
   return (
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
@@ -372,10 +399,48 @@ export const TemplatePanel = ({ isVisible, onClose, onApplyTemplate }: TemplateP
             </Button>
           </div>
 
+          {/* Create Template Section */}
+          {currentElements.length > 0 && (
+            <div className="p-6 border-b border-border">
+              {!isCreating ? (
+                <Button 
+                  variant="outline" 
+                  className="w-full gap-2"
+                  onClick={() => setIsCreating(true)}
+                >
+                  <Plus size={16} />
+                  Créer un template à partir du canvas actuel
+                </Button>
+              ) : (
+                <div className="space-y-3">
+                  <Input
+                    placeholder="Nom du template"
+                    value={newTemplateName}
+                    onChange={(e) => setNewTemplateName(e.target.value)}
+                  />
+                  <Textarea
+                    placeholder="Description (optionnel)"
+                    value={newTemplateDescription}
+                    onChange={(e) => setNewTemplateDescription(e.target.value)}
+                    rows={2}
+                  />
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={handleCreateTemplate} disabled={!newTemplateName.trim()}>
+                      Créer
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => setIsCreating(false)}>
+                      Annuler
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Templates Grid */}
           <div className="flex-1 overflow-y-auto p-6">
             <div className="space-y-4">
-              {templates.map((template) => {
+              {allTemplates.map((template) => {
                 const Icon = template.icon;
                 const isSelected = selectedTemplate === template.id;
                 

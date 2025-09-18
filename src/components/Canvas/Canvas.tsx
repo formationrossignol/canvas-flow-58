@@ -7,6 +7,7 @@ import { SelectionBox } from "./SelectionBox";
 import { ResizeHandles } from "./ResizeHandles";
 import { TemplatePanel } from "./TemplatePanel";
 import { ExportImportModal } from "./ExportImportModal";
+import { ConnectionSystem, Connection } from "./ConnectionSystem";
 import { useCanvasInteraction } from "./hooks/useCanvasInteraction";
 import { useSelection } from "./hooks/useSelection";
 
@@ -42,6 +43,8 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   const [isPropertyPanelVisible, setIsPropertyPanelVisible] = useState(false);
   const [isTemplatePanelVisible, setIsTemplatePanelVisible] = useState(false);
   const [isExportModalVisible, setIsExportModalVisible] = useState(false);
+  const [connections, setConnections] = useState<Connection[]>([]);
+  const [isConnecting, setIsConnecting] = useState(false);
   
   const {
     canvasTransform,
@@ -286,6 +289,16 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
             }}
           />
 
+          {/* Connection System */}
+          <ConnectionSystem
+            elements={elements}
+            connections={connections}
+            onUpdateConnections={setConnections}
+            canvasTransform={canvasTransform}
+            isConnecting={isConnecting}
+            setIsConnecting={setIsConnecting}
+          />
+
           {/* Selection Box */}
           <SelectionBox {...selection.selectionBox} />
 
@@ -320,6 +333,8 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         onToolSelect={setSelectedTool}
         onColorSelect={setSelectedColor}
         onAddElement={handleAddElement}
+        isConnecting={isConnecting}
+        onToggleConnecting={() => setIsConnecting(!isConnecting)}
       />
 
       {/* Property Panel */}
@@ -337,6 +352,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         isVisible={isTemplatePanelVisible}
         onClose={() => setIsTemplatePanelVisible(false)}
         onApplyTemplate={handleApplyTemplate}
+        currentElements={elements}
       />
 
       {/* Export/Import Modal */}
