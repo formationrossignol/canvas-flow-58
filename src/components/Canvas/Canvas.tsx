@@ -28,7 +28,12 @@ export interface CanvasElement {
   imageUrl?: string;
 }
 
-export const Canvas = () => {
+interface CanvasProps {
+  boardId?: string;
+  templateId?: string | null;
+}
+
+export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [elements, setElements] = useState<CanvasElement[]>([]);
   const [selectedTool, setSelectedTool] = useState<string>('select');

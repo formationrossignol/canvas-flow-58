@@ -1,7 +1,7 @@
-import { Canvas } from "@/components/Canvas/Canvas";
+import Dashboard from "./Dashboard";
 
 const Index = () => {
-  return <Canvas />;
+  return <Dashboard />;
 };
 
 export default Index;
