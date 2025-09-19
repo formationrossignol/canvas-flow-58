@@ -1,12 +1,15 @@
-import { Square, Circle, Type, StickyNote, MousePointer2, ArrowRight, Palette, Image, Layout } from "lucide-react";
+import { Square, Circle, Type, StickyNote, MousePointer2, ArrowRight, Palette, Image, Edit3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
 import { CanvasElement } from "./Canvas";
 
 interface CanvasToolbarProps {
   selectedTool: string;
   selectedColor: string;
+  brushThickness: number;
   onToolSelect: (tool: string) => void;
   onColorSelect: (color: string) => void;
+  onBrushThicknessChange: (thickness: number) => void;
   onAddElement: (type: CanvasElement['type']) => void;
   isConnecting: boolean;
   onToggleConnecting: () => void;
@@ -14,6 +17,7 @@ interface CanvasToolbarProps {
 
 const tools = [
   { id: 'select', icon: MousePointer2, label: 'Sélection', shortcut: 'V' },
+  { id: 'pen', icon: Edit3, label: 'Crayon', shortcut: 'P' },
   { id: 'sticky', icon: StickyNote, label: 'Post-it', shortcut: 'S' },
   { id: 'text', icon: Type, label: 'Texte', shortcut: 'T' },
   { id: 'rectangle', icon: Square, label: 'Rectangle', shortcut: 'R' },
@@ -37,8 +41,10 @@ const colors = [
 export const CanvasToolbar = ({
   selectedTool,
   selectedColor,
+  brushThickness,
   onToolSelect,
   onColorSelect,
+  onBrushThicknessChange,
   onAddElement,
   isConnecting,
   onToggleConnecting,
@@ -50,7 +56,7 @@ export const CanvasToolbar = ({
       onToolSelect(toolId);
       
       // Auto-add element for certain tools
-      if (toolId !== 'select') {
+      if (toolId !== 'select' && toolId !== 'pen' && toolId !== 'connect') {
         onAddElement(toolId as CanvasElement['type']);
       }
     }
@@ -123,6 +129,32 @@ export const CanvasToolbar = ({
             })}
           </div>
         </div>
+
+        {/* Brush Thickness for Pen Tool */}
+        {selectedTool === 'pen' && (
+          <>
+            <div className="w-full h-px bg-border my-3" />
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2 mb-2">
+                <Edit3 size={14} className="text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Épaisseur</span>
+              </div>
+              <div className="px-1">
+                <Slider
+                  value={[brushThickness]}
+                  onValueChange={(value) => onBrushThicknessChange(value[0])}
+                  min={1}
+                  max={20}
+                  step={1}
+                  className="w-full"
+                />
+                <div className="text-xs text-center text-muted-foreground mt-1">
+                  {brushThickness}px
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

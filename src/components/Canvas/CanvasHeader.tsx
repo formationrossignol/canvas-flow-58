@@ -1,4 +1,4 @@
-import { Settings, Download, Share2, Users, MessageCircle, Timer } from "lucide-react";
+import { Settings, Download, Share2, Users, MessageCircle, Layout } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
@@ -86,7 +86,7 @@ export const CanvasHeader = ({
           </Button>
           
           <Button variant="ghost" size="sm" className="gap-2" onClick={onOpenTemplates}>
-            <Timer size={16} />
+            <Layout size={16} />
             Templates
           </Button>
           

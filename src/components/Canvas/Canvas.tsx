@@ -8,6 +8,8 @@ import { ResizeHandles } from "./ResizeHandles";
 import { TemplatePanel } from "./TemplatePanel";
 import { ExportImportModal } from "./ExportImportModal";
 import { ConnectionSystem, Connection } from "./ConnectionSystem";
+import { DrawingTool, DrawingStroke } from "./DrawingTool";
+import { Timer } from "./Timer";
 import { useCanvasInteraction } from "./hooks/useCanvasInteraction";
 import { useSelection } from "./hooks/useSelection";
 
@@ -45,6 +47,9 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   const [isExportModalVisible, setIsExportModalVisible] = useState(false);
   const [connections, setConnections] = useState<Connection[]>([]);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [drawingStrokes, setDrawingStrokes] = useState<DrawingStroke[]>([]);
+  const [brushThickness, setBrushThickness] = useState(3);
+  const [isTimerVisible, setIsTimerVisible] = useState(false);
   
   const {
     canvasTransform,
@@ -235,7 +240,11 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   }, [selection.selectedIds, handleElementDelete, handleElementDuplicate, clearSelection]);
 
   const selectedElements = elements.filter(el => isSelected(el.id));
-  const cursor = isSpacePressed ? 'canvas-cursor-grabbing' : selectedTool === 'select' ? 'canvas-cursor-grab' : 'crosshair';
+  const cursor = isSpacePressed ? 'canvas-cursor-grabbing' : selectedTool === 'select' ? 'canvas-cursor-grab' : selectedTool === 'pen' ? 'crosshair' : 'crosshair';
+
+  const handleAddStroke = useCallback((stroke: DrawingStroke) => {
+    setDrawingStrokes(prev => [...prev, stroke]);
+  }, []);
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-canvas">
@@ -260,33 +269,43 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       >
         {/* Canvas Content */}
         <div
-          className="relative origin-top-left transition-transform duration-100 ease-out"
+          className="relative origin-top-left transition-transform duration-100 ease-out bg-canvas"
           style={{
             transform: `translate(${canvasTransform.x}px, ${canvasTransform.y}px) scale(${canvasTransform.scale})`,
-            width: '4000px',
-            height: '4000px',
+            width: '8000px',
+            height: '8000px',
           }}
         >
-          {/* Grid Background */}
+          {/* Enhanced Grid Background */}
           <div 
             className="absolute inset-0"
             style={{
               backgroundImage: `
-                linear-gradient(to right, hsl(var(--border)) 1px, transparent 1px),
-                linear-gradient(to bottom, hsl(var(--border)) 1px, transparent 1px)
+                linear-gradient(to right, hsl(var(--muted-foreground) / 0.15) 1px, transparent 1px),
+                linear-gradient(to bottom, hsl(var(--muted-foreground) / 0.15) 1px, transparent 1px)
               `,
-              backgroundSize: '24px 24px',
+              backgroundSize: '20px 20px',
             }}
           />
           <div 
             className="absolute inset-0"
             style={{
               backgroundImage: `
-                linear-gradient(to right, hsl(var(--muted-foreground) / 0.2) 1px, transparent 1px),
-                linear-gradient(to bottom, hsl(var(--muted-foreground) / 0.2) 1px, transparent 1px)
+                linear-gradient(to right, hsl(var(--muted-foreground) / 0.3) 2px, transparent 2px),
+                linear-gradient(to bottom, hsl(var(--muted-foreground) / 0.3) 2px, transparent 2px)
               `,
-              backgroundSize: '120px 120px',
+              backgroundSize: '100px 100px',
             }}
+          />
+
+          {/* Drawing Tool */}
+          <DrawingTool
+            strokes={drawingStrokes}
+            onAddStroke={handleAddStroke}
+            isActive={selectedTool === 'pen'}
+            color={selectedColor}
+            thickness={brushThickness}
+            canvasTransform={canvasTransform}
           />
 
           {/* Connection System */}
@@ -330,11 +349,19 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       <CanvasToolbar
         selectedTool={selectedTool}
         selectedColor={selectedColor}
+        brushThickness={brushThickness}
         onToolSelect={setSelectedTool}
         onColorSelect={setSelectedColor}
+        onBrushThicknessChange={setBrushThickness}
         onAddElement={handleAddElement}
         isConnecting={isConnecting}
         onToggleConnecting={() => setIsConnecting(!isConnecting)}
+      />
+
+      {/* Timer */}
+      <Timer
+        isVisible={isTimerVisible}
+        onToggle={() => setIsTimerVisible(!isTimerVisible)}
       />
 
       {/* Property Panel */}
