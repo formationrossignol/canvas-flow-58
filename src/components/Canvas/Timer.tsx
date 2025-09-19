@@ -48,7 +48,7 @@ export const Timer = ({ isVisible, onToggle }: TimerProps) => {
       <Button
         variant="ghost"
         size="sm"
-        className="absolute top-20 right-6 z-40 gap-2 floating-element bg-card/95 backdrop-blur-sm"
+        className="absolute top-28 right-6 z-40 gap-2 floating-element bg-card/95 backdrop-blur-sm"
         onClick={onToggle}
       >
         <TimerIcon size={16} />
@@ -58,7 +58,7 @@ export const Timer = ({ isVisible, onToggle }: TimerProps) => {
   }
 
   return (
-    <div className="absolute top-20 right-6 z-40 animate-float-in">
+    <div className="absolute top-28 right-6 z-40 animate-float-in">
       <div className="floating-element bg-card/95 backdrop-blur-sm rounded-xl border border-border p-4">
         <div className="flex items-center gap-3 mb-4">
           <TimerIcon size={20} className="text-primary" />

@@ -269,11 +269,13 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       >
         {/* Canvas Content */}
         <div
-          className="relative origin-top-left transition-transform duration-100 ease-out bg-canvas"
+          className="absolute inset-0 bg-canvas"
           style={{
             transform: `translate(${canvasTransform.x}px, ${canvasTransform.y}px) scale(${canvasTransform.scale})`,
-            width: '8000px',
-            height: '8000px',
+            width: '100vw',
+            height: '100vh',
+            minWidth: '8000px',
+            minHeight: '8000px',
           }}
         >
           {/* Enhanced Grid Background */}
@@ -323,25 +325,27 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
 
           {/* Canvas Elements */}
           {elements.map(element => (
-            <div key={element.id} className="relative">
-              <CanvasObject
+            <CanvasObject
+              key={element.id}
+              element={element}
+              onUpdate={handleElementUpdate}
+              onDelete={handleElementDelete}
+              onClick={handleElementClick}
+              isSelected={isSelected(element.id)}
+            />
+          ))}
+
+          {/* Resize Handles - Rendered separately to ensure proper positioning */}
+          {elements.map(element => 
+            isSelected(element.id) && (
+              <ResizeHandles
+                key={`handles-${element.id}`}
                 element={element}
                 onUpdate={handleElementUpdate}
-                onDelete={handleElementDelete}
-                onClick={handleElementClick}
-                isSelected={isSelected(element.id)}
+                isVisible={true}
               />
-              
-              {/* Resize Handles */}
-              {isSelected(element.id) && (
-                <ResizeHandles
-                  element={element}
-                  onUpdate={handleElementUpdate}
-                  isVisible={true}
-                />
-              )}
-            </div>
-          ))}
+            )
+          )}
         </div>
       </div>
 
