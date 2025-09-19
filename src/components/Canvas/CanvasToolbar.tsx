@@ -1,4 +1,4 @@
-import { Square, Circle, Type, StickyNote, MousePointer2, ArrowRight, Palette, Image, Edit3 } from "lucide-react";
+import { Square, Circle, Type, StickyNote, MousePointer2, ArrowRight, Palette, Image, Edit3, Timer, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { CanvasElement } from "./Canvas";
@@ -13,6 +13,8 @@ interface CanvasToolbarProps {
   onAddElement: (type: CanvasElement['type']) => void;
   isConnecting: boolean;
   onToggleConnecting: () => void;
+  isTimerVisible: boolean;
+  onToggleTimer: () => void;
 }
 
 const tools = [
@@ -24,7 +26,8 @@ const tools = [
   { id: 'circle', icon: Circle, label: 'Cercle', shortcut: 'C' },
   { id: 'image', icon: Image, label: 'Image', shortcut: 'I' },
   { id: 'arrow', icon: ArrowRight, label: 'Flèche', shortcut: 'A' },
-  { id: 'connect', icon: ArrowRight, label: 'Connecter', shortcut: 'L' },
+  { id: 'connect', icon: Link2, label: 'Connecter', shortcut: 'L' },
+  { id: 'timer', icon: Timer, label: 'Timer', shortcut: 'M' },
 ];
 
 const colors = [
@@ -48,15 +51,19 @@ export const CanvasToolbar = ({
   onAddElement,
   isConnecting,
   onToggleConnecting,
+  isTimerVisible,
+  onToggleTimer,
 }: CanvasToolbarProps) => {
   const handleToolClick = (toolId: string) => {
     if (toolId === 'connect') {
       onToggleConnecting();
+    } else if (toolId === 'timer') {
+      onToggleTimer();
     } else {
       onToolSelect(toolId);
       
       // Auto-add element for certain tools
-      if (toolId !== 'select' && toolId !== 'pen' && toolId !== 'connect') {
+      if (toolId !== 'select' && toolId !== 'pen' && toolId !== 'connect' && toolId !== 'timer') {
         onAddElement(toolId as CanvasElement['type']);
       }
     }
@@ -67,9 +74,11 @@ export const CanvasToolbar = ({
       <div className="floating-element bg-card/95 backdrop-blur-sm rounded-xl border border-border p-3">
         {/* Tools */}
         <div className="flex flex-col gap-2 mb-4">
-          {tools.map((tool) => {
-            const Icon = tool.icon;
-            const isSelected = selectedTool === tool.id || (tool.id === 'connect' && isConnecting);
+        {tools.map((tool) => {
+          const Icon = tool.icon;
+          const isSelected = selectedTool === tool.id || 
+                           (tool.id === 'connect' && isConnecting) ||
+                           (tool.id === 'timer' && isTimerVisible);
             
             return (
               <Button

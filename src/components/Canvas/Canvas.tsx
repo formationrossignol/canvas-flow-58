@@ -360,6 +360,8 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         onAddElement={handleAddElement}
         isConnecting={isConnecting}
         onToggleConnecting={() => setIsConnecting(!isConnecting)}
+        isTimerVisible={isTimerVisible}
+        onToggleTimer={() => setIsTimerVisible(!isTimerVisible)}
       />
 
       {/* Timer */}
