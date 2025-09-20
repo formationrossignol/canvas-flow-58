@@ -24,6 +24,8 @@ export const Timer = ({ isVisible, onToggle }: TimerProps) => {
           if (isCountdown) {
             if (prev <= 1) {
               setIsRunning(false);
+              // Play notification sound when countdown ends
+              playNotificationSound();
               return 0;
             }
             return prev - 1;
@@ -36,6 +38,25 @@ export const Timer = ({ isVisible, onToggle }: TimerProps) => {
     
     return () => clearInterval(interval);
   }, [isRunning, isCountdown]);
+
+  const playNotificationSound = () => {
+    // Create a simple beep sound using Web Audio API
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.value = 800; // 800 Hz frequency
+    oscillator.type = 'sine';
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.5);
+  };
 
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);

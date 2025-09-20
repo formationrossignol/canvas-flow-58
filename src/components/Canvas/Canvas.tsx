@@ -10,6 +10,8 @@ import { ExportImportModal } from "./ExportImportModal";
 import { ConnectionSystem, Connection } from "./ConnectionSystem";
 import { DrawingTool, DrawingStroke } from "./DrawingTool";
 import { Timer } from "./Timer";
+import { MiniMap } from "./MiniMap";
+import { TextEditor } from "./TextEditor";
 import { useCanvasInteraction } from "./hooks/useCanvasInteraction";
 import { useSelection } from "./hooks/useSelection";
 
@@ -50,6 +52,8 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   const [drawingStrokes, setDrawingStrokes] = useState<DrawingStroke[]>([]);
   const [brushThickness, setBrushThickness] = useState(3);
   const [isTimerVisible, setIsTimerVisible] = useState(false);
+  const [isTextEditorVisible, setIsTextEditorVisible] = useState(false);
+  const [textStyle, setTextStyle] = useState({});
   
   const {
     canvasTransform,
@@ -278,25 +282,35 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
             minHeight: '8000px',
           }}
         >
-          {/* Enhanced Grid Background */}
+          {/* Enhanced Grid Background - Infinite */}
           <div 
-            className="absolute inset-0"
+            className="absolute"
             style={{
+              left: '-100vw',
+              top: '-100vh',
+              width: '300vw',
+              height: '300vh',
               backgroundImage: `
                 linear-gradient(to right, hsl(var(--muted-foreground) / 0.15) 1px, transparent 1px),
                 linear-gradient(to bottom, hsl(var(--muted-foreground) / 0.15) 1px, transparent 1px)
               `,
-              backgroundSize: '20px 20px',
+              backgroundSize: `${20 / canvasTransform.scale}px ${20 / canvasTransform.scale}px`,
+              backgroundPosition: `${canvasTransform.x % (20 / canvasTransform.scale)}px ${canvasTransform.y % (20 / canvasTransform.scale)}px`,
             }}
           />
           <div 
-            className="absolute inset-0"
+            className="absolute"
             style={{
+              left: '-100vw',
+              top: '-100vh',
+              width: '300vw',
+              height: '300vh',
               backgroundImage: `
                 linear-gradient(to right, hsl(var(--muted-foreground) / 0.3) 2px, transparent 2px),
                 linear-gradient(to bottom, hsl(var(--muted-foreground) / 0.3) 2px, transparent 2px)
               `,
-              backgroundSize: '100px 100px',
+              backgroundSize: `${100 / canvasTransform.scale}px ${100 / canvasTransform.scale}px`,
+              backgroundPosition: `${canvasTransform.x % (100 / canvasTransform.scale)}px ${canvasTransform.y % (100 / canvasTransform.scale)}px`,
             }}
           />
 
@@ -362,12 +376,27 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         onToggleConnecting={() => setIsConnecting(!isConnecting)}
         isTimerVisible={isTimerVisible}
         onToggleTimer={() => setIsTimerVisible(!isTimerVisible)}
+        onToggleTextEditor={() => setIsTextEditorVisible(!isTextEditorVisible)}
       />
 
       {/* Timer */}
       <Timer
         isVisible={isTimerVisible}
         onToggle={() => setIsTimerVisible(!isTimerVisible)}
+      />
+
+      {/* Text Editor */}
+      <TextEditor
+        style={textStyle}
+        onStyleChange={setTextStyle}
+        isVisible={isTextEditorVisible && selectedTool === 'text'}
+      />
+
+      {/* Mini Map */}
+      <MiniMap
+        elements={elements}
+        canvasTransform={canvasTransform}
+        onNavigate={(x, y) => setCanvasTransform(prev => ({ ...prev, x, y }))}
       />
 
       {/* Property Panel */}

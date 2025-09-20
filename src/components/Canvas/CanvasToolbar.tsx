@@ -1,7 +1,8 @@
-import { Square, Circle, Type, StickyNote, MousePointer2, ArrowRight, Palette, Image, Edit3, Timer, Link2 } from "lucide-react";
+import { Type, StickyNote, MousePointer2, ArrowRight, Palette, Image, Edit3, Timer, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { CanvasElement } from "./Canvas";
+import { ShapeSelector } from "./ShapeSelector";
 
 interface CanvasToolbarProps {
   selectedTool: string;
@@ -15,6 +16,7 @@ interface CanvasToolbarProps {
   onToggleConnecting: () => void;
   isTimerVisible: boolean;
   onToggleTimer: () => void;
+  onToggleTextEditor: () => void;
 }
 
 const tools = [
@@ -22,8 +24,6 @@ const tools = [
   { id: 'pen', icon: Edit3, label: 'Crayon', shortcut: 'P' },
   { id: 'sticky', icon: StickyNote, label: 'Post-it', shortcut: 'S' },
   { id: 'text', icon: Type, label: 'Texte', shortcut: 'T' },
-  { id: 'rectangle', icon: Square, label: 'Rectangle', shortcut: 'R' },
-  { id: 'circle', icon: Circle, label: 'Cercle', shortcut: 'C' },
   { id: 'image', icon: Image, label: 'Image', shortcut: 'I' },
   { id: 'arrow', icon: ArrowRight, label: 'Flèche', shortcut: 'A' },
   { id: 'connect', icon: Link2, label: 'Connecter', shortcut: 'L' },
@@ -53,17 +53,22 @@ export const CanvasToolbar = ({
   onToggleConnecting,
   isTimerVisible,
   onToggleTimer,
+  onToggleTextEditor,
 }: CanvasToolbarProps) => {
   const handleToolClick = (toolId: string) => {
     if (toolId === 'connect') {
       onToggleConnecting();
     } else if (toolId === 'timer') {
       onToggleTimer();
+    } else if (toolId === 'text') {
+      onToolSelect(toolId);
+      onToggleTextEditor();
+      onAddElement(toolId as CanvasElement['type']);
     } else {
       onToolSelect(toolId);
       
       // Auto-add element for certain tools
-      if (toolId !== 'select' && toolId !== 'pen' && toolId !== 'connect' && toolId !== 'timer') {
+      if (toolId !== 'select' && toolId !== 'pen' && toolId !== 'connect' && toolId !== 'timer' && toolId !== 'text') {
         onAddElement(toolId as CanvasElement['type']);
       }
     }
@@ -101,6 +106,13 @@ export const CanvasToolbar = ({
               </Button>
             );
           })}
+          
+          {/* Shape Selector */}
+          <ShapeSelector
+            selectedShape={selectedTool}
+            onShapeSelect={onToolSelect}
+            onAddElement={onAddElement}
+          />
         </div>
 
         {/* Color Separator */}
