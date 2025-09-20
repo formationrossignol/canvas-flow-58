@@ -427,7 +427,10 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       />
 
       {/* Zoom Controls */}
-      <div className="absolute bottom-6 right-6 flex flex-col gap-2 bg-card/95 backdrop-blur-sm rounded-lg border border-border p-2 shadow-float">
+      <div className="absolute bottom-6 right-6 flex flex-col gap-2 bg-card/95 backdrop-blur-sm rounded-lg border border-border p-2 shadow-float" style={{ marginBottom: '200px' }}>
+        <div className="text-xs text-center text-muted-foreground py-1 font-medium">
+          Zoom {Math.round(canvasTransform.scale * 100)}%
+        </div>
         <button 
           className="w-10 h-10 rounded-md bg-muted hover:bg-tool-hover flex items-center justify-center transition-colors"
           onClick={() => {
@@ -437,9 +440,6 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         >
           <span className="text-lg font-medium">+</span>
         </button>
-        <div className="text-xs text-center text-muted-foreground py-1">
-          {Math.round(canvasTransform.scale * 100)}%
-        </div>
         <button 
           className="w-10 h-10 rounded-md bg-muted hover:bg-tool-hover flex items-center justify-center transition-colors"
           onClick={() => {

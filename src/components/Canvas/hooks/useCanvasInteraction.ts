@@ -66,6 +66,34 @@ export const useCanvasInteraction = (containerRef: React.RefObject<HTMLDivElemen
     }));
   }, [isDragging, isSpacePressed]);
 
+  // Navigation with arrow keys
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const step = 50;
+      switch (e.key) {
+        case 'ArrowUp':
+          e.preventDefault();
+          setCanvasTransform(prev => ({ ...prev, y: prev.y + step }));
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          setCanvasTransform(prev => ({ ...prev, y: prev.y - step }));
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          setCanvasTransform(prev => ({ ...prev, x: prev.x + step }));
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          setCanvasTransform(prev => ({ ...prev, x: prev.x - step }));
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
   }, []);

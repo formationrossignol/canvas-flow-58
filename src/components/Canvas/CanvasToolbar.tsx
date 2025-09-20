@@ -1,4 +1,4 @@
-import { Type, StickyNote, MousePointer2, ArrowRight, Palette, Image, Edit3, Timer, Link2 } from "lucide-react";
+import { Type, StickyNote, MousePointer2, ArrowRight, Palette, Image, Edit3, Timer, Link2, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { CanvasElement } from "./Canvas";
@@ -28,6 +28,7 @@ const tools = [
   { id: 'arrow', icon: ArrowRight, label: 'Flèche', shortcut: 'A' },
   { id: 'connect', icon: Link2, label: 'Connecter', shortcut: 'L' },
   { id: 'timer', icon: Timer, label: 'Timer', shortcut: 'M' },
+  { id: 'view', icon: Eye, label: 'Vue', shortcut: 'E' },
 ];
 
 const colors = [
