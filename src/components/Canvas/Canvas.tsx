@@ -1,4 +1,6 @@
 import { useRef, useState, useCallback, useEffect } from "react";
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import { CanvasToolbar } from "./CanvasToolbar";
 import { CanvasObject } from "./CanvasObject";
 import { CanvasHeader } from "./CanvasHeader";
@@ -271,6 +273,59 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     setDrawingStrokes(prev => [...prev, stroke]);
   }, []);
 
+  const handleExportPDF = useCallback(async () => {
+    if (!containerRef.current) return;
+
+    const canvasContent = containerRef.current.querySelector('[style*="transform"]') as HTMLElement;
+    if (!canvasContent) return;
+
+    try {
+      // Temporarily reset transform for capture
+      const originalTransform = canvasContent.style.transform;
+      canvasContent.style.transform = 'translate(0px, 0px) scale(1)';
+      
+      // Calculate visible area based on elements
+      const elementBounds = elements.reduce((bounds, element) => {
+        return {
+          minX: Math.min(bounds.minX, element.x),
+          minY: Math.min(bounds.minY, element.y),
+          maxX: Math.max(bounds.maxX, element.x + element.width),
+          maxY: Math.max(bounds.maxY, element.y + element.height),
+        };
+      }, { minX: 0, minY: 0, maxX: 800, maxY: 600 });
+
+      // Add padding
+      const padding = 50;
+      const captureWidth = Math.max(800, elementBounds.maxX - elementBounds.minX + padding * 2);
+      const captureHeight = Math.max(600, elementBounds.maxY - elementBounds.minY + padding * 2);
+
+      const canvas = await html2canvas(canvasContent, {
+        width: captureWidth,
+        height: captureHeight,
+        scale: 1,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+      });
+
+      // Restore original transform
+      canvasContent.style.transform = originalTransform;
+
+      // Create PDF
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: captureWidth > captureHeight ? 'landscape' : 'portrait',
+        unit: 'px',
+        format: [captureWidth, captureHeight]
+      });
+
+      pdf.addImage(imgData, 'PNG', 0, 0, captureWidth, captureHeight);
+      pdf.save(`${boardTitle || 'board'}.pdf`);
+    } catch (error) {
+      console.error('Erreur lors de l\'export PDF:', error);
+    }
+  }, [elements, boardTitle]);
+
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-canvas">
       {/* Header */}
@@ -297,20 +352,18 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
           className="absolute inset-0 bg-canvas"
           style={{
             transform: `translate(${canvasTransform.x}px, ${canvasTransform.y}px) scale(${canvasTransform.scale})`,
-            width: '100vw',
-            height: '100vh',
-            minWidth: '8000px',
-            minHeight: '8000px',
+            width: '20000px',
+            height: '20000px',
           }}
         >
           {/* Enhanced Grid Background - Infinite */}
           <div 
             className="absolute"
             style={{
-              left: '-100vw',
-              top: '-100vh',
-              width: '300vw',
-              height: '300vh',
+              left: '-20000px',
+              top: '-20000px',
+              width: '60000px',
+              height: '60000px',
               backgroundImage: `
                 linear-gradient(to right, hsl(var(--muted-foreground) / 0.15) 1px, transparent 1px),
                 linear-gradient(to bottom, hsl(var(--muted-foreground) / 0.15) 1px, transparent 1px)
@@ -322,10 +375,10 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
           <div 
             className="absolute"
             style={{
-              left: '-100vw',
-              top: '-100vh',
-              width: '300vw',
-              height: '300vh',
+              left: '-20000px',
+              top: '-20000px',
+              width: '60000px',
+              height: '60000px',
               backgroundImage: `
                 linear-gradient(to right, hsl(var(--muted-foreground) / 0.3) 2px, transparent 2px),
                 linear-gradient(to bottom, hsl(var(--muted-foreground) / 0.3) 2px, transparent 2px)
@@ -399,6 +452,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         onToggleTimer={() => setIsTimerVisible(!isTimerVisible)}
         onToggleTextEditor={() => setIsTextEditorVisible(!isTextEditorVisible)}
         onToggleOptions={() => setIsOptionsMenuVisible(!isOptionsMenuVisible)}
+        onExportPDF={handleExportPDF}
       />
 
       {/* Timer */}

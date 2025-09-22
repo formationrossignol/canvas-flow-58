@@ -1,4 +1,4 @@
-import { Type, StickyNote, MousePointer2, ArrowRight, Palette, Image, Edit3, Timer, Link2, Eye, Settings } from "lucide-react";
+import { Type, StickyNote, MousePointer2, ArrowRight, Palette, Image, Edit3, Timer, Link2, Eye, Settings, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { CanvasElement } from "./Canvas";
@@ -18,6 +18,7 @@ interface CanvasToolbarProps {
   onToggleTimer: () => void;
   onToggleTextEditor: () => void;
   onToggleOptions: () => void;
+  onExportPDF?: () => void;
 }
 
 const tools = [
@@ -57,6 +58,7 @@ export const CanvasToolbar = ({
   onToggleTimer,
   onToggleTextEditor,
   onToggleOptions,
+  onExportPDF,
 }: CanvasToolbarProps) => {
   const handleToolClick = (toolId: string) => {
     if (toolId === 'connect') {
@@ -180,16 +182,29 @@ export const CanvasToolbar = ({
           </>
         )}
 
-        {/* Options Button */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onToggleOptions}
-          className="text-muted-foreground hover:text-foreground transition-colors mt-2"
-          title="Options du board"
-        >
-          <Settings size={16} />
-        </Button>
+        {/* Export PDF and Options Buttons */}
+        <div className="flex flex-col gap-2 mt-2">
+          {onExportPDF && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onExportPDF}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              title="Exporter en PDF"
+            >
+              <Download size={16} />
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggleOptions}
+            className="text-muted-foreground hover:text-foreground transition-colors"
+            title="Options du board"
+          >
+            <Settings size={16} />
+          </Button>
+        </div>
       </div>
     </div>
   );
