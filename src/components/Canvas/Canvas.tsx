@@ -512,7 +512,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       )}
 
       {/* Zoom Controls - Horizontal */}
-      <div className="absolute bottom-32 right-6 flex items-center gap-2 bg-card/95 backdrop-blur-sm rounded-lg border border-border p-2 shadow-float">
+      <div className="absolute bottom-56 right-6 flex items-center gap-2 bg-card/95 backdrop-blur-sm rounded-lg border border-border p-2 shadow-float">
         <div className="text-xs text-muted-foreground px-2 font-medium">
           Zoom {Math.round(canvasTransform.scale * 100)}%
         </div>
