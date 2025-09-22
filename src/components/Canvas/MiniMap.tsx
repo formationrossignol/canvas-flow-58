@@ -86,7 +86,6 @@ export const MiniMap = ({ elements, canvasTransform, onNavigate }: MiniMapProps)
     <div 
       ref={containerRef}
       className="absolute bottom-6 right-6 z-50 bg-card/95 backdrop-blur-sm rounded-lg border border-border p-3 shadow-float"
-      style={{ marginBottom: '20px' }}
     >
       <h4 className="text-xs font-medium text-muted-foreground mb-2">Mini carte</h4>
       <canvas

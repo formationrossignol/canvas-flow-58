@@ -168,6 +168,7 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected 
         style={{ 
           color: element.type === 'sticky' ? '#2D3748' : element.color,
           fontSize: element.fontSize || 14,
+          ...element.textStyle,
         }}
       >
         {element.content || (element.type === 'sticky' ? 'Double-clic pour éditer' : '')}

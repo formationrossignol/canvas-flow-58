@@ -2,8 +2,9 @@ import { useRef, useState, useCallback, useEffect } from "react";
 import { CanvasToolbar } from "./CanvasToolbar";
 import { CanvasObject } from "./CanvasObject";
 import { CanvasHeader } from "./CanvasHeader";
-import { PropertyPanel } from "./PropertyPanel";
 import { SelectionBox } from "./SelectionBox";
+import { OptionsMenu } from "./OptionsMenu";
+import { InlineEditor } from "./InlineEditor";
 import { ResizeHandles } from "./ResizeHandles";
 import { TemplatePanel } from "./TemplatePanel";
 import { ExportImportModal } from "./ExportImportModal";
@@ -31,6 +32,7 @@ export interface CanvasElement {
   locked?: boolean;
   zIndex?: number;
   imageUrl?: string;
+  textStyle?: React.CSSProperties;
 }
 
 interface CanvasProps {
@@ -44,7 +46,8 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   const [selectedTool, setSelectedTool] = useState<string>('select');
   const [selectedColor, setSelectedColor] = useState('#FFE066');
   const [boardTitle, setBoardTitle] = useState('Tableau sans titre');
-  const [isPropertyPanelVisible, setIsPropertyPanelVisible] = useState(false);
+  const [isOptionsMenuVisible, setIsOptionsMenuVisible] = useState(false);
+  const [editingElement, setEditingElement] = useState<{element: CanvasElement, position: {x: number, y: number}} | null>(null);
   const [isTemplatePanelVisible, setIsTemplatePanelVisible] = useState(false);
   const [isExportModalVisible, setIsExportModalVisible] = useState(false);
   const [connections, setConnections] = useState<Connection[]>([]);
@@ -223,8 +226,26 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   const handleElementClick = useCallback((id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     const isMultiSelect = e.ctrlKey || e.metaKey;
+    
+    if (!isMultiSelect && selection.selectedIds.length <= 1) {
+      // Open inline editor for single click
+      const element = elements.find(el => el.id === id);
+      if (element) {
+        const rect = containerRef.current?.getBoundingClientRect();
+        if (rect) {
+          setEditingElement({
+            element,
+            position: {
+              x: rect.left + (element.x + element.width / 2) * canvasTransform.scale + canvasTransform.x,
+              y: rect.top + element.y * canvasTransform.scale + canvasTransform.y + 64,
+            }
+          });
+        }
+      }
+    }
+    
     selectElement(id, isMultiSelect);
-  }, [selectElement]);
+  }, [selectElement, selection.selectedIds, elements, canvasTransform]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -377,6 +398,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         isTimerVisible={isTimerVisible}
         onToggleTimer={() => setIsTimerVisible(!isTimerVisible)}
         onToggleTextEditor={() => setIsTextEditorVisible(!isTextEditorVisible)}
+        onToggleOptions={() => setIsOptionsMenuVisible(!isOptionsMenuVisible)}
       />
 
       {/* Timer */}
@@ -399,16 +421,6 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         onNavigate={(x, y) => setCanvasTransform(prev => ({ ...prev, x, y }))}
       />
 
-      {/* Property Panel */}
-      <PropertyPanel
-        selectedElements={selectedElements}
-        onUpdate={handleElementUpdate}
-        onDelete={handleElementDelete}
-        onDuplicate={handleElementDuplicate}
-        isVisible={isPropertyPanelVisible}
-        onToggle={() => setIsPropertyPanelVisible(!isPropertyPanelVisible)}
-      />
-
       {/* Template Panel */}
       <TemplatePanel
         isVisible={isTemplatePanelVisible}
@@ -426,31 +438,50 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         canvasTransform={canvasTransform}
       />
 
-      {/* Zoom Controls */}
-      <div className="absolute bottom-6 right-6 flex flex-col gap-2 bg-card/95 backdrop-blur-sm rounded-lg border border-border p-2 shadow-float" style={{ marginBottom: '200px' }}>
-        <div className="text-xs text-center text-muted-foreground py-1 font-medium">
+      {/* Options Menu */}
+      <OptionsMenu
+        isVisible={isOptionsMenuVisible}
+        onToggle={() => setIsOptionsMenuVisible(!isOptionsMenuVisible)}
+      />
+
+      {/* Inline Editor */}
+      {editingElement && (
+        <InlineEditor
+          element={editingElement.element}
+          onUpdate={(updates) => {
+            handleElementUpdate(editingElement.element.id, updates);
+            setEditingElement(null);
+          }}
+          onClose={() => setEditingElement(null)}
+          position={editingElement.position}
+        />
+      )}
+
+      {/* Zoom Controls - Horizontal */}
+      <div className="absolute bottom-32 right-6 flex items-center gap-2 bg-card/95 backdrop-blur-sm rounded-lg border border-border p-2 shadow-float">
+        <div className="text-xs text-muted-foreground px-2 font-medium">
           Zoom {Math.round(canvasTransform.scale * 100)}%
         </div>
         <button 
-          className="w-10 h-10 rounded-md bg-muted hover:bg-tool-hover flex items-center justify-center transition-colors"
+          className="w-8 h-8 rounded-md bg-muted hover:bg-tool-hover flex items-center justify-center transition-colors"
           onClick={() => {
             const newScale = Math.min(3, canvasTransform.scale * 1.2);
             setCanvasTransform(prev => ({ ...prev, scale: newScale }));
           }}
         >
-          <span className="text-lg font-medium">+</span>
+          <span className="text-sm font-medium">+</span>
         </button>
         <button 
-          className="w-10 h-10 rounded-md bg-muted hover:bg-tool-hover flex items-center justify-center transition-colors"
+          className="w-8 h-8 rounded-md bg-muted hover:bg-tool-hover flex items-center justify-center transition-colors"
           onClick={() => {
             const newScale = Math.max(0.1, canvasTransform.scale * 0.8);
             setCanvasTransform(prev => ({ ...prev, scale: newScale }));
           }}
         >
-          <span className="text-lg font-medium">−</span>
+          <span className="text-sm font-medium">−</span>
         </button>
         <button 
-          className="w-10 h-10 rounded-md bg-muted hover:bg-tool-hover flex items-center justify-center transition-colors"
+          className="w-8 h-8 rounded-md bg-muted hover:bg-tool-hover flex items-center justify-center transition-colors"
           onClick={() => {
             setCanvasTransform({ x: 0, y: 0, scale: 1 });
           }}

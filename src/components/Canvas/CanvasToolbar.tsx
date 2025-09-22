@@ -1,4 +1,4 @@
-import { Type, StickyNote, MousePointer2, ArrowRight, Palette, Image, Edit3, Timer, Link2, Eye } from "lucide-react";
+import { Type, StickyNote, MousePointer2, ArrowRight, Palette, Image, Edit3, Timer, Link2, Eye, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { CanvasElement } from "./Canvas";
@@ -17,6 +17,7 @@ interface CanvasToolbarProps {
   isTimerVisible: boolean;
   onToggleTimer: () => void;
   onToggleTextEditor: () => void;
+  onToggleOptions: () => void;
 }
 
 const tools = [
@@ -55,6 +56,7 @@ export const CanvasToolbar = ({
   isTimerVisible,
   onToggleTimer,
   onToggleTextEditor,
+  onToggleOptions,
 }: CanvasToolbarProps) => {
   const handleToolClick = (toolId: string) => {
     if (toolId === 'connect') {
@@ -177,6 +179,17 @@ export const CanvasToolbar = ({
             </div>
           </>
         )}
+
+        {/* Options Button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onToggleOptions}
+          className="text-muted-foreground hover:text-foreground transition-colors mt-2"
+          title="Options du board"
+        >
+          <Settings size={16} />
+        </Button>
       </div>
     </div>
   );
