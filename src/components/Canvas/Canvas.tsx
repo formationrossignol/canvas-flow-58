@@ -554,11 +554,14 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
 
       {/* Export/Import Modal */}
       <ExportImportModal
-        isOpen={isExportModalVisible}
+        isVisible={isExportModalVisible}
         onClose={() => setIsExportModalVisible(false)}
         elements={elements}
         onImport={handleImportElements}
         canvasTransform={canvasTransform}
+        onExportPDF={() => handleExportPDF(false)}
+        onExportSelectedArea={handleExportSelectedArea}
+        hasSelection={selection.selectedIds.length > 0}
       />
 
       {/* Options Menu */}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Download, Upload, FileImage, FileText, X } from "lucide-react";
+import { Download, Upload, FileImage, FileText, X, FileDown, Crop } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,19 +7,25 @@ import { toast } from "sonner";
 import { CanvasElement } from "./Canvas";
 
 interface ExportImportModalProps {
-  isOpen: boolean;
+  isVisible: boolean;
   onClose: () => void;
   elements: CanvasElement[];
   onImport: (elements: CanvasElement[]) => void;
   canvasTransform: { x: number; y: number; scale: number };
+  onExportPDF?: () => void;
+  onExportSelectedArea?: () => void;
+  hasSelection?: boolean;
 }
 
 export const ExportImportModal = ({
-  isOpen,
+  isVisible,
   onClose,
   elements,
   onImport,
-  canvasTransform
+  canvasTransform,
+  onExportPDF,
+  onExportSelectedArea,
+  hasSelection = false
 }: ExportImportModalProps) => {
   const [isExporting, setIsExporting] = useState(false);
 
@@ -188,15 +194,10 @@ export const ExportImportModal = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isVisible} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
-            Export & Import
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              <X size={16} />
-            </Button>
-          </DialogTitle>
+          <DialogTitle>Export & Import</DialogTitle>
         </DialogHeader>
         
         <Tabs defaultValue="export" className="w-full">
@@ -207,6 +208,34 @@ export const ExportImportModal = ({
           
           <TabsContent value="export" className="space-y-4">
             <div className="space-y-3">
+              {onExportPDF && (
+                <Button 
+                  onClick={onExportPDF}
+                  className="w-full justify-start gap-3 h-12"
+                  variant="outline"
+                >
+                  <FileDown size={20} />
+                  <div className="text-left">
+                    <div className="font-medium">PDF Complet</div>
+                    <div className="text-xs text-muted-foreground">Exporter tout le board en PDF</div>
+                  </div>
+                </Button>
+              )}
+              
+              {onExportSelectedArea && hasSelection && (
+                <Button 
+                  onClick={onExportSelectedArea}
+                  className="w-full justify-start gap-3 h-12"
+                  variant="outline"
+                >
+                  <Crop size={20} />
+                  <div className="text-left">
+                    <div className="font-medium">PDF Sélection</div>
+                    <div className="text-xs text-muted-foreground">Exporter les éléments sélectionnés</div>
+                  </div>
+                </Button>
+              )}
+              
               <Button 
                 onClick={exportAsJSON}
                 className="w-full justify-start gap-3 h-12"
