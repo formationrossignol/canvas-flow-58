@@ -17,6 +17,7 @@ import { MiniMap } from "./MiniMap";
 import { TextEditor } from "./TextEditor";
 import { useCanvasInteraction } from "./hooks/useCanvasInteraction";
 import { useSelection } from "./hooks/useSelection";
+import { useHistory } from "./hooks/useHistory";
 
 export interface CanvasElement {
   id: string;
@@ -46,6 +47,9 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [elements, setElements] = useState<CanvasElement[]>([]);
   const [selectedTool, setSelectedTool] = useState<string>('select');
+  
+  // History management
+  const { addToHistory, undo, redo, canUndo, canRedo } = useHistory(elements);
   const [selectedColor, setSelectedColor] = useState('#FFE066');
   const [boardTitle, setBoardTitle] = useState('Tableau sans titre');
   const [isOptionsMenuVisible, setIsOptionsMenuVisible] = useState(false);
@@ -132,16 +136,28 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       borderRadius: type === 'rectangle' ? 8 : 0,
     };
     
-    setElements(prev => [...prev, newElement]);
+    setElements(prev => {
+      const newElements = [...prev, newElement];
+      addToHistory(newElements);
+      return newElements;
+    });
   }, [selectedColor]);
 
   const handleElementUpdate = useCallback((id: string, updates: Partial<CanvasElement>) => {
-    setElements(prev => prev.map(el => el.id === id ? { ...el, ...updates } : el));
-  }, []);
+    setElements(prev => {
+      const newElements = prev.map(el => el.id === id ? { ...el, ...updates } : el);
+      addToHistory(newElements);
+      return newElements;
+    });
+  }, [addToHistory]);
 
   const handleElementDelete = useCallback((id: string) => {
-    setElements(prev => prev.filter(el => el.id !== id));
-  }, []);
+    setElements(prev => {
+      const newElements = prev.filter(el => el.id !== id);
+      addToHistory(newElements);
+      return newElements;
+    });
+  }, [addToHistory]);
 
   const handleElementDuplicate = useCallback((id: string) => {
     const element = elements.find(el => el.id === id);
@@ -154,18 +170,24 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       y: element.y + 20,
     };
     
-    setElements(prev => [...prev, newElement]);
+    setElements(prev => {
+      const newElements = [...prev, newElement];
+      addToHistory(newElements);
+      return newElements;
+    });
   }, [elements]);
 
   const handleApplyTemplate = useCallback((templateElements: CanvasElement[]) => {
     setElements(templateElements);
+    addToHistory(templateElements);
     clearSelection();
-  }, [clearSelection]);
+  }, [clearSelection, addToHistory]);
 
   const handleImportElements = useCallback((importedElements: CanvasElement[]) => {
     setElements(importedElements);
+    addToHistory(importedElements);
     clearSelection();
-  }, [clearSelection]);
+  }, [clearSelection, addToHistory]);
 
   // Enhanced selection and interaction handlers
   const handleCanvasMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -259,12 +281,24 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       } else if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
         e.preventDefault();
         selection.selectedIds.forEach(id => handleElementDuplicate(id));
+      } else if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        const prevElements = undo();
+        if (prevElements) {
+          setElements(prevElements);
+        }
+      } else if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault();
+        const nextElements = redo();
+        if (nextElements) {
+          setElements(nextElements);
+        }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selection.selectedIds, handleElementDelete, handleElementDuplicate, clearSelection]);
+  }, [selection.selectedIds, handleElementDelete, handleElementDuplicate, clearSelection, undo, redo]);
 
   const selectedElements = elements.filter(el => isSelected(el.id));
   const cursor = isSpacePressed ? 'canvas-cursor-grabbing' : selectedTool === 'select' ? 'canvas-cursor-grab' : selectedTool === 'pen' ? 'crosshair' : 'crosshair';
@@ -273,7 +307,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     setDrawingStrokes(prev => [...prev, stroke]);
   }, []);
 
-  const handleExportPDF = useCallback(async () => {
+  const handleExportPDF = useCallback(async (exportOnlySelected = false) => {
     if (!containerRef.current) return;
 
     const canvasContent = containerRef.current.querySelector('[style*="transform"]') as HTMLElement;
@@ -284,22 +318,40 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       const originalTransform = canvasContent.style.transform;
       canvasContent.style.transform = 'translate(0px, 0px) scale(1)';
       
-      // Calculate visible area based on elements
-      const elementBounds = elements.reduce((bounds, element) => {
+      // Determine which elements to export
+      const elementsToExport = exportOnlySelected && selection.selectedIds.length > 0
+        ? elements.filter(el => selection.selectedIds.includes(el.id))
+        : elements;
+
+      if (elementsToExport.length === 0) {
+        console.warn('Aucun élément à exporter');
+        canvasContent.style.transform = originalTransform;
+        return;
+      }
+      
+      // Calculate visible area based on elements to export
+      const elementBounds = elementsToExport.reduce((bounds, element) => {
         return {
           minX: Math.min(bounds.minX, element.x),
           minY: Math.min(bounds.minY, element.y),
           maxX: Math.max(bounds.maxX, element.x + element.width),
           maxY: Math.max(bounds.maxY, element.y + element.height),
         };
-      }, { minX: 0, minY: 0, maxX: 800, maxY: 600 });
+      }, { 
+        minX: elementsToExport[0].x, 
+        minY: elementsToExport[0].y, 
+        maxX: elementsToExport[0].x + elementsToExport[0].width, 
+        maxY: elementsToExport[0].y + elementsToExport[0].height 
+      });
 
       // Add padding
       const padding = 50;
-      const captureWidth = Math.max(800, elementBounds.maxX - elementBounds.minX + padding * 2);
-      const captureHeight = Math.max(600, elementBounds.maxY - elementBounds.minY + padding * 2);
+      const captureWidth = Math.max(400, elementBounds.maxX - elementBounds.minX + padding * 2);
+      const captureHeight = Math.max(300, elementBounds.maxY - elementBounds.minY + padding * 2);
 
       const canvas = await html2canvas(canvasContent, {
+        x: Math.max(0, elementBounds.minX - padding),
+        y: Math.max(0, elementBounds.minY - padding),
         width: captureWidth,
         height: captureHeight,
         scale: 1,
@@ -320,11 +372,16 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       });
 
       pdf.addImage(imgData, 'PNG', 0, 0, captureWidth, captureHeight);
-      pdf.save(`${boardTitle || 'board'}.pdf`);
+      const fileName = exportOnlySelected ? `${boardTitle || 'board'}-selection.pdf` : `${boardTitle || 'board'}.pdf`;
+      pdf.save(fileName);
     } catch (error) {
       console.error('Erreur lors de l\'export PDF:', error);
     }
-  }, [elements, boardTitle]);
+  }, [elements, boardTitle, selection.selectedIds]);
+
+  const handleExportSelectedArea = useCallback(() => {
+    handleExportPDF(true);
+  }, [handleExportPDF]);
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-canvas">
@@ -452,7 +509,19 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         onToggleTimer={() => setIsTimerVisible(!isTimerVisible)}
         onToggleTextEditor={() => setIsTextEditorVisible(!isTextEditorVisible)}
         onToggleOptions={() => setIsOptionsMenuVisible(!isOptionsMenuVisible)}
-        onExportPDF={handleExportPDF}
+        onExportPDF={() => handleExportPDF(false)}
+        onExportSelectedArea={handleExportSelectedArea}
+        hasSelection={selection.selectedIds.length > 0}
+        canUndo={canUndo}
+        canRedo={canRedo}
+        onUndo={() => {
+          const prevElements = undo();
+          if (prevElements) setElements(prevElements);
+        }}
+        onRedo={() => {
+          const nextElements = redo();
+          if (nextElements) setElements(nextElements);
+        }}
       />
 
       {/* Timer */}

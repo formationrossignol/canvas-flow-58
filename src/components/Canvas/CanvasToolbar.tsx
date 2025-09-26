@@ -1,4 +1,4 @@
-import { Type, StickyNote, MousePointer2, ArrowRight, Palette, Image, Edit3, Timer, Link2, Eye, Settings, Download } from "lucide-react";
+import { Type, StickyNote, MousePointer2, ArrowRight, Palette, Image, Edit3, Timer, Link2, Eye, Settings, Download, Undo2, Redo2, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { CanvasElement } from "./Canvas";
@@ -19,6 +19,12 @@ interface CanvasToolbarProps {
   onToggleTextEditor: () => void;
   onToggleOptions: () => void;
   onExportPDF?: () => void;
+  onExportSelectedArea?: () => void;
+  hasSelection?: boolean;
+  canUndo?: boolean;
+  canRedo?: boolean;
+  onUndo?: () => void;
+  onRedo?: () => void;
 }
 
 const tools = [
@@ -59,6 +65,12 @@ export const CanvasToolbar = ({
   onToggleTextEditor,
   onToggleOptions,
   onExportPDF,
+  onExportSelectedArea,
+  hasSelection = false,
+  canUndo = false,
+  canRedo = false,
+  onUndo,
+  onRedo,
 }: CanvasToolbarProps) => {
   const handleToolClick = (toolId: string) => {
     if (toolId === 'connect') {
@@ -182,27 +194,79 @@ export const CanvasToolbar = ({
           </>
         )}
 
-        {/* Export PDF and Options Buttons */}
-        <div className="flex flex-col gap-2 mt-2">
-          {onExportPDF && (
+        {/* History Controls */}
+        <div className="w-full h-px bg-border my-3" />
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2 mb-2">
+            <Undo2 size={14} className="text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">Historique</span>
+          </div>
+          <div className="flex gap-1">
             <Button
               variant="ghost"
               size="sm"
-              onClick={onExportPDF}
-              className="text-muted-foreground hover:text-foreground transition-colors"
-              title="Exporter en PDF"
+              onClick={onUndo}
+              disabled={!canUndo}
+              className="flex-1 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30"
+              title="Annuler (Ctrl+Z)"
             >
-              <Download size={16} />
+              <Undo2 size={14} />
             </Button>
-          )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onRedo}
+              disabled={!canRedo}
+              className="flex-1 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30"
+              title="Refaire (Ctrl+Y)"
+            >
+              <Redo2 size={14} />
+            </Button>
+          </div>
+        </div>
+
+        {/* Export PDF and Options Buttons */}
+        <div className="w-full h-px bg-border my-3" />
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2 mb-2">
+            <Download size={14} className="text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">Export</span>
+          </div>
+          <div className="flex flex-col gap-1">
+            {onExportPDF && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onExportPDF}
+                className="text-muted-foreground hover:text-foreground transition-colors justify-start"
+                title="Exporter tout en PDF"
+              >
+                <Download size={14} />
+                <span className="text-xs ml-1">Tout</span>
+              </Button>
+            )}
+            {onExportSelectedArea && hasSelection && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onExportSelectedArea}
+                className="text-muted-foreground hover:text-foreground transition-colors justify-start"
+                title="Exporter la sélection en PDF"
+              >
+                <FileDown size={14} />
+                <span className="text-xs ml-1">Sélection</span>
+              </Button>
+            )}
+          </div>
           <Button
             variant="ghost"
             size="sm"
             onClick={onToggleOptions}
-            className="text-muted-foreground hover:text-foreground transition-colors"
+            className="text-muted-foreground hover:text-foreground transition-colors justify-start mt-1"
             title="Options du board"
           >
-            <Settings size={16} />
+            <Settings size={14} />
+            <span className="text-xs ml-1">Options</span>
           </Button>
         </div>
       </div>
