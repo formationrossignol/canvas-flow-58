@@ -21,7 +21,7 @@ import { useHistory } from "./hooks/useHistory";
 
 export interface CanvasElement {
   id: string;
-  type: 'sticky' | 'text' | 'rectangle' | 'circle' | 'arrow' | 'image';
+  type: 'sticky' | 'text' | 'rectangle' | 'circle' | 'triangle' | 'hexagon' | 'pentagon' | 'star' | 'diamond' | 'heart' | 'arrow' | 'image';
   x: number;
   y: number;
   width: number;
@@ -128,8 +128,12 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       type,
       x: Math.random() * 400 + 100,
       y: Math.random() * 300 + 100,
-      width: type === 'sticky' ? 200 : type === 'circle' ? 120 : 160,
-      height: type === 'sticky' ? 200 : type === 'circle' ? 120 : 100,
+      width: type === 'sticky' ? 200 : 
+             type === 'circle' ? 120 : 
+             ['triangle', 'hexagon', 'pentagon', 'star', 'diamond', 'heart'].includes(type) ? 120 : 160,
+      height: type === 'sticky' ? 200 : 
+              type === 'circle' ? 120 : 
+              ['triangle', 'hexagon', 'pentagon', 'star', 'diamond', 'heart'].includes(type) ? 120 : 100,
       color: selectedColor,
       content: type === 'sticky' ? 'Nouvelle idée...' : type === 'text' ? 'Tapez votre texte' : '',
       fontSize: type === 'text' ? 16 : 14,

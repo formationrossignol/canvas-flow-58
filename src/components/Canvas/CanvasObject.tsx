@@ -119,6 +119,48 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected 
           border: '2px solid rgba(0,0,0,0.1)',
         };
       
+      case 'triangle':
+        return {
+          ...baseStyle,
+          backgroundColor: 'transparent',
+          border: 'none',
+        };
+      
+      case 'hexagon':
+        return {
+          ...baseStyle,
+          backgroundColor: 'transparent',
+          border: 'none',
+        };
+      
+      case 'pentagon':
+        return {
+          ...baseStyle,
+          backgroundColor: 'transparent',
+          border: 'none',
+        };
+      
+      case 'star':
+        return {
+          ...baseStyle,
+          backgroundColor: 'transparent',
+          border: 'none',
+        };
+      
+      case 'diamond':
+        return {
+          ...baseStyle,
+          backgroundColor: 'transparent',
+          border: 'none',
+        };
+      
+      case 'heart':
+        return {
+          ...baseStyle,
+          backgroundColor: 'transparent',
+          border: 'none',
+        };
+      
       case 'text':
         return {
           ...baseStyle,
@@ -148,6 +190,75 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected 
           className="w-full h-full object-cover"
           draggable={false}
         />
+      );
+    }
+
+    // Render SVG shapes
+    const shapeTypes = ['triangle', 'hexagon', 'pentagon', 'star', 'diamond', 'heart'];
+    if (shapeTypes.includes(element.type)) {
+      const renderShape = () => {
+        const w = element.width;
+        const h = element.height;
+        
+        switch (element.type) {
+          case 'triangle':
+            return `M ${w/2} 5 L ${w-5} ${h-5} L 5 ${h-5} Z`;
+          
+          case 'hexagon':
+            return `M ${w/2} 5 L ${w-5} ${h/4} L ${w-5} ${3*h/4} L ${w/2} ${h-5} L 5 ${3*h/4} L 5 ${h/4} Z`;
+          
+          case 'pentagon':
+            return `M ${w/2} 5 L ${w-5} ${h/3} L ${w-10} ${h-5} L 10 ${h-5} L 5 ${h/3} Z`;
+          
+          case 'star':
+            const cx = w / 2;
+            const cy = h / 2;
+            const spikes = 5;
+            const outerRadius = Math.min(w, h) / 2 - 5;
+            const innerRadius = outerRadius / 2.5;
+            let path = '';
+            for (let i = 0; i < spikes * 2; i++) {
+              const radius = i % 2 === 0 ? outerRadius : innerRadius;
+              const angle = (Math.PI * i) / spikes - Math.PI / 2;
+              const x = cx + Math.cos(angle) * radius;
+              const y = cy + Math.sin(angle) * radius;
+              path += `${i === 0 ? 'M' : 'L'} ${x} ${y} `;
+            }
+            return path + 'Z';
+          
+          case 'diamond':
+            return `M ${w/2} 5 L ${w-5} ${h/2} L ${w/2} ${h-5} L 5 ${h/2} Z`;
+          
+          case 'heart':
+            const heartW = w - 10;
+            const heartH = h - 10;
+            return `M ${heartW/2 + 5} ${heartH/4 + 10} 
+                    C ${heartW/2 + 5} ${heartH/8 + 10}, ${heartW/4 + 5} 5, ${heartW/8 + 5} 5
+                    C 5 5, 5 ${heartH/4 + 10}, 5 ${heartH/3 + 10}
+                    C 5 ${heartH/2 + 10}, ${heartW/4 + 5} ${3*heartH/4 + 10}, ${heartW/2 + 5} ${heartH + 5}
+                    C ${3*heartW/4 + 5} ${3*heartH/4 + 10}, ${heartW + 5} ${heartH/2 + 10}, ${heartW + 5} ${heartH/3 + 10}
+                    C ${heartW + 5} ${heartH/4 + 10}, ${heartW + 5} 5, ${7*heartW/8 + 5} 5
+                    C ${3*heartW/4 + 5} 5, ${heartW/2 + 5} ${heartH/8 + 10}, ${heartW/2 + 5} ${heartH/4 + 10} Z`;
+          
+          default:
+            return '';
+        }
+      };
+
+      return (
+        <svg 
+          width={element.width} 
+          height={element.height} 
+          className="absolute inset-0"
+          style={{ pointerEvents: 'none' }}
+        >
+          <path
+            d={renderShape()}
+            fill={element.color}
+            stroke="rgba(0,0,0,0.1)"
+            strokeWidth="2"
+          />
+        </svg>
       );
     }
 
