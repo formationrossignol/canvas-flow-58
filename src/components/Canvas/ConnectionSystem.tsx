@@ -140,12 +140,24 @@ export const ConnectionSystem = ({
   const updatedConnections = getUpdatedConnections();
 
   return (
-    <div 
-      className="absolute inset-0 pointer-events-none"
-      onMouseMove={handleMouseMove}
-      style={{ pointerEvents: isConnecting ? 'auto' : 'none' }}
-    >
-      <svg className="absolute inset-0 w-full h-full overflow-visible">
+    <>
+      {/* Instructions overlay */}
+      {isConnecting && (
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-primary text-primary-foreground px-4 py-2 rounded-lg shadow-elegant animate-fade-in">
+          <p className="text-sm font-medium">
+            {connectingFrom 
+              ? "Cliquez sur l'élément de destination" 
+              : "Cliquez sur l'élément de départ"}
+          </p>
+        </div>
+      )}
+      
+      <div 
+        className="absolute inset-0 pointer-events-none"
+        onMouseMove={handleMouseMove}
+        style={{ pointerEvents: isConnecting ? 'auto' : 'none' }}
+      >
+        <svg className="absolute inset-0 w-full h-full overflow-visible">
         <defs>
           <marker
             id="arrowhead"
@@ -183,22 +195,24 @@ export const ConnectionSystem = ({
         )}
       </svg>
       
-      {/* Connection points overlay */}
-      {isConnecting && elements.map(element => (
-        <div
-          key={`connection-point-${element.id}`}
-          className={`absolute w-4 h-4 rounded-full border-2 transition-all pointer-events-auto cursor-pointer ${
-            connectingFrom === element.id 
-              ? 'bg-primary border-primary-foreground scale-125' 
-              : 'bg-background border-primary hover:scale-110'
-          }`}
-          style={{
-            left: element.x + element.width / 2 - 8,
-            top: element.y + element.height / 2 - 8,
-          }}
-          onClick={(e) => handleElementClick(element.id, e)}
-        />
-      ))}
-    </div>
+        {/* Connection points overlay */}
+        {isConnecting && elements.map(element => (
+          <div
+            key={`connection-point-${element.id}`}
+            className={`absolute rounded-full border-2 transition-all pointer-events-auto cursor-pointer animate-pulse ${
+              connectingFrom === element.id 
+                ? 'w-6 h-6 bg-primary border-primary-foreground scale-125 shadow-glow' 
+                : 'w-5 h-5 bg-background border-primary hover:scale-125 hover:shadow-soft'
+            }`}
+            style={{
+              left: element.x + element.width / 2 - (connectingFrom === element.id ? 12 : 10),
+              top: element.y + element.height / 2 - (connectingFrom === element.id ? 12 : 10),
+              zIndex: 100,
+            }}
+            onClick={(e) => handleElementClick(element.id, e)}
+          />
+        ))}
+      </div>
+    </>
   );
 };
