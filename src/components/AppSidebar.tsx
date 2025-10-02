@@ -15,8 +15,8 @@ import { Button } from "@/components/ui/button";
 
 const menuItems = [
   { title: "Mes tableaux", url: "/", icon: Home },
-  { title: "Récents", url: "/?tab=recent", icon: Clock },
-  { title: "Templates", url: "/?tab=templates", icon: Layout },
+  { title: "Récents", url: "/recent", icon: Clock },
+  { title: "Templates", url: "/templates", icon: Layout },
 ];
 
 export function AppSidebar() {
@@ -61,7 +61,14 @@ export function AppSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <NavLink to="/?tab=settings" className="hover:bg-sidebar-accent/50">
+                  <NavLink 
+                    to="/settings"
+                    className={({ isActive }) => 
+                      isActive 
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" 
+                        : "hover:bg-sidebar-accent/50"
+                    }
+                  >
                     <Settings className="h-4 w-4" />
                     <span>Paramètres</span>
                   </NavLink>

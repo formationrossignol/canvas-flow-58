@@ -1,15 +1,23 @@
 import { useParams, useSearchParams } from "react-router-dom";
 import { Canvas as CanvasComponent } from "@/components/Canvas/Canvas";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
 
 const Canvas = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const templateId = searchParams.get('template');
 
-  // Here you could load the specific board data based on the ID
-  // and apply the template if templateId is provided
-
-  return <CanvasComponent boardId={id} templateId={templateId} />;
+  return (
+    <SidebarProvider defaultOpen={false}>
+      <div className="flex min-h-screen w-full">
+        <AppSidebar />
+        <div className="flex-1">
+          <CanvasComponent boardId={id} templateId={templateId} />
+        </div>
+      </div>
+    </SidebarProvider>
+  );
 };
 
 export default Canvas;

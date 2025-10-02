@@ -2,6 +2,18 @@ import { Settings, Download, Share2, Users, MessageCircle, Layout } from "lucide
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface CanvasHeaderProps {
   boardTitle: string;
@@ -19,11 +31,20 @@ export const CanvasHeader = ({
   onOpenExport
 }: CanvasHeaderProps) => {
   const navigate = useNavigate();
+  
+  const handleShare = () => {
+    const shareLink = window.location.href;
+    navigator.clipboard.writeText(shareLink);
+    toast.success("Lien copié dans le presse-papier");
+  };
+  
   return (
     <header className="absolute top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border shadow-soft">
       <div className="flex items-center justify-between px-6 py-3">
         {/* Left Section */}
         <div className="flex items-center gap-4">
+          <SidebarTrigger />
+          
           <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => navigate('/')}>
             <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
               <span className="text-sm font-bold text-white">CB</span>
@@ -95,12 +116,38 @@ export const CanvasHeader = ({
             Export
           </Button>
           
-          <Button variant="default" size="sm" className="gap-2 bg-gradient-primary">
-            <Share2 size={16} />
-            Partager
-          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="default" size="sm" className="gap-2 bg-gradient-primary">
+                <Share2 size={16} />
+                Partager
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Partager le tableau</DialogTitle>
+                <DialogDescription>
+                  Copiez ce lien pour partager le tableau avec d'autres personnes
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="share-link">Lien de partage</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="share-link"
+                      value={window.location.href}
+                      readOnly
+                      className="flex-1"
+                    />
+                    <Button onClick={handleShare}>Copier</Button>
+                  </div>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
           
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" onClick={() => navigate('/settings')}>
             <Settings size={16} />
           </Button>
         </div>

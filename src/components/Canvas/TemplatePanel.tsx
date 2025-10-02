@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Zap, Layout, Plus } from "lucide-react";
+import { X, Zap, Layout, Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,7 @@ export const TemplatePanel = ({ isVisible, onClose, onApplyTemplate, currentElem
   const [newTemplateName, setNewTemplateName] = useState('');
   const [newTemplateDescription, setNewTemplateDescription] = useState('');
   const [customTemplates, setCustomTemplates] = useState<typeof predefinedTemplates>([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   if (!isVisible) return null;
 
@@ -48,6 +49,12 @@ export const TemplatePanel = ({ isVisible, onClose, onApplyTemplate, currentElem
   };
 
   const allTemplates = [...predefinedTemplates, ...customTemplates];
+  
+  const filteredTemplates = allTemplates.filter(template =>
+    template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    template.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    template.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
@@ -62,6 +69,19 @@ export const TemplatePanel = ({ isVisible, onClose, onApplyTemplate, currentElem
             <Button variant="ghost" size="sm" onClick={onClose}>
               <X size={16} />
             </Button>
+          </div>
+
+          {/* Search */}
+          <div className="p-6 border-b border-border">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Rechercher un template..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
           </div>
 
           {/* Create Template Section */}
@@ -105,7 +125,7 @@ export const TemplatePanel = ({ isVisible, onClose, onApplyTemplate, currentElem
           {/* Templates Grid */}
           <div className="flex-1 overflow-y-auto p-6">
             <div className="space-y-4">
-              {allTemplates.map((template) => {
+              {filteredTemplates.map((template) => {
                 const Icon = template.icon;
                 const isSelected = selectedTemplate === template.id;
                 
@@ -159,6 +179,16 @@ export const TemplatePanel = ({ isVisible, onClose, onApplyTemplate, currentElem
                   </div>
                 );
               })}
+              
+              {filteredTemplates.length === 0 && (
+                <div className="text-center py-8">
+                  <Search className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Aucun template trouvé</h3>
+                  <p className="text-muted-foreground">
+                    Essayez avec d'autres mots-clés
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
