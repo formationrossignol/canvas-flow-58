@@ -417,7 +417,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
             height: '20000px',
           }}
         >
-          {/* Enhanced Grid Background - Infinite */}
+          {/* Grid Background with primary color */}
           <div 
             className="absolute"
             style={{
@@ -425,27 +425,9 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
               top: '-20000px',
               width: '60000px',
               height: '60000px',
-              backgroundImage: `
-                linear-gradient(to right, hsl(var(--muted-foreground) / 0.15) 1px, transparent 1px),
-                linear-gradient(to bottom, hsl(var(--muted-foreground) / 0.15) 1px, transparent 1px)
-              `,
-              backgroundSize: `${20 / canvasTransform.scale}px ${20 / canvasTransform.scale}px`,
-              backgroundPosition: `${canvasTransform.x % (20 / canvasTransform.scale)}px ${canvasTransform.y % (20 / canvasTransform.scale)}px`,
-            }}
-          />
-          <div 
-            className="absolute"
-            style={{
-              left: '-20000px',
-              top: '-20000px',
-              width: '60000px',
-              height: '60000px',
-              backgroundImage: `
-                linear-gradient(to right, hsl(var(--muted-foreground) / 0.3) 2px, transparent 2px),
-                linear-gradient(to bottom, hsl(var(--muted-foreground) / 0.3) 2px, transparent 2px)
-              `,
-              backgroundSize: `${100 / canvasTransform.scale}px ${100 / canvasTransform.scale}px`,
-              backgroundPosition: `${canvasTransform.x % (100 / canvasTransform.scale)}px ${canvasTransform.y % (100 / canvasTransform.scale)}px`,
+              backgroundImage: 'linear-gradient(rgba(99, 102, 241, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(99, 102, 241, 0.1) 1px, transparent 1px)',
+              backgroundSize: '32px 32px',
+              backgroundPosition: `${canvasTransform.x % 32}px ${canvasTransform.y % 32}px`,
             }}
           />
 
