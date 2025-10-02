@@ -1,4 +1,4 @@
-import { Type, StickyNote, MousePointer2, ArrowRight, Palette, Image, Edit3, Timer, Link2, Eye, Settings, Download, Undo2, Redo2, FileDown } from "lucide-react";
+import { Type, StickyNote, MousePointer2, ArrowRight, Palette, Image, Edit3, Timer, Link2, Eye, Settings, Download, Undo2, Redo2, FileDown, Shapes } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { CanvasElement } from "./Canvas";
@@ -18,6 +18,7 @@ interface CanvasToolbarProps {
   onToggleTimer: () => void;
   onToggleTextEditor: () => void;
   onToggleOptions: () => void;
+  onToggleShapeLibrary?: () => void;
   onExportPDF?: () => void;
   onExportSelectedArea?: () => void;
   hasSelection?: boolean;
@@ -64,6 +65,7 @@ export const CanvasToolbar = ({
   onToggleTimer,
   onToggleTextEditor,
   onToggleOptions,
+  onToggleShapeLibrary,
   onExportPDF,
   onExportSelectedArea,
   hasSelection = false,
@@ -130,6 +132,24 @@ export const CanvasToolbar = ({
             onShapeSelect={onToolSelect}
             onAddElement={onAddElement}
           />
+          
+          {/* Shape Library Button */}
+          {onToggleShapeLibrary && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-10 h-10 p-0 tool-button hover:bg-tool-hover relative group"
+              onClick={onToggleShapeLibrary}
+              title="Bibliothèque de formes"
+            >
+              <Shapes size={18} />
+              
+              {/* Tooltip */}
+              <div className="absolute left-full ml-3 px-2 py-1 bg-foreground text-background text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
+                Bibliothèque
+              </div>
+            </Button>
+          )}
         </div>
 
         {/* Color Separator */}

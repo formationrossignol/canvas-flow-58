@@ -9,6 +9,7 @@ import { OptionsMenu } from "./OptionsMenu";
 import { InlineEditor } from "./InlineEditor";
 import { ResizeHandles } from "./ResizeHandles";
 import { TemplatePanel } from "./TemplatePanel";
+import { ShapeLibrary } from "./ShapeLibrary";
 import { ExportImportModal } from "./ExportImportModal";
 import { ConnectionSystem, Connection } from "./ConnectionSystem";
 import { DrawingTool, DrawingStroke } from "./DrawingTool";
@@ -55,6 +56,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   const [isOptionsMenuVisible, setIsOptionsMenuVisible] = useState(false);
   const [editingElement, setEditingElement] = useState<{element: CanvasElement, position: {x: number, y: number}} | null>(null);
   const [isTemplatePanelVisible, setIsTemplatePanelVisible] = useState(false);
+  const [isShapeLibraryVisible, setIsShapeLibraryVisible] = useState(false);
   const [isExportModalVisible, setIsExportModalVisible] = useState(false);
   const [connections, setConnections] = useState<Connection[]>([]);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -495,6 +497,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         onToggleTimer={() => setIsTimerVisible(!isTimerVisible)}
         onToggleTextEditor={() => setIsTextEditorVisible(!isTextEditorVisible)}
         onToggleOptions={() => setIsOptionsMenuVisible(!isOptionsMenuVisible)}
+        onToggleShapeLibrary={() => setIsShapeLibraryVisible(!isShapeLibraryVisible)}
         onExportPDF={() => handleExportPDF(false)}
         onExportSelectedArea={handleExportSelectedArea}
         hasSelection={selection.selectedIds.length > 0}
@@ -536,6 +539,13 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         onClose={() => setIsTemplatePanelVisible(false)}
         onApplyTemplate={handleApplyTemplate}
         currentElements={elements}
+      />
+
+      {/* Shape Library */}
+      <ShapeLibrary
+        isVisible={isShapeLibraryVisible}
+        onClose={() => setIsShapeLibraryVisible(false)}
+        onAddShape={handleAddElement}
       />
 
       {/* Export/Import Modal */}
