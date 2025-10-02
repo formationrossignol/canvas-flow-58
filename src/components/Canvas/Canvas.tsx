@@ -37,6 +37,7 @@ export interface CanvasElement {
   zIndex?: number;
   imageUrl?: string;
   textStyle?: React.CSSProperties;
+  likes?: number;
 }
 
 interface CanvasProps {

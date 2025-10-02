@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from "react";
-import { Trash2, Edit3, Lock, Unlock } from "lucide-react";
+import { Trash2, Edit3, Lock, Unlock, Heart } from "lucide-react";
 import { CanvasElement } from "./Canvas";
 
 interface CanvasObjectProps {
@@ -80,6 +80,12 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected 
       setEditContent(element.content || '');
     }
   }, [handleContentSave, element.content]);
+
+  const handleLike = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    const currentLikes = element.likes || 0;
+    onUpdate(element.id, { likes: currentLikes + 1 });
+  }, [element.id, element.likes, onUpdate]);
 
   const getElementStyle = (): React.CSSProperties => {
     const baseStyle: React.CSSProperties = {
@@ -309,8 +315,25 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected 
         <div className="absolute inset-0 border-2 border-primary rounded-lg pointer-events-none" />
       )}
       
+      {/* Likes Badge */}
+      {element.likes && element.likes > 0 && (
+        <div className="absolute -bottom-2 -left-2 bg-destructive text-destructive-foreground rounded-full px-2 py-1 flex items-center gap-1 text-xs font-medium shadow-soft animate-scale-in">
+          <Heart size={12} fill="currentColor" />
+          <span>{element.likes}</span>
+        </div>
+      )}
+      
       {/* Hover Controls */}
       <div className="absolute -top-3 -right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
+        {/* Like Button - Always visible */}
+        <button
+          onClick={handleLike}
+          className="w-6 h-6 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center shadow-soft hover:scale-110 transition-transform"
+          title="Aimer cette idée"
+        >
+          <Heart size={12} fill={element.likes && element.likes > 0 ? "currentColor" : "none"} />
+        </button>
+        
         <button
           onClick={(e) => {
             e.stopPropagation();
