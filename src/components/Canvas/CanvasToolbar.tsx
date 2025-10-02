@@ -1,4 +1,4 @@
-import { Type, StickyNote, MousePointer2, ArrowRight, Palette, Image, Edit3, Timer, Link2, Eye, Settings, Download, Undo2, Redo2, FileDown, Shapes } from "lucide-react";
+import { Type, StickyNote, MousePointer2, ArrowRight, Palette, Image, Edit3, Timer, Link2, Eye, Settings, Download, Undo2, Redo2, FileDown, Shapes, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { CanvasElement } from "./Canvas";
@@ -33,6 +33,7 @@ const tools = [
   { id: 'pen', icon: Edit3, label: 'Crayon', shortcut: 'P' },
   { id: 'sticky', icon: StickyNote, label: 'Post-it', shortcut: 'S' },
   { id: 'text', icon: Type, label: 'Texte', shortcut: 'T' },
+  { id: 'comment', icon: MessageCircle, label: 'Commentaire', shortcut: 'C' },
   { id: 'image', icon: Image, label: 'Image', shortcut: 'I' },
   { id: 'arrow', icon: ArrowRight, label: 'Flèche', shortcut: 'A' },
   { id: 'connect', icon: Link2, label: 'Connecter', shortcut: 'L' },
@@ -86,7 +87,7 @@ export const CanvasToolbar = ({
     } else {
       onToolSelect(toolId);
       
-      // Auto-add element for certain tools
+      // Auto-add element for certain tools (but as pending element)
       if (toolId !== 'select' && toolId !== 'pen' && toolId !== 'connect' && toolId !== 'timer' && toolId !== 'text') {
         onAddElement(toolId as CanvasElement['type']);
       }

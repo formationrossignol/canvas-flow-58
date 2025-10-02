@@ -20,9 +20,17 @@ import { useCanvasInteraction } from "./hooks/useCanvasInteraction";
 import { useSelection } from "./hooks/useSelection";
 import { useHistory } from "./hooks/useHistory";
 
+export interface Comment {
+  id: string;
+  userId: string;
+  userName: string;
+  text: string;
+  timestamp: Date;
+}
+
 export interface CanvasElement {
   id: string;
-  type: 'sticky' | 'text' | 'rectangle' | 'circle' | 'triangle' | 'hexagon' | 'pentagon' | 'star' | 'diamond' | 'heart' | 'arrow' | 'image';
+  type: 'sticky' | 'text' | 'rectangle' | 'circle' | 'triangle' | 'hexagon' | 'pentagon' | 'star' | 'diamond' | 'heart' | 'arrow' | 'image' | 'comment';
   x: number;
   y: number;
   width: number;
@@ -37,7 +45,8 @@ export interface CanvasElement {
   zIndex?: number;
   imageUrl?: string;
   textStyle?: React.CSSProperties;
-  likedBy?: string[]; // Array of user IDs who liked this element
+  likedBy?: string[];
+  comments?: Comment[];
 }
 
 interface CanvasProps {
@@ -49,6 +58,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [elements, setElements] = useState<CanvasElement[]>([]);
   const [selectedTool, setSelectedTool] = useState<string>('select');
+  const [pendingElement, setPendingElement] = useState<CanvasElement['type'] | null>(null);
   
   // History management
   const { addToHistory, undo, redo, canUndo, canRedo } = useHistory(elements);
@@ -107,17 +117,9 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
           const reader = new FileReader();
           reader.onload = (event) => {
             const imageUrl = event.target?.result as string;
-            const newElement: CanvasElement = {
-              id: `image-${Date.now()}`,
-              type: 'image',
-              x: Math.random() * 400 + 100,
-              y: Math.random() * 300 + 100,
-              width: 200,
-              height: 150,
-              color: selectedColor,
-              imageUrl,
-            };
-            setElements(prev => [...prev, newElement]);
+            setPendingElement(type);
+            // Store imageUrl temporarily
+            (window as any).__pendingImageUrl = imageUrl;
           };
           reader.readAsDataURL(file);
         }
@@ -126,29 +128,46 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       return;
     }
 
+    // Set pending element instead of creating immediately
+    setPendingElement(type);
+  }, [selectedColor]);
+
+  const createElementAtPosition = useCallback((type: CanvasElement['type'], x: number, y: number) => {
     const newElement: CanvasElement = {
       id: `${type}-${Date.now()}`,
       type,
-      x: Math.random() * 400 + 100,
-      y: Math.random() * 300 + 100,
+      x,
+      y,
       width: type === 'sticky' ? 200 : 
              type === 'circle' ? 120 : 
+             type === 'comment' ? 300 :
              ['triangle', 'hexagon', 'pentagon', 'star', 'diamond', 'heart'].includes(type) ? 120 : 160,
       height: type === 'sticky' ? 200 : 
               type === 'circle' ? 120 : 
+              type === 'comment' ? 150 :
               ['triangle', 'hexagon', 'pentagon', 'star', 'diamond', 'heart'].includes(type) ? 120 : 100,
       color: selectedColor,
-      content: type === 'sticky' ? 'Nouvelle idée...' : type === 'text' ? 'Tapez votre texte' : '',
+      content: type === 'sticky' ? 'Nouvelle idée...' : 
+               type === 'text' ? 'Tapez votre texte' : 
+               type === 'comment' ? '' : '',
       fontSize: type === 'text' ? 16 : 14,
-      borderRadius: type === 'rectangle' ? 8 : 0,
+      borderRadius: type === 'rectangle' ? 8 : type === 'comment' ? 12 : 0,
+      imageUrl: type === 'image' ? (window as any).__pendingImageUrl : undefined,
+      comments: type === 'comment' ? [] : undefined,
     };
+    
+    if (type === 'image') {
+      delete (window as any).__pendingImageUrl;
+    }
     
     setElements(prev => {
       const newElements = [...prev, newElement];
       addToHistory(newElements);
       return newElements;
     });
-  }, [selectedColor]);
+    
+    setPendingElement(null);
+  }, [selectedColor, addToHistory]);
 
   const handleElementUpdate = useCallback((id: string, updates: Partial<CanvasElement>) => {
     setElements(prev => {
@@ -263,6 +282,18 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
 
   // Enhanced selection and interaction handlers
   const handleCanvasMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    // If we have a pending element, create it at click position
+    if (pendingElement && !isSpacePressed) {
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+
+      const x = (e.clientX - rect.left - canvasTransform.x) / canvasTransform.scale;
+      const y = (e.clientY - rect.top - canvasTransform.y) / canvasTransform.scale;
+
+      createElementAtPosition(pendingElement, x, y);
+      return;
+    }
+
     if (selectedTool === 'select' && !isSpacePressed) {
       const rect = containerRef.current?.getBoundingClientRect();
       if (!rect) return;
@@ -276,7 +307,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     } else {
       canvasMouseDown(e);
     }
-  }, [selectedTool, isSpacePressed, canvasTransform, startSelectionBox, clearSelection, canvasMouseDown]);
+  }, [pendingElement, selectedTool, isSpacePressed, canvasTransform, createElementAtPosition, startSelectionBox, clearSelection, canvasMouseDown]);
 
   const handleCanvasMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (selection.selectionBox.isActive) {
@@ -357,7 +388,15 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   }, [selection.selectedIds, handleElementDelete, handleElementDuplicate, clearSelection, undo, redo]);
 
   const selectedElements = elements.filter(el => isSelected(el.id));
-  const cursor = isSpacePressed ? 'canvas-cursor-grabbing' : selectedTool === 'select' ? 'canvas-cursor-grab' : selectedTool === 'pen' ? 'crosshair' : 'crosshair';
+  const cursor = pendingElement 
+    ? 'crosshair' 
+    : isSpacePressed 
+    ? 'canvas-cursor-grabbing' 
+    : selectedTool === 'select' 
+    ? 'canvas-cursor-grab' 
+    : selectedTool === 'pen' 
+    ? 'crosshair' 
+    : 'crosshair';
 
   const handleAddStroke = useCallback((stroke: DrawingStroke) => {
     setDrawingStrokes(prev => [...prev, stroke]);

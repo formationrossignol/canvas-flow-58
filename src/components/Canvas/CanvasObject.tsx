@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback } from "react";
-import { Trash2, Edit3, Lock, Unlock, Heart } from "lucide-react";
-import { CanvasElement } from "./Canvas";
+import { Trash2, Edit3, Lock, Unlock, Heart, MessageCircle } from "lucide-react";
+import { CanvasElement, Comment } from "./Canvas";
+import { CommentThread } from "./CommentThread";
 
 interface CanvasObjectProps {
   element: CanvasElement;
@@ -14,6 +15,7 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected 
   const [isDragging, setIsDragging] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(element.content || '');
+  const [showComments, setShowComments] = useState(false);
   const dragStart = useRef({ x: 0, y: 0 });
   const elementRef = useRef<HTMLDivElement>(null);
 
@@ -63,6 +65,8 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected 
     if (element.type === 'sticky' || element.type === 'text') {
       setIsEditing(true);
       setEditContent(element.content || '');
+    } else if (element.type === 'comment') {
+      setShowComments(true);
     }
   }, [element.type, element.content, element.locked]);
 
@@ -108,6 +112,18 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected 
   const userId = getCurrentUserId();
   const hasUserLiked = element.likedBy?.includes(userId) || false;
   const likesCount = element.likedBy?.length || 0;
+
+  const handleAddComment = useCallback((text: string) => {
+    const newComment: Comment = {
+      id: `comment-${Date.now()}`,
+      userId: getCurrentUserId(),
+      userName: 'Utilisateur', // In a real app, get from auth
+      text,
+      timestamp: new Date(),
+    };
+    const updatedComments = [...(element.comments || []), newComment];
+    onUpdate(element.id, { comments: updatedComments });
+  }, [element.comments, element.id, onUpdate, getCurrentUserId]);
 
   const getElementStyle = (): React.CSSProperties => {
     const baseStyle: React.CSSProperties = {
@@ -204,6 +220,15 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected 
           overflow: 'hidden',
         };
       
+      case 'comment':
+        return {
+          ...baseStyle,
+          backgroundColor: '#FFFFFF',
+          borderRadius: 12,
+          border: '2px solid #E2E8F0',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+        };
+      
       default:
         return baseStyle;
     }
@@ -218,6 +243,31 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected 
           className="w-full h-full object-cover"
           draggable={false}
         />
+      );
+    }
+
+    if (element.type === 'comment') {
+      const comments = element.comments || [];
+      return (
+        <div className="w-full h-full p-3 flex flex-col gap-2">
+          <div className="flex items-center gap-2 text-primary">
+            <MessageCircle size={18} />
+            <span className="font-semibold text-sm">Commentaires</span>
+            {comments.length > 0 && (
+              <span className="bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-full">
+                {comments.length}
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Double-cliquez pour voir ou ajouter des commentaires
+          </p>
+          {comments.length > 0 && (
+            <div className="text-xs text-foreground truncate">
+              Dernier: {comments[comments.length - 1].text.substring(0, 30)}...
+            </div>
+          )}
+        </div>
       );
     }
 
@@ -323,82 +373,106 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected 
   };
 
   return (
-    <div
-      ref={elementRef}
-      style={getElementStyle()}
-      onMouseDown={handleMouseDown}
-      onDoubleClick={handleDoubleClick}
-      className="group animate-scale-in"
-    >
-      {renderContent()}
-      
-      {/* Selection Border */}
-      {isSelected && (
-        <div className="absolute inset-0 border-2 border-primary rounded-lg pointer-events-none" />
-      )}
-      
-      {/* Likes Badge */}
-      {likesCount > 0 && (
-        <div className="absolute -bottom-2 -left-2 bg-destructive text-destructive-foreground rounded-full px-2 py-1 flex items-center gap-1 text-xs font-medium shadow-soft animate-scale-in">
-          <Heart size={12} fill="currentColor" />
-          <span>{likesCount}</span>
-        </div>
-      )}
-      
-      {/* Hover Controls */}
-      <div className="absolute -top-3 -right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
-        {/* Like Button - Always visible */}
-        <button
-          onClick={handleLike}
-          className={`w-6 h-6 rounded-full flex items-center justify-center shadow-soft hover:scale-110 transition-all ${
-            hasUserLiked
-              ? 'bg-destructive text-destructive-foreground'
-              : 'bg-background text-destructive border border-destructive'
-          }`}
-          title={hasUserLiked ? "Retirer mon like" : "Aimer cette idée"}
-        >
-          <Heart size={12} fill={hasUserLiked ? "currentColor" : "none"} />
-        </button>
+    <>
+      <div
+        ref={elementRef}
+        style={getElementStyle()}
+        onMouseDown={handleMouseDown}
+        onDoubleClick={handleDoubleClick}
+        className="group animate-scale-in"
+      >
+        {renderContent()}
         
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onUpdate(element.id, { locked: !element.locked });
-          }}
-          className={`w-6 h-6 rounded-full flex items-center justify-center shadow-soft hover:scale-110 transition-transform ${
-            element.locked 
-              ? 'bg-warning text-warning-foreground' 
-              : 'bg-secondary text-secondary-foreground'
-          }`}
-          title={element.locked ? "Déverrouiller" : "Verrouiller"}
-        >
-          {element.locked ? <Lock size={12} /> : <Unlock size={12} />}
-        </button>
-        {!element.locked && (
-          <>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsEditing(true);
-              }}
-              className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-soft hover:scale-110 transition-transform"
-              title="Éditer"
-            >
-              <Edit3 size={12} />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete(element.id);
-              }}
-              className="w-6 h-6 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center shadow-soft hover:scale-110 transition-transform"
-              title="Supprimer"
-            >
-              <Trash2 size={12} />
-            </button>
-          </>
+        {/* Selection Border */}
+        {isSelected && (
+          <div className="absolute inset-0 border-2 border-primary rounded-lg pointer-events-none" />
         )}
+        
+        {/* Likes Badge */}
+        {likesCount > 0 && (
+          <div className="absolute -bottom-2 -left-2 bg-destructive text-destructive-foreground rounded-full px-2 py-1 flex items-center gap-1 text-xs font-medium shadow-soft animate-scale-in">
+            <Heart size={12} fill="currentColor" />
+            <span>{likesCount}</span>
+          </div>
+        )}
+        
+        {/* Comment Count Badge */}
+        {element.type === 'comment' && (element.comments?.length || 0) > 0 && (
+          <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-medium shadow-soft animate-scale-in">
+            {element.comments?.length}
+          </div>
+        )}
+        
+        {/* Hover Controls */}
+        <div className="absolute -top-3 -right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
+          {/* Like Button - Always visible */}
+          <button
+            onClick={handleLike}
+            className={`w-6 h-6 rounded-full flex items-center justify-center shadow-soft hover:scale-110 transition-all ${
+              hasUserLiked
+                ? 'bg-destructive text-destructive-foreground'
+                : 'bg-background text-destructive border border-destructive'
+            }`}
+            title={hasUserLiked ? "Retirer mon like" : "Aimer cette idée"}
+          >
+            <Heart size={12} fill={hasUserLiked ? "currentColor" : "none"} />
+          </button>
+          
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onUpdate(element.id, { locked: !element.locked });
+            }}
+            className={`w-6 h-6 rounded-full flex items-center justify-center shadow-soft hover:scale-110 transition-transform ${
+              element.locked 
+                ? 'bg-warning text-warning-foreground' 
+                : 'bg-secondary text-secondary-foreground'
+            }`}
+            title={element.locked ? "Déverrouiller" : "Verrouiller"}
+          >
+            {element.locked ? <Lock size={12} /> : <Unlock size={12} />}
+          </button>
+          {!element.locked && (
+            <>
+              {element.type !== 'comment' && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsEditing(true);
+                  }}
+                  className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-soft hover:scale-110 transition-transform"
+                  title="Éditer"
+                >
+                  <Edit3 size={12} />
+                </button>
+              )}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(element.id);
+                }}
+                className="w-6 h-6 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center shadow-soft hover:scale-110 transition-transform"
+                title="Supprimer"
+              >
+                <Trash2 size={12} />
+              </button>
+            </>
+          )}
+        </div>
       </div>
-    </div>
+
+      {/* Comment Thread Modal */}
+      {showComments && element.type === 'comment' && (
+        <CommentThread
+          comments={element.comments || []}
+          onAddComment={handleAddComment}
+          onClose={() => setShowComments(false)}
+          position={{
+            x: element.x + element.width + 10,
+            y: element.y,
+          }}
+        />
+      )}
+    </>
   );
 };
