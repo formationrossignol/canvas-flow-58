@@ -81,11 +81,33 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected 
     }
   }, [handleContentSave, element.content]);
 
+  const getCurrentUserId = useCallback(() => {
+    // Get or create a unique user ID for this session
+    let userId = localStorage.getItem('canvas_user_id');
+    if (!userId) {
+      userId = `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      localStorage.setItem('canvas_user_id', userId);
+    }
+    return userId;
+  }, []);
+
   const handleLike = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    const currentLikes = element.likes || 0;
-    onUpdate(element.id, { likes: currentLikes + 1 });
-  }, [element.id, element.likes, onUpdate]);
+    const userId = getCurrentUserId();
+    const likedBy = element.likedBy || [];
+    
+    // Toggle like: if user already liked, remove; otherwise add
+    const hasLiked = likedBy.includes(userId);
+    const updatedLikedBy = hasLiked 
+      ? likedBy.filter(id => id !== userId)
+      : [...likedBy, userId];
+    
+    onUpdate(element.id, { likedBy: updatedLikedBy });
+  }, [element.id, element.likedBy, onUpdate, getCurrentUserId]);
+
+  const userId = getCurrentUserId();
+  const hasUserLiked = element.likedBy?.includes(userId) || false;
+  const likesCount = element.likedBy?.length || 0;
 
   const getElementStyle = (): React.CSSProperties => {
     const baseStyle: React.CSSProperties = {
@@ -316,10 +338,10 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected 
       )}
       
       {/* Likes Badge */}
-      {element.likes && element.likes > 0 && (
+      {likesCount > 0 && (
         <div className="absolute -bottom-2 -left-2 bg-destructive text-destructive-foreground rounded-full px-2 py-1 flex items-center gap-1 text-xs font-medium shadow-soft animate-scale-in">
           <Heart size={12} fill="currentColor" />
-          <span>{element.likes}</span>
+          <span>{likesCount}</span>
         </div>
       )}
       
@@ -328,10 +350,14 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected 
         {/* Like Button - Always visible */}
         <button
           onClick={handleLike}
-          className="w-6 h-6 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center shadow-soft hover:scale-110 transition-transform"
-          title="Aimer cette idée"
+          className={`w-6 h-6 rounded-full flex items-center justify-center shadow-soft hover:scale-110 transition-all ${
+            hasUserLiked
+              ? 'bg-destructive text-destructive-foreground'
+              : 'bg-background text-destructive border border-destructive'
+          }`}
+          title={hasUserLiked ? "Retirer mon like" : "Aimer cette idée"}
         >
-          <Heart size={12} fill={element.likes && element.likes > 0 ? "currentColor" : "none"} />
+          <Heart size={12} fill={hasUserLiked ? "currentColor" : "none"} />
         </button>
         
         <button

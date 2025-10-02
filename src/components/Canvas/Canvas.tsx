@@ -37,7 +37,7 @@ export interface CanvasElement {
   zIndex?: number;
   imageUrl?: string;
   textStyle?: React.CSSProperties;
-  likes?: number;
+  likedBy?: string[]; // Array of user IDs who liked this element
 }
 
 interface CanvasProps {
