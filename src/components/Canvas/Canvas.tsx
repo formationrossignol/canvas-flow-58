@@ -257,25 +257,9 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     e.stopPropagation();
     const isMultiSelect = e.ctrlKey || e.metaKey;
     
-    if (!isMultiSelect && selection.selectedIds.length <= 1) {
-      // Open inline editor for single click
-      const element = elements.find(el => el.id === id);
-      if (element) {
-        const rect = containerRef.current?.getBoundingClientRect();
-        if (rect) {
-          setEditingElement({
-            element,
-            position: {
-              x: rect.left + (element.x + element.width / 2) * canvasTransform.scale + canvasTransform.x,
-              y: rect.top + element.y * canvasTransform.scale + canvasTransform.y + 64,
-            }
-          });
-        }
-      }
-    }
-    
+    // Just select the element, don't open editor on click
     selectElement(id, isMultiSelect);
-  }, [selectElement, selection.selectedIds, elements, canvasTransform]);
+  }, [selectElement]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
