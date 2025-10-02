@@ -7,8 +7,16 @@ export interface Connection {
   toElementId: string;
   fromPoint: { x: number; y: number };
   toPoint: { x: number; y: number };
+  fromSide?: 'top' | 'bottom' | 'left' | 'right';
+  toSide?: 'top' | 'bottom' | 'left' | 'right';
   color: string;
 }
+
+type ConnectionPoint = {
+  side: 'top' | 'bottom' | 'left' | 'right';
+  x: number;
+  y: number;
+};
 
 interface ConnectionSystemProps {
   elements: CanvasElement[];
@@ -27,38 +35,52 @@ export const ConnectionSystem = ({
   isConnecting,
   setIsConnecting,
 }: ConnectionSystemProps) => {
-  const [connectingFrom, setConnectingFrom] = useState<string | null>(null);
+  const [connectingFrom, setConnectingFrom] = useState<{ elementId: string; side: 'top' | 'bottom' | 'left' | 'right' } | null>(null);
   const [tempConnection, setTempConnection] = useState<{ x: number; y: number } | null>(null);
 
-  const handleElementClick = useCallback((elementId: string, e: React.MouseEvent) => {
+  // Get connection points for an element
+  const getConnectionPoints = (element: CanvasElement): ConnectionPoint[] => {
+    return [
+      { side: 'top', x: element.x + element.width / 2, y: element.y },
+      { side: 'bottom', x: element.x + element.width / 2, y: element.y + element.height },
+      { side: 'left', x: element.x, y: element.y + element.height / 2 },
+      { side: 'right', x: element.x + element.width, y: element.y + element.height / 2 },
+    ];
+  };
+
+  const handleConnectionPointClick = useCallback((elementId: string, side: 'top' | 'bottom' | 'left' | 'right', e: React.MouseEvent) => {
     if (!isConnecting) return;
     
     e.stopPropagation();
     
     if (!connectingFrom) {
-      setConnectingFrom(elementId);
-    } else if (connectingFrom !== elementId) {
+      setConnectingFrom({ elementId, side });
+    } else if (connectingFrom.elementId !== elementId) {
       // Create connection
-      const fromElement = elements.find(el => el.id === connectingFrom);
+      const fromElement = elements.find(el => el.id === connectingFrom.elementId);
       const toElement = elements.find(el => el.id === elementId);
       
       if (fromElement && toElement) {
-        const newConnection: Connection = {
-          id: `connection-${Date.now()}`,
-          fromElementId: connectingFrom,
-          toElementId: elementId,
-          fromPoint: {
-            x: fromElement.x + fromElement.width / 2,
-            y: fromElement.y + fromElement.height / 2,
-          },
-          toPoint: {
-            x: toElement.x + toElement.width / 2,
-            y: toElement.y + toElement.height / 2,
-          },
-          color: '#6366F1',
-        };
+        const fromPoints = getConnectionPoints(fromElement);
+        const toPoints = getConnectionPoints(toElement);
         
-        onUpdateConnections([...connections, newConnection]);
+        const fromPoint = fromPoints.find(p => p.side === connectingFrom.side);
+        const toPoint = toPoints.find(p => p.side === side);
+        
+        if (fromPoint && toPoint) {
+          const newConnection: Connection = {
+            id: `connection-${Date.now()}`,
+            fromElementId: connectingFrom.elementId,
+            toElementId: elementId,
+            fromPoint: { x: fromPoint.x, y: fromPoint.y },
+            toPoint: { x: toPoint.x, y: toPoint.y },
+            fromSide: connectingFrom.side,
+            toSide: side,
+            color: '#6366F1',
+          };
+          
+          onUpdateConnections([...connections, newConnection]);
+        }
       }
       
       setConnectingFrom(null);
@@ -82,7 +104,6 @@ export const ConnectionSystem = ({
     const dx = toPoint.x - fromPoint.x;
     const dy = toPoint.y - fromPoint.y;
     const angle = Math.atan2(dy, dx);
-    const length = Math.sqrt(dx * dx + dy * dy);
     
     // Arrow head size
     const arrowSize = 10;
@@ -120,16 +141,16 @@ export const ConnectionSystem = ({
       const toElement = elements.find(el => el.id === connection.toElementId);
       
       if (fromElement && toElement) {
+        const fromPoints = getConnectionPoints(fromElement);
+        const toPoints = getConnectionPoints(toElement);
+        
+        const fromPoint = fromPoints.find(p => p.side === connection.fromSide) || fromPoints[0];
+        const toPoint = toPoints.find(p => p.side === connection.toSide) || toPoints[0];
+        
         return {
           ...connection,
-          fromPoint: {
-            x: fromElement.x + fromElement.width / 2,
-            y: fromElement.y + fromElement.height / 2,
-          },
-          toPoint: {
-            x: toElement.x + toElement.width / 2,
-            y: toElement.y + toElement.height / 2,
-          },
+          fromPoint: { x: fromPoint.x, y: fromPoint.y },
+          toPoint: { x: toPoint.x, y: toPoint.y },
         };
       }
       
@@ -146,8 +167,8 @@ export const ConnectionSystem = ({
         <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-primary text-primary-foreground px-4 py-2 rounded-lg shadow-elegant animate-fade-in">
           <p className="text-sm font-medium">
             {connectingFrom 
-              ? "Cliquez sur l'élément de destination" 
-              : "Cliquez sur l'élément de départ"}
+              ? "Cliquez sur un point de connexion de destination" 
+              : "Cliquez sur un point de connexion de départ"}
           </p>
         </div>
       )}
@@ -180,14 +201,16 @@ export const ConnectionSystem = ({
         {/* Render temporary connection while connecting */}
         {isConnecting && connectingFrom && tempConnection && (
           (() => {
-            const fromElement = elements.find(el => el.id === connectingFrom);
+            const fromElement = elements.find(el => el.id === connectingFrom.elementId);
             if (!fromElement) return null;
             
+            const fromPoints = getConnectionPoints(fromElement);
+            const fromPoint = fromPoints.find(p => p.side === connectingFrom.side);
+            
+            if (!fromPoint) return null;
+            
             return renderArrow({
-              fromPoint: {
-                x: fromElement.x + fromElement.width / 2,
-                y: fromElement.y + fromElement.height / 2,
-              },
+              fromPoint: { x: fromPoint.x, y: fromPoint.y },
               toPoint: tempConnection,
               color: '#6366F1',
             });
@@ -195,23 +218,31 @@ export const ConnectionSystem = ({
         )}
       </svg>
       
-        {/* Connection points overlay */}
-        {isConnecting && elements.map(element => (
-          <div
-            key={`connection-point-${element.id}`}
-            className={`absolute rounded-full border-2 transition-all pointer-events-auto cursor-pointer animate-pulse ${
-              connectingFrom === element.id 
-                ? 'w-6 h-6 bg-primary border-primary-foreground scale-125 shadow-glow' 
-                : 'w-5 h-5 bg-background border-primary hover:scale-125 hover:shadow-soft'
-            }`}
-            style={{
-              left: element.x + element.width / 2 - (connectingFrom === element.id ? 12 : 10),
-              top: element.y + element.height / 2 - (connectingFrom === element.id ? 12 : 10),
-              zIndex: 100,
-            }}
-            onClick={(e) => handleElementClick(element.id, e)}
-          />
-        ))}
+        {/* Connection points overlay - 4 points per element */}
+        {isConnecting && elements.map(element => {
+          const points = getConnectionPoints(element);
+          return points.map(point => {
+            const isFromPoint = connectingFrom?.elementId === element.id && connectingFrom?.side === point.side;
+            
+            return (
+              <div
+                key={`connection-point-${element.id}-${point.side}`}
+                className={`absolute rounded-full border-2 transition-all pointer-events-auto cursor-pointer ${
+                  isFromPoint 
+                    ? 'w-5 h-5 bg-primary border-primary-foreground scale-125 shadow-glow animate-pulse' 
+                    : 'w-3 h-3 bg-background border-primary hover:scale-150 hover:shadow-soft'
+                }`}
+                style={{
+                  left: point.x - (isFromPoint ? 10 : 6),
+                  top: point.y - (isFromPoint ? 10 : 6),
+                  zIndex: 100,
+                }}
+                onClick={(e) => handleConnectionPointClick(element.id, point.side, e)}
+                title={`${element.id} - ${point.side}`}
+              />
+            );
+          });
+        })}
       </div>
     </>
   );
