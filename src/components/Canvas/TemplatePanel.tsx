@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { X, Lightbulb, Target, ArrowRight, Users, Zap, Layout, Plus } from "lucide-react";
+import { X, Zap, Layout, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { CanvasElement } from "./Canvas";
+import { templates as predefinedTemplates } from "./templates";
 
 interface TemplatePanelProps {
   isVisible: boolean;
@@ -12,8 +13,6 @@ interface TemplatePanelProps {
   onApplyTemplate: (elements: CanvasElement[]) => void;
   currentElements?: CanvasElement[];
 }
-
-const templates = [
   {
     id: 'brainstorm',
     name: 'Brainstorming',
@@ -355,11 +354,11 @@ export const TemplatePanel = ({ isVisible, onClose, onApplyTemplate, currentElem
   const [isCreating, setIsCreating] = useState(false);
   const [newTemplateName, setNewTemplateName] = useState('');
   const [newTemplateDescription, setNewTemplateDescription] = useState('');
-  const [customTemplates, setCustomTemplates] = useState<typeof templates>([]);
+  const [customTemplates, setCustomTemplates] = useState<typeof predefinedTemplates>([]);
 
   if (!isVisible) return null;
 
-  const handleApplyTemplate = (template: typeof templates[0]) => {
+  const handleApplyTemplate = (template: typeof predefinedTemplates[0]) => {
     onApplyTemplate(template.elements);
     onClose();
   };
@@ -373,6 +372,7 @@ export const TemplatePanel = ({ isVisible, onClose, onApplyTemplate, currentElem
       description: newTemplateDescription || 'Template personnalisé',
       icon: Layout,
       color: '#6366F1',
+      category: 'Personnalisé',
       elements: currentElements.map(el => ({ ...el, id: `${el.type}-${Date.now()}-${Math.random()}` })) as any,
     };
     
@@ -382,7 +382,7 @@ export const TemplatePanel = ({ isVisible, onClose, onApplyTemplate, currentElem
     setNewTemplateDescription('');
   };
 
-  const allTemplates = [...templates, ...customTemplates];
+  const allTemplates = [...predefinedTemplates, ...customTemplates];
 
   return (
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">

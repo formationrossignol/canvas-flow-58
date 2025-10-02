@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from "react";
-import { Trash2, Edit3 } from "lucide-react";
+import { Trash2, Edit3, Lock, Unlock } from "lucide-react";
 import { CanvasElement } from "./Canvas";
 
 interface CanvasObjectProps {
@@ -20,12 +20,16 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     onClick(element.id, e);
+    
+    // Don't allow dragging if locked
+    if (element.locked) return;
+    
     setIsDragging(true);
     dragStart.current = {
       x: e.clientX - element.x,
       y: e.clientY - element.y,
     };
-  }, [element.x, element.y, element.id, onClick]);
+  }, [element.x, element.y, element.id, onClick, element.locked]);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isDragging) return;
@@ -53,11 +57,14 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected 
   }, [isDragging, handleMouseMove, handleMouseUp]);
 
   const handleDoubleClick = useCallback(() => {
+    // Don't allow editing if locked
+    if (element.locked) return;
+    
     if (element.type === 'sticky' || element.type === 'text') {
       setIsEditing(true);
       setEditContent(element.content || '');
     }
-  }, [element.type, element.content]);
+  }, [element.type, element.content, element.locked]);
 
   const handleContentSave = useCallback(() => {
     onUpdate(element.id, { content: editContent });
@@ -82,10 +89,10 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected 
       width: element.width,
       height: element.height,
       backgroundColor: element.color,
-      cursor: isDragging ? 'grabbing' : 'grab',
+      cursor: element.locked ? 'not-allowed' : (isDragging ? 'grabbing' : 'grab'),
       transition: isDragging ? 'none' : 'transform 0.2s ease-out',
       transform: isSelected ? 'scale(1.02)' : 'scale(1)',
-      opacity: element.opacity || 1,
+      opacity: element.locked ? (element.opacity || 1) * 0.7 : (element.opacity || 1),
       zIndex: element.zIndex || 1,
     };
 
@@ -196,23 +203,41 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected 
         <button
           onClick={(e) => {
             e.stopPropagation();
-            setIsEditing(true);
+            onUpdate(element.id, { locked: !element.locked });
           }}
-          className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-soft hover:scale-110 transition-transform"
-          title="Éditer"
+          className={`w-6 h-6 rounded-full flex items-center justify-center shadow-soft hover:scale-110 transition-transform ${
+            element.locked 
+              ? 'bg-warning text-warning-foreground' 
+              : 'bg-secondary text-secondary-foreground'
+          }`}
+          title={element.locked ? "Déverrouiller" : "Verrouiller"}
         >
-          <Edit3 size={12} />
+          {element.locked ? <Lock size={12} /> : <Unlock size={12} />}
         </button>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete(element.id);
-          }}
-          className="w-6 h-6 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center shadow-soft hover:scale-110 transition-transform"
-          title="Supprimer"
-        >
-          <Trash2 size={12} />
-        </button>
+        {!element.locked && (
+          <>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsEditing(true);
+              }}
+              className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-soft hover:scale-110 transition-transform"
+              title="Éditer"
+            >
+              <Edit3 size={12} />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(element.id);
+              }}
+              className="w-6 h-6 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center shadow-soft hover:scale-110 transition-transform"
+              title="Supprimer"
+            >
+              <Trash2 size={12} />
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
