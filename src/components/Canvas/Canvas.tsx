@@ -164,6 +164,13 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       addToHistory(newElements);
       return newElements;
     });
+    
+    // Also remove connections related to this element
+    setConnections(prev => 
+      prev.filter(conn => 
+        conn.fromElementId !== id && conn.toElementId !== id
+      )
+    );
   }, [addToHistory]);
 
   const handleElementDuplicate = useCallback((id: string) => {
@@ -175,6 +182,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       id: `${element.type}-${Date.now()}`,
       x: element.x + 20,
       y: element.y + 20,
+      likedBy: [], // Reset likes for duplicated element
     };
     
     setElements(prev => {
@@ -182,7 +190,64 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       addToHistory(newElements);
       return newElements;
     });
-  }, [elements]);
+  }, [elements, addToHistory]);
+
+  const handleLockSelectedElements = useCallback(() => {
+    if (selection.selectedIds.length === 0) return;
+    
+    setElements(prev => {
+      const newElements = prev.map(el => 
+        selection.selectedIds.includes(el.id) 
+          ? { ...el, locked: true }
+          : el
+      );
+      addToHistory(newElements);
+      return newElements;
+    });
+  }, [selection.selectedIds, addToHistory]);
+
+  const handleUnlockSelectedElements = useCallback(() => {
+    if (selection.selectedIds.length === 0) return;
+    
+    setElements(prev => {
+      const newElements = prev.map(el => 
+        selection.selectedIds.includes(el.id) 
+          ? { ...el, locked: false }
+          : el
+      );
+      addToHistory(newElements);
+      return newElements;
+    });
+  }, [selection.selectedIds, addToHistory]);
+
+  const handleDuplicateSelectedElements = useCallback(() => {
+    if (selection.selectedIds.length === 0) return;
+    
+    const newElements: CanvasElement[] = [];
+    selection.selectedIds.forEach(id => {
+      const element = elements.find(el => el.id === id);
+      if (element) {
+        const newElement: CanvasElement = {
+          ...element,
+          id: `${element.type}-${Date.now()}-${Math.random()}`,
+          x: element.x + 20,
+          y: element.y + 20,
+          likedBy: [], // Reset likes for duplicated element
+        };
+        newElements.push(newElement);
+      }
+    });
+    
+    if (newElements.length > 0) {
+      setElements(prev => {
+        const updated = [...prev, ...newElements];
+        addToHistory(updated);
+        return updated;
+      });
+      // Select the newly duplicated elements
+      selectMultiple(newElements.map(el => el.id));
+    }
+  }, [selection.selectedIds, elements, addToHistory, selectMultiple]);
 
   const handleApplyTemplate = useCallback((templateElements: CanvasElement[]) => {
     setElements(templateElements);
@@ -383,6 +448,10 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         collaborators={collaborators}
         onOpenTemplates={() => setIsTemplatePanelVisible(true)}
         onOpenExport={() => setIsExportModalVisible(true)}
+        selectedCount={selection.selectedIds.length}
+        onLockSelected={handleLockSelectedElements}
+        onUnlockSelected={handleUnlockSelectedElements}
+        onDuplicateSelected={handleDuplicateSelectedElements}
       />
 
       {/* Canvas Container */}

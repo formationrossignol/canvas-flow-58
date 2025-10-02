@@ -1,4 +1,4 @@
-import { Settings, Download, Share2, Users, MessageCircle, Layout } from "lucide-react";
+import { Settings, Download, Share2, Users, MessageCircle, Layout, Lock, Unlock, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
@@ -21,6 +21,10 @@ interface CanvasHeaderProps {
   collaborators: Array<{ id: string; name: string; avatar: string; color: string }>;
   onOpenTemplates: () => void;
   onOpenExport: () => void;
+  selectedCount?: number;
+  onLockSelected?: () => void;
+  onUnlockSelected?: () => void;
+  onDuplicateSelected?: () => void;
 }
 
 export const CanvasHeader = ({ 
@@ -28,7 +32,11 @@ export const CanvasHeader = ({
   onTitleChange, 
   collaborators,
   onOpenTemplates,
-  onOpenExport
+  onOpenExport,
+  selectedCount = 0,
+  onLockSelected,
+  onUnlockSelected,
+  onDuplicateSelected,
 }: CanvasHeaderProps) => {
   const navigate = useNavigate();
   
@@ -63,34 +71,61 @@ export const CanvasHeader = ({
           />
         </div>
 
-        {/* Center Section - Collaborators */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <Users size={16} className="text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">{collaborators.length} collaborateur{collaborators.length > 1 ? 's' : ''}</span>
-          </div>
-          
-          <div className="flex -space-x-2">
-            {collaborators.slice(0, 4).map((collaborator, index) => (
-              <div
-                key={collaborator.id}
-                className="w-8 h-8 rounded-full border-2 border-background flex items-center justify-center text-xs font-medium text-white shadow-soft"
-                style={{ 
-                  backgroundColor: collaborator.color,
-                  zIndex: collaborators.length - index,
-                }}
-                title={collaborator.name}
-              >
-                {collaborator.name.charAt(0).toUpperCase()}
-              </div>
-            ))}
-            {collaborators.length > 4 && (
-              <div className="w-8 h-8 rounded-full bg-muted border-2 border-background flex items-center justify-center text-xs font-medium text-muted-foreground">
-                +{collaborators.length - 4}
-              </div>
+        {/* Center Section - Collaborators or Selection Actions */}
+        {selectedCount > 0 ? (
+          <div className="flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-lg">
+            <Badge variant="secondary">{selectedCount} élément{selectedCount > 1 ? 's' : ''} sélectionné{selectedCount > 1 ? 's' : ''}</Badge>
+            
+            {onLockSelected && (
+              <Button variant="ghost" size="sm" onClick={onLockSelected} className="gap-2">
+                <Lock size={16} />
+                Verrouiller
+              </Button>
+            )}
+            
+            {onUnlockSelected && (
+              <Button variant="ghost" size="sm" onClick={onUnlockSelected} className="gap-2">
+                <Unlock size={16} />
+                Déverrouiller
+              </Button>
+            )}
+            
+            {onDuplicateSelected && (
+              <Button variant="ghost" size="sm" onClick={onDuplicateSelected} className="gap-2">
+                <Copy size={16} />
+                Dupliquer
+              </Button>
             )}
           </div>
-        </div>
+        ) : (
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Users size={16} className="text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">{collaborators.length} collaborateur{collaborators.length > 1 ? 's' : ''}</span>
+            </div>
+            
+            <div className="flex -space-x-2">
+              {collaborators.slice(0, 4).map((collaborator, index) => (
+                <div
+                  key={collaborator.id}
+                  className="w-8 h-8 rounded-full border-2 border-background flex items-center justify-center text-xs font-medium text-white shadow-soft"
+                  style={{ 
+                    backgroundColor: collaborator.color,
+                    zIndex: collaborators.length - index,
+                  }}
+                  title={collaborator.name}
+                >
+                  {collaborator.name.charAt(0).toUpperCase()}
+                </div>
+              ))}
+              {collaborators.length > 4 && (
+                <div className="w-8 h-8 rounded-full bg-muted border-2 border-background flex items-center justify-center text-xs font-medium text-muted-foreground">
+                  +{collaborators.length - 4}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Right Section */}
         <div className="flex items-center gap-2">
