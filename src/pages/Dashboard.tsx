@@ -5,9 +5,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Grid, Trash2, Edit, Copy, Search, Download, LayoutGrid, List, Star, Share2, FileEdit } from "lucide-react";
+import { Plus, Grid, Trash2, Edit, Copy, Search, Download, LayoutGrid, List, Star, Share2, FileEdit, MoreVertical, Folder } from "lucide-react";
 import { toast } from "sonner";
 import { Toggle } from "@/components/ui/toggle";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface SavedBoard {
   id: string;
@@ -17,6 +19,7 @@ interface SavedBoard {
   elementsCount: number;
   thumbnail?: string;
   isFavorite?: boolean;
+  teamId?: string;
 }
 
 const Dashboard = () => {
@@ -27,14 +30,18 @@ const Dashboard = () => {
       name: "Réunion d'équipe Sprint 12",
       description: "Planning et retrospective de l'équipe dev",
       lastModified: new Date(2024, 0, 15),
-      elementsCount: 12
+      elementsCount: 12,
+      isFavorite: true,
+      teamId: "team2"
     },
     {
       id: "2", 
       name: "Brainstorming Produit",
       description: "Nouvelles fonctionnalités Q1 2024",
       lastModified: new Date(2024, 0, 10),
-      elementsCount: 8
+      elementsCount: 8,
+      isFavorite: false,
+      teamId: "team1"
     }
   ]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -43,6 +50,14 @@ const Dashboard = () => {
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [renamingBoardId, setRenamingBoardId] = useState<string | null>(null);
   const [newBoardName, setNewBoardName] = useState("");
+  const [selectedTeam, setSelectedTeam] = useState<string>("all");
+  
+  const teams = [
+    { id: "all", name: "Tous les tableaux" },
+    { id: "team1", name: "Équipe Marketing" },
+    { id: "team2", name: "Équipe Dev" },
+    { id: "team3", name: "Projets Perso" }
+  ];
 
   const handleCreateNewBoard = () => {
     const boardId = `board-${Date.now()}`;
@@ -114,7 +129,8 @@ const Dashboard = () => {
     const matchesSearch = board.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       board.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFavorite = !showFavoritesOnly || board.isFavorite;
-    return matchesSearch && matchesFavorite;
+    const matchesTeam = selectedTeam === "all" || board.teamId === selectedTeam;
+    return matchesSearch && matchesFavorite && matchesTeam;
   });
 
   return (
@@ -142,6 +158,21 @@ const Dashboard = () => {
               className="pl-10"
             />
           </div>
+          <Select value={selectedTeam} onValueChange={setSelectedTeam}>
+            <SelectTrigger className="w-[200px]">
+              <div className="flex items-center">
+                <Folder className="h-4 w-4 mr-2" />
+                <SelectValue />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              {teams.map(team => (
+                <SelectItem key={team.id} value={team.id}>
+                  {team.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <div className="flex items-center gap-2">
             <Toggle
               pressed={showFavoritesOnly}
@@ -225,75 +256,68 @@ const Dashboard = () => {
                           {board.description}
                         </CardDescription>
                       </div>
-                      <div className="flex gap-1 ml-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => e.stopPropagation()}
+                            className="h-8 w-8 p-0 ml-2"
+                          >
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuItem onClick={(e) => {
                             e.stopPropagation();
                             toggleFavorite(board.id);
-                          }}
-                          title="Favori"
-                        >
-                          <Star className={`h-4 w-4 ${board.isFavorite ? 'fill-current text-yellow-500' : ''}`} />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
+                          }}>
+                            <Star className={`h-4 w-4 mr-2 ${board.isFavorite ? 'fill-current text-yellow-500' : ''}`} />
+                            {board.isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={(e) => {
                             e.stopPropagation();
                             setRenamingBoardId(board.id);
                             setNewBoardName(board.name);
-                          }}
-                          title="Renommer"
-                        >
-                          <FileEdit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
+                          }}>
+                            <FileEdit className="h-4 w-4 mr-2" />
+                            Renommer
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={(e) => {
                             e.stopPropagation();
                             handleDuplicateBoard(board);
-                          }}
-                          title="Dupliquer"
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
+                          }}>
+                            <Copy className="h-4 w-4 mr-2" />
+                            Dupliquer
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={(e) => {
                             e.stopPropagation();
                             handleExportBoard(board);
-                          }}
-                          title="Exporter"
-                        >
-                          <Download className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
+                          }}>
+                            <Download className="h-4 w-4 mr-2" />
+                            Exporter
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={(e) => {
                             e.stopPropagation();
                             handleShareBoard(board);
-                          }}
-                          title="Partager"
-                        >
-                          <Share2 className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setBoardToDelete(board.id);
-                          }}
-                          title="Supprimer"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                          }}>
+                            <Share2 className="h-4 w-4 mr-2" />
+                            Partager
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setBoardToDelete(board.id);
+                            }}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Supprimer
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -360,49 +384,67 @@ const Dashboard = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-2 ml-4">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setRenamingBoardId(board.id);
-                            setNewBoardName(board.name);
-                          }}
-                          title="Renommer"
-                        >
-                          <FileEdit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDuplicateBoard(board)}
-                          title="Dupliquer"
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleExportBoard(board)}
-                          title="Exporter"
-                        >
-                          <Download className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleShareBoard(board)}
-                          title="Partager"
-                        >
-                          <Share2 className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setBoardToDelete(board.id)}
-                          title="Supprimer"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0"
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              toggleFavorite(board.id);
+                            }}>
+                              <Star className={`h-4 w-4 mr-2 ${board.isFavorite ? 'fill-current text-yellow-500' : ''}`} />
+                              {board.isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              setRenamingBoardId(board.id);
+                              setNewBoardName(board.name);
+                            }}>
+                              <FileEdit className="h-4 w-4 mr-2" />
+                              Renommer
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              handleDuplicateBoard(board);
+                            }}>
+                              <Copy className="h-4 w-4 mr-2" />
+                              Dupliquer
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              handleExportBoard(board);
+                            }}>
+                              <Download className="h-4 w-4 mr-2" />
+                              Exporter
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              handleShareBoard(board);
+                            }}>
+                              <Share2 className="h-4 w-4 mr-2" />
+                              Partager
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setBoardToDelete(board.id);
+                              }}
+                              className="text-destructive focus:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Supprimer
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                         <Button
                           onClick={() => handleOpenBoard(board.id)}
                           size="sm"
