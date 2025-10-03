@@ -5,8 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Grid, Trash2, Edit, Copy, Search, Download } from "lucide-react";
+import { Plus, Grid, Trash2, Edit, Copy, Search, Download, LayoutGrid, List, Star } from "lucide-react";
 import { toast } from "sonner";
+import { Toggle } from "@/components/ui/toggle";
 
 interface SavedBoard {
   id: string;
@@ -15,6 +16,7 @@ interface SavedBoard {
   lastModified: Date;
   elementsCount: number;
   thumbnail?: string;
+  isFavorite?: boolean;
 }
 
 const Dashboard = () => {
@@ -37,6 +39,8 @@ const Dashboard = () => {
   ]);
   const [searchQuery, setSearchQuery] = useState("");
   const [boardToDelete, setBoardToDelete] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
   const handleCreateNewBoard = () => {
     const boardId = `board-${Date.now()}`;
@@ -66,6 +70,16 @@ const Dashboard = () => {
     toast.success("Tableau dupliqué");
   };
 
+  const toggleFavorite = (boardId: string) => {
+    setSavedBoards(prev =>
+      prev.map(board =>
+        board.id === boardId
+          ? { ...board, isFavorite: !board.isFavorite }
+          : board
+      )
+    );
+  };
+
   const handleExportBoards = () => {
     const dataStr = JSON.stringify(savedBoards, null, 2);
     const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
@@ -77,10 +91,12 @@ const Dashboard = () => {
     toast.success("Tableaux exportés");
   };
 
-  const filteredBoards = savedBoards.filter(board => 
-    board.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    board.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredBoards = savedBoards.filter(board => {
+    const matchesSearch = board.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      board.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesFavorite = !showFavoritesOnly || board.isFavorite;
+    return matchesSearch && matchesFavorite;
+  });
 
   return (
     <div className="p-8">
@@ -98,10 +114,10 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Search Bar */}
+      {/* Search Bar and View Controls */}
       {savedBoards.length > 0 && (
-        <div className="mb-6">
-          <div className="relative max-w-md">
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <div className="relative max-w-md flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="text"
@@ -110,6 +126,35 @@ const Dashboard = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
             />
+          </div>
+          <div className="flex items-center gap-2">
+            <Toggle
+              pressed={showFavoritesOnly}
+              onPressedChange={setShowFavoritesOnly}
+              aria-label="Afficher favoris uniquement"
+              className="gap-2"
+            >
+              <Star className={`h-4 w-4 ${showFavoritesOnly ? 'fill-current' : ''}`} />
+              Favoris
+            </Toggle>
+            <div className="flex gap-1 border rounded-md p-1">
+              <Button
+                variant={viewMode === "grid" ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("grid")}
+                className="h-8 w-8 p-0"
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === "list" ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("list")}
+                className="h-8 w-8 p-0"
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
       )}
@@ -130,59 +175,125 @@ const Dashboard = () => {
         </Card>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredBoards.map((board) => (
-              <Card key={board.id} className="hover:shadow-lg transition-shadow cursor-pointer">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg line-clamp-1">{board.name}</CardTitle>
-                      <CardDescription className="line-clamp-2 mt-1">
-                        {board.description}
-                      </CardDescription>
+          {viewMode === "grid" ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredBoards.map((board) => (
+                <Card key={board.id} className="hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="text-lg line-clamp-1">{board.name}</CardTitle>
+                        <CardDescription className="line-clamp-2 mt-1">
+                          {board.description}
+                        </CardDescription>
+                      </div>
+                      <div className="flex gap-1 ml-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFavorite(board.id);
+                          }}
+                          title="Favori"
+                        >
+                          <Star className={`h-4 w-4 ${board.isFavorite ? 'fill-current text-yellow-500' : ''}`} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDuplicateBoard(board);
+                          }}
+                          title="Dupliquer"
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setBoardToDelete(board.id);
+                          }}
+                          title="Supprimer"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex gap-1 ml-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDuplicateBoard(board);
-                        }}
-                        title="Dupliquer"
-                      >
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setBoardToDelete(board.id);
-                        }}
-                        title="Supprimer"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
+                      <span>{board.elementsCount} éléments</span>
+                      <span>Modifié le {board.lastModified.toLocaleDateString()}</span>
                     </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
-                    <span>{board.elementsCount} éléments</span>
-                    <span>Modifié le {board.lastModified.toLocaleDateString()}</span>
-                  </div>
-                  <Button 
-                    onClick={() => handleOpenBoard(board.id)} 
-                    className="w-full gap-2"
-                  >
-                    <Edit className="h-4 w-4" />
-                    Ouvrir
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                    <Button 
+                      onClick={() => handleOpenBoard(board.id)} 
+                      className="w-full gap-2"
+                    >
+                      <Edit className="h-4 w-4" />
+                      Ouvrir
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {filteredBoards.map((board) => (
+                <Card key={board.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1 flex items-center gap-4">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleFavorite(board.id)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Star className={`h-4 w-4 ${board.isFavorite ? 'fill-current text-yellow-500' : ''}`} />
+                        </Button>
+                        <div className="flex-1">
+                          <h3 className="font-semibold">{board.name}</h3>
+                          <p className="text-sm text-muted-foreground">{board.description}</p>
+                        </div>
+                        <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                          <span>{board.elementsCount} éléments</span>
+                          <span>Modifié le {board.lastModified.toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 ml-4">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDuplicateBoard(board)}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setBoardToDelete(board.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          onClick={() => handleOpenBoard(board.id)}
+                          size="sm"
+                          className="gap-2"
+                        >
+                          <Edit className="h-4 w-4" />
+                          Ouvrir
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
           
           {filteredBoards.length === 0 && searchQuery && (
             <div className="text-center py-12">

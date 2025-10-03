@@ -5,12 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Layout, Plus, Search, FileEdit } from "lucide-react";
+import { Layout, Plus, Search, FileEdit, LayoutGrid, List } from "lucide-react";
 import { templates } from "@/components/Canvas/templates";
 
 const Templates = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   const filteredTemplates = templates.filter(template =>
     template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -37,8 +38,8 @@ const Templates = () => {
           </Button>
         </div>
 
-      <div className="mb-6">
-        <div className="relative max-w-md">
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <div className="relative max-w-md flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Rechercher un template..."
@@ -47,46 +48,104 @@ const Templates = () => {
             className="pl-10"
           />
         </div>
+        <div className="flex gap-1 border rounded-md p-1">
+          <Button
+            variant={viewMode === "grid" ? "secondary" : "ghost"}
+            size="sm"
+            onClick={() => setViewMode("grid")}
+            className="h-8 w-8 p-0"
+          >
+            <LayoutGrid className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={viewMode === "list" ? "secondary" : "ghost"}
+            size="sm"
+            onClick={() => setViewMode("list")}
+            className="h-8 w-8 p-0"
+          >
+            <List className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredTemplates.map((template) => {
-          const Icon = template.icon;
-          return (
-            <Card key={template.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-start justify-between mb-2">
-                  <div 
-                    className="w-10 h-10 rounded-lg flex items-center justify-center"
-                    style={{ backgroundColor: template.color }}
-                  >
-                    <Icon size={20} className="text-white" />
+      {viewMode === "grid" ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredTemplates.map((template) => {
+            const Icon = template.icon;
+            return (
+              <Card key={template.id} className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="flex items-start justify-between mb-2">
+                    <div 
+                      className="w-10 h-10 rounded-lg flex items-center justify-center"
+                      style={{ backgroundColor: template.color }}
+                    >
+                      <Icon size={20} className="text-white" />
+                    </div>
+                    <Badge variant="secondary">
+                      {template.category}
+                    </Badge>
                   </div>
-                  <Badge variant="secondary">
-                    {template.category}
-                  </Badge>
-                </div>
-                <CardTitle className="text-lg">{template.name}</CardTitle>
-                <CardDescription>
-                  {template.description}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-sm text-muted-foreground mb-3">
-                  {template.elements.length} éléments
-                </div>
-                <Button 
-                  onClick={() => handleUseTemplate(template.id)} 
-                  className="w-full gap-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  Utiliser ce template
-                </Button>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+                  <CardTitle className="text-lg">{template.name}</CardTitle>
+                  <CardDescription>
+                    {template.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-sm text-muted-foreground mb-3">
+                    {template.elements.length} éléments
+                  </div>
+                  <Button 
+                    onClick={() => handleUseTemplate(template.id)} 
+                    className="w-full gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Utiliser ce template
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {filteredTemplates.map((template) => {
+            const Icon = template.icon;
+            return (
+              <Card key={template.id} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4 flex-1">
+                      <div 
+                        className="h-10 w-10 rounded-lg flex items-center justify-center shrink-0"
+                        style={{ backgroundColor: template.color }}
+                      >
+                        <Icon size={20} className="text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-semibold">{template.name}</h3>
+                          <Badge variant="secondary" className="text-xs">{template.category}</Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{template.description}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{template.elements.length} éléments</p>
+                      </div>
+                    </div>
+                    <Button 
+                      onClick={() => handleUseTemplate(template.id)}
+                      size="sm"
+                      className="ml-4 gap-2"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Utiliser
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
 
       {filteredTemplates.length === 0 && (
         <Card className="text-center py-12">
