@@ -66,7 +66,7 @@ export function AppSidebar() {
                       className={({ isActive }) => 
                         `flex items-center gap-4 px-5 py-4 rounded-xl transition-all duration-200 ${
                           isActive 
-                            ? "bg-gradient-primary text-white font-semibold scale-[1.02]" 
+                            ? "bg-gradient-primary font-semibold scale-[1.02]" 
                             : "text-sidebar-foreground font-medium"
                         }`
                       }
