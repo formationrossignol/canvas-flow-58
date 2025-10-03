@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Folder, Plus, Edit2, Trash2, Users } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Folder, Plus, Edit2, Trash2, Users, UserPlus, X } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -24,12 +25,20 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 
+interface TeamMember {
+  id: string;
+  name: string;
+  email: string;
+  role: "owner" | "admin" | "member";
+}
+
 interface Team {
   id: string;
   name: string;
   description: string;
   boardCount: number;
   color: string;
+  members: TeamMember[];
 }
 
 const Teams = () => {
@@ -39,21 +48,31 @@ const Teams = () => {
       name: "Équipe Marketing",
       description: "Tous les tableaux liés au marketing",
       boardCount: 5,
-      color: "hsl(15, 85%, 75%)"
+      color: "hsl(15, 85%, 75%)",
+      members: [
+        { id: "1", name: "Marie Dupont", email: "marie@example.com", role: "owner" },
+        { id: "2", name: "Pierre Martin", email: "pierre@example.com", role: "member" }
+      ]
     },
     {
       id: "team2",
       name: "Équipe Dev",
       description: "Tableaux techniques et développement",
       boardCount: 8,
-      color: "hsl(224, 55%, 65%)"
+      color: "hsl(224, 55%, 65%)",
+      members: [
+        { id: "3", name: "Jean Durand", email: "jean@example.com", role: "owner" }
+      ]
     },
     {
       id: "team3",
       name: "Projets Perso",
       description: "Mes projets personnels",
       boardCount: 3,
-      color: "hsl(150, 45%, 65%)"
+      color: "hsl(150, 45%, 65%)",
+      members: [
+        { id: "4", name: "Vous", email: "vous@example.com", role: "owner" }
+      ]
     }
   ]);
 
@@ -61,6 +80,8 @@ const Teams = () => {
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [formData, setFormData] = useState({ name: "", description: "", color: "#6B9BD1" });
+  const [managingMembersTeam, setManagingMembersTeam] = useState<Team | null>(null);
+  const [newMemberEmail, setNewMemberEmail] = useState("");
 
   const handleCreateTeam = () => {
     if (!formData.name.trim()) {
@@ -73,7 +94,8 @@ const Teams = () => {
       name: formData.name,
       description: formData.description,
       boardCount: 0,
-      color: formData.color
+      color: formData.color,
+      members: [{ id: "owner", name: "Vous", email: "vous@example.com", role: "owner" }]
     };
 
     setTeams([...teams, newTeam]);
@@ -113,6 +135,37 @@ const Teams = () => {
       description: team.description, 
       color: team.color 
     });
+  };
+
+  const handleAddMember = () => {
+    if (!managingMembersTeam || !newMemberEmail.trim()) {
+      toast.error("Email requis");
+      return;
+    }
+
+    const newMember: TeamMember = {
+      id: `member-${Date.now()}`,
+      name: newMemberEmail.split("@")[0],
+      email: newMemberEmail,
+      role: "member"
+    };
+
+    setTeams(teams.map(team => 
+      team.id === managingMembersTeam.id 
+        ? { ...team, members: [...team.members, newMember] }
+        : team
+    ));
+    setNewMemberEmail("");
+    toast.success("Membre ajouté");
+  };
+
+  const handleRemoveMember = (teamId: string, memberId: string) => {
+    setTeams(teams.map(team => 
+      team.id === teamId 
+        ? { ...team, members: team.members.filter(m => m.id !== memberId) }
+        : team
+    ));
+    toast.success("Membre retiré");
   };
 
   return (
@@ -167,15 +220,23 @@ const Teams = () => {
               <CardContent>
                 <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
                   <span>{team.boardCount} tableau{team.boardCount > 1 ? 'x' : ''}</span>
+                  <span>{team.members.length} membre{team.members.length > 1 ? 's' : ''}</span>
                 </div>
                 <div className="flex gap-2">
                   <Button 
-                    onClick={() => startEditing(team)} 
+                    onClick={() => setManagingMembersTeam(team)} 
                     variant="outline"
                     className="flex-1 gap-2"
                   >
+                    <Users className="h-4 w-4" />
+                    Membres
+                  </Button>
+                  <Button 
+                    onClick={() => startEditing(team)} 
+                    variant="outline"
+                    className="gap-2"
+                  >
                     <Edit2 className="h-4 w-4" />
-                    Modifier
                   </Button>
                   <Button 
                     onClick={() => setTeamToDelete(team.id)}
@@ -261,6 +322,61 @@ const Teams = () => {
               {editingTeam ? "Mettre à jour" : "Créer"}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Members Management Dialog */}
+      <Dialog open={managingMembersTeam !== null} onOpenChange={(open) => {
+        if (!open) {
+          setManagingMembersTeam(null);
+          setNewMemberEmail("");
+        }
+      }}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Gérer les membres - {managingMembersTeam?.name}</DialogTitle>
+            <DialogDescription>
+              Ajoutez ou supprimez des membres de l'équipe
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex gap-2">
+              <Input
+                placeholder="Email du membre"
+                value={newMemberEmail}
+                onChange={(e) => setNewMemberEmail(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddMember()}
+              />
+              <Button onClick={handleAddMember} className="gap-2">
+                <UserPlus className="h-4 w-4" />
+                Ajouter
+              </Button>
+            </div>
+            <div className="space-y-2 max-h-[400px] overflow-y-auto">
+              {managingMembersTeam?.members.map((member) => (
+                <div key={member.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">{member.name}</p>
+                    <p className="text-sm text-muted-foreground">{member.email}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant={member.role === "owner" ? "default" : "secondary"}>
+                      {member.role}
+                    </Badge>
+                    {member.role !== "owner" && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveMember(managingMembersTeam.id, member.id)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 

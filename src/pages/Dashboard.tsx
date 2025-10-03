@@ -8,7 +8,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Plus, Grid, Trash2, Edit, Copy, Search, Download, LayoutGrid, List, Star, Share2, FileEdit, MoreVertical, Folder } from "lucide-react";
 import { toast } from "sonner";
 import { Toggle } from "@/components/ui/toggle";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface SavedBoard {
@@ -292,6 +292,25 @@ const Dashboard = () => {
                             Dupliquer
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
+                          <DropdownMenuLabel className="text-xs text-muted-foreground">
+                            Affecter à une équipe
+                          </DropdownMenuLabel>
+                          {teams.filter(t => t.id !== "all").map(team => (
+                            <DropdownMenuItem 
+                              key={team.id}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSavedBoards(prev => 
+                                  prev.map(b => b.id === board.id ? { ...b, teamId: team.id } : b)
+                                );
+                                toast.success(`Tableau affecté à ${team.name}`);
+                              }}
+                            >
+                              <Folder className={`h-4 w-4 mr-2 ${board.teamId === team.id ? 'fill-current' : ''}`} />
+                              {team.name}
+                            </DropdownMenuItem>
+                          ))}
+                          <DropdownMenuSeparator />
                           <DropdownMenuItem onClick={(e) => {
                             e.stopPropagation();
                             handleExportBoard(board);
@@ -312,7 +331,7 @@ const Dashboard = () => {
                               e.stopPropagation();
                               setBoardToDelete(board.id);
                             }}
-                            className="text-destructive focus:text-destructive"
+                            className="text-destructive hover:text-destructive focus:text-destructive"
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Supprimer
@@ -419,6 +438,25 @@ const Dashboard = () => {
                               Dupliquer
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
+                            <DropdownMenuLabel className="text-xs text-muted-foreground">
+                              Affecter à une équipe
+                            </DropdownMenuLabel>
+                            {teams.filter(t => t.id !== "all").map(team => (
+                              <DropdownMenuItem 
+                                key={team.id}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSavedBoards(prev => 
+                                    prev.map(b => b.id === board.id ? { ...b, teamId: team.id } : b)
+                                  );
+                                  toast.success(`Tableau affecté à ${team.name}`);
+                                }}
+                              >
+                                <Folder className={`h-4 w-4 mr-2 ${board.teamId === team.id ? 'fill-current' : ''}`} />
+                                {team.name}
+                              </DropdownMenuItem>
+                            ))}
+                            <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={(e) => {
                               e.stopPropagation();
                               handleExportBoard(board);
@@ -439,7 +477,7 @@ const Dashboard = () => {
                                 e.stopPropagation();
                                 setBoardToDelete(board.id);
                               }}
-                              className="text-destructive focus:text-destructive"
+                              className="text-destructive hover:text-destructive focus:text-destructive"
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
                               Supprimer
@@ -468,6 +506,16 @@ const Dashboard = () => {
               <h3 className="text-lg font-semibold mb-2">Aucun résultat</h3>
               <p className="text-muted-foreground">
                 Aucun tableau ne correspond à votre recherche
+              </p>
+            </div>
+          )}
+          
+          {filteredBoards.length === 0 && !searchQuery && showFavoritesOnly && (
+            <div className="text-center py-12">
+              <Star className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Aucun favori</h3>
+              <p className="text-muted-foreground">
+                Vous n'avez pas encore ajouté de tableaux aux favoris
               </p>
             </div>
           )}
