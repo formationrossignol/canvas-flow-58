@@ -71,17 +71,19 @@ const Templates = () => {
       {viewMode === "grid" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredTemplates.map((template) => {
-            const Icon = template.icon;
             return (
-              <Card key={template.id} className="hover:shadow-lg transition-shadow">
+              <Card key={template.id} className="hover:shadow-lg transition-shadow overflow-hidden">
+                {template.imageUrl && (
+                  <div className="h-32 overflow-hidden">
+                    <img 
+                      src={template.imageUrl} 
+                      alt={template.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
                 <CardHeader>
                   <div className="flex items-start justify-between mb-2">
-                    <div 
-                      className="w-10 h-10 rounded-lg flex items-center justify-center"
-                      style={{ backgroundColor: template.color }}
-                    >
-                      <Icon size={20} className="text-white" />
-                    </div>
                     <Badge variant="secondary">
                       {template.category}
                     </Badge>
@@ -110,18 +112,20 @@ const Templates = () => {
       ) : (
         <div className="space-y-3">
           {filteredTemplates.map((template) => {
-            const Icon = template.icon;
             return (
               <Card key={template.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4 flex-1">
-                      <div 
-                        className="h-10 w-10 rounded-lg flex items-center justify-center shrink-0"
-                        style={{ backgroundColor: template.color }}
-                      >
-                        <Icon size={20} className="text-white" />
-                      </div>
+                      {template.imageUrl && (
+                        <div className="h-16 w-24 rounded-lg overflow-hidden shrink-0">
+                          <img 
+                            src={template.imageUrl} 
+                            alt={template.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <h3 className="font-semibold">{template.name}</h3>

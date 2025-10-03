@@ -9,6 +9,7 @@ export const templates = [
     icon: Lightbulb,
     color: '#FFE066',
     category: 'Créativité',
+    imageUrl: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=400&h=200&fit=crop',
     elements: [
       {
         id: 'title-brainstorm',
@@ -63,6 +64,7 @@ export const templates = [
     icon: Target,
     color: '#64B5F6',
     category: 'Agile',
+    imageUrl: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=200&fit=crop',
     elements: [] as CanvasElement[],
   },
   {
@@ -72,6 +74,7 @@ export const templates = [
     icon: Coffee,
     color: '#8D6E63',
     category: 'Réunion',
+    imageUrl: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=400&h=200&fit=crop',
     elements: [
       {
         id: 'title-lean',
@@ -156,6 +159,7 @@ export const templates = [
     icon: Grid3x3,
     color: '#9C27B0',
     category: 'Gestion',
+    imageUrl: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400&h=200&fit=crop',
     elements: [
       {
         id: 'title-raci',
@@ -261,6 +265,7 @@ export const templates = [
     icon: Calendar,
     color: '#FF5722',
     category: 'Planning',
+    imageUrl: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=400&h=200&fit=crop',
     elements: [
       {
         id: 'title-gantt',
@@ -355,6 +360,7 @@ export const templates = [
     icon: Star,
     color: '#4CAF50',
     category: 'Priorisation',
+    imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=200&fit=crop',
     elements: [
       {
         id: 'title-moscow',
@@ -460,6 +466,7 @@ export const templates = [
     icon: Trello,
     color: '#2196F3',
     category: 'Agile',
+    imageUrl: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=400&h=200&fit=crop&sat=-100',
     elements: [
       {
         id: 'title-kanban',

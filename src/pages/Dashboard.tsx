@@ -10,6 +10,9 @@ import { toast } from "sonner";
 import { Toggle } from "@/components/ui/toggle";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 interface SavedBoard {
   id: string;
@@ -52,6 +55,12 @@ const Dashboard = () => {
   const [renamingBoardId, setRenamingBoardId] = useState<string | null>(null);
   const [newBoardName, setNewBoardName] = useState("");
   const [selectedTeam, setSelectedTeam] = useState<string>("all");
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [newBoard, setNewBoard] = useState({
+    name: "",
+    description: "",
+    teamId: "team1"
+  });
   
   const teams = [
     { id: "all", name: "Tous les tableaux" },
@@ -61,8 +70,30 @@ const Dashboard = () => {
   ];
 
   const handleCreateNewBoard = () => {
-    const boardId = `board-${Date.now()}`;
-    navigate(`/canvas/${boardId}`);
+    setIsCreateDialogOpen(true);
+  };
+
+  const handleConfirmCreateBoard = () => {
+    if (!newBoard.name.trim()) {
+      toast.error("Le nom du tableau est requis");
+      return;
+    }
+
+    const board: SavedBoard = {
+      id: `board-${Date.now()}`,
+      name: newBoard.name,
+      description: newBoard.description,
+      lastModified: new Date(),
+      elementsCount: 0,
+      isFavorite: false,
+      teamId: newBoard.teamId
+    };
+
+    setSavedBoards(prev => [...prev, board]);
+    toast.success("Tableau créé");
+    setIsCreateDialogOpen(false);
+    setNewBoard({ name: "", description: "", teamId: "team1" });
+    navigate(`/canvas/${board.id}`);
   };
 
   const handleOpenBoard = (boardId: string) => {
@@ -136,6 +167,64 @@ const Dashboard = () => {
 
   return (
     <div className="p-8">
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Créer un nouveau tableau</DialogTitle>
+            <DialogDescription>
+              Définissez les propriétés de votre nouveau tableau
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="board-name">Nom du tableau *</Label>
+              <Input
+                id="board-name"
+                value={newBoard.name}
+                onChange={(e) => setNewBoard(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Ex: Réunion d'équipe Sprint 13"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="board-description">Description</Label>
+              <Textarea
+                id="board-description"
+                value={newBoard.description}
+                onChange={(e) => setNewBoard(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Décrivez le contenu de ce tableau..."
+                rows={3}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="board-team">Équipe</Label>
+              <Select value={newBoard.teamId} onValueChange={(value) => setNewBoard(prev => ({ ...prev, teamId: value }))}>
+                <SelectTrigger id="board-team">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {teams.filter(t => t.id !== "all").map(team => (
+                    <SelectItem key={team.id} value={team.id}>
+                      {team.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setIsCreateDialogOpen(false);
+              setNewBoard({ name: "", description: "", teamId: "team1" });
+            }}>
+              Annuler
+            </Button>
+            <Button onClick={handleConfirmCreateBoard}>
+              Créer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-semibold">Mes Tableaux</h2>
         <div className="flex gap-2">
@@ -218,6 +307,16 @@ const Dashboard = () => {
               <Plus className="h-4 w-4" />
               Créer un tableau
             </Button>
+          </CardContent>
+        </Card>
+      ) : filteredBoards.length === 0 && showFavoritesOnly ? (
+        <Card className="text-center py-12">
+          <CardContent>
+            <Star className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Aucun favori</h3>
+            <p className="text-muted-foreground">
+              Vous n'avez pas encore de tableaux favoris
+            </p>
           </CardContent>
         </Card>
       ) : (
