@@ -634,13 +634,49 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         isVisible={isTextEditorVisible && selectedTool === 'text'}
       />
 
-      {/* Mini Map */}
-      <div className="absolute bottom-6 right-6">
+      {/* Mini Map and Zoom Controls */}
+      <div className="absolute bottom-6 right-6 flex flex-col gap-3">
         <MiniMap
           elements={elements}
           canvasTransform={canvasTransform}
           onNavigate={(x, y) => setCanvasTransform(prev => ({ ...prev, x, y }))}
         />
+        
+        {/* Zoom Controls */}
+        <div className="flex items-center gap-2 bg-card border border-border rounded-lg p-2 shadow-float">
+          <div className="text-xs text-muted-foreground px-2 font-medium">
+            {Math.round(canvasTransform.scale * 100)}%
+          </div>
+          <button 
+            className="w-8 h-8 rounded-md bg-muted hover:bg-tool-hover flex items-center justify-center transition-colors"
+            onClick={() => {
+              const newScale = Math.min(3, canvasTransform.scale * 1.2);
+              setCanvasTransform(prev => ({ ...prev, scale: newScale }));
+            }}
+            title="Zoom avant"
+          >
+            <span className="text-sm font-medium">+</span>
+          </button>
+          <button 
+            className="w-8 h-8 rounded-md bg-muted hover:bg-tool-hover flex items-center justify-center transition-colors"
+            onClick={() => {
+              const newScale = Math.max(0.1, canvasTransform.scale * 0.8);
+              setCanvasTransform(prev => ({ ...prev, scale: newScale }));
+            }}
+            title="Zoom arrière"
+          >
+            <span className="text-sm font-medium">−</span>
+          </button>
+          <button 
+            className="w-8 h-8 rounded-md bg-muted hover:bg-tool-hover flex items-center justify-center transition-colors"
+            onClick={() => {
+              setCanvasTransform({ x: 0, y: 0, scale: 1 });
+            }}
+            title="Réinitialiser le zoom"
+          >
+            <span className="text-xs font-medium">1:1</span>
+          </button>
+        </div>
       </div>
 
       {/* Template Panel */}
@@ -696,39 +732,6 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         />
       )}
 
-      {/* Zoom Controls - Horizontal */}
-      <div className="absolute bottom-56 right-6 flex items-center gap-2 bg-card/95 backdrop-blur-sm rounded-lg border border-border p-2 shadow-float">
-        <div className="text-xs text-muted-foreground px-2 font-medium">
-          Zoom {Math.round(canvasTransform.scale * 100)}%
-        </div>
-        <button 
-          className="w-8 h-8 rounded-md bg-muted hover:bg-tool-hover flex items-center justify-center transition-colors"
-          onClick={() => {
-            const newScale = Math.min(3, canvasTransform.scale * 1.2);
-            setCanvasTransform(prev => ({ ...prev, scale: newScale }));
-          }}
-        >
-          <span className="text-sm font-medium">+</span>
-        </button>
-        <button 
-          className="w-8 h-8 rounded-md bg-muted hover:bg-tool-hover flex items-center justify-center transition-colors"
-          onClick={() => {
-            const newScale = Math.max(0.1, canvasTransform.scale * 0.8);
-            setCanvasTransform(prev => ({ ...prev, scale: newScale }));
-          }}
-        >
-          <span className="text-sm font-medium">−</span>
-        </button>
-        <button 
-          className="w-8 h-8 rounded-md bg-muted hover:bg-tool-hover flex items-center justify-center transition-colors"
-          onClick={() => {
-            setCanvasTransform({ x: 0, y: 0, scale: 1 });
-          }}
-          title="Réinitialiser le zoom"
-        >
-          <span className="text-xs font-medium">1:1</span>
-        </button>
-      </div>
     </div>
   );
 };

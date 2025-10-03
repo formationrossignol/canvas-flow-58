@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Grid, Trash2, Edit, Copy, Search, Download, LayoutGrid, List, Star } from "lucide-react";
+import { Plus, Grid, Trash2, Edit, Copy, Search, Download, LayoutGrid, List, Star, Share2, FileEdit } from "lucide-react";
 import { toast } from "sonner";
 import { Toggle } from "@/components/ui/toggle";
 
@@ -41,6 +41,8 @@ const Dashboard = () => {
   const [boardToDelete, setBoardToDelete] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [renamingBoardId, setRenamingBoardId] = useState<string | null>(null);
+  const [newBoardName, setNewBoardName] = useState("");
 
   const handleCreateNewBoard = () => {
     const boardId = `board-${Date.now()}`;
@@ -80,15 +82,32 @@ const Dashboard = () => {
     );
   };
 
-  const handleExportBoards = () => {
-    const dataStr = JSON.stringify(savedBoards, null, 2);
+  const handleRenameBoard = (id: string, newName: string) => {
+    const updatedBoards = savedBoards.map(board =>
+      board.id === id ? { ...board, name: newName } : board
+    );
+    setSavedBoards(updatedBoards);
+    setRenamingBoardId(null);
+    setNewBoardName("");
+    toast.success("Tableau renommé");
+  };
+
+  const handleExportBoard = (board: SavedBoard) => {
+    const dataStr = JSON.stringify(board, null, 2);
     const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    const exportFileDefaultName = `collabboard-export-${Date.now()}.json`;
+    const exportFileDefaultName = `${board.name || 'tableau'}.json`;
+    
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', dataUri);
     linkElement.setAttribute('download', exportFileDefaultName);
     linkElement.click();
-    toast.success("Tableaux exportés");
+    toast.success("Tableau exporté");
+  };
+
+  const handleShareBoard = (board: SavedBoard) => {
+    const shareUrl = `${window.location.origin}/canvas/${board.id}`;
+    navigator.clipboard.writeText(shareUrl);
+    toast.success("Lien copié dans le presse-papiers!");
   };
 
   const filteredBoards = savedBoards.filter(board => {
@@ -103,10 +122,6 @@ const Dashboard = () => {
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-semibold">Mes Tableaux</h2>
         <div className="flex gap-2">
-          <Button onClick={handleExportBoards} variant="outline" className="gap-2">
-            <Download className="h-4 w-4" />
-            Exporter
-          </Button>
           <Button onClick={handleCreateNewBoard} className="gap-2">
             <Plus className="h-4 w-4" />
             Nouveau Tableau
@@ -178,11 +193,34 @@ const Dashboard = () => {
           {viewMode === "grid" ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredBoards.map((board) => (
-                <Card key={board.id} className="hover:shadow-lg transition-shadow cursor-pointer">
+                <Card key={board.id} className="hover:shadow-lg transition-shadow">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <CardTitle className="text-lg line-clamp-1">{board.name}</CardTitle>
+                        {renamingBoardId === board.id ? (
+                          <Input
+                            value={newBoardName}
+                            onChange={(e) => setNewBoardName(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') handleRenameBoard(board.id, newBoardName);
+                              if (e.key === 'Escape') {
+                                setRenamingBoardId(null);
+                                setNewBoardName("");
+                              }
+                            }}
+                            onBlur={() => {
+                              if (newBoardName.trim()) handleRenameBoard(board.id, newBoardName);
+                              else {
+                                setRenamingBoardId(null);
+                                setNewBoardName("");
+                              }
+                            }}
+                            autoFocus
+                            className="h-7 text-lg font-semibold"
+                          />
+                        ) : (
+                          <CardTitle className="text-lg line-clamp-1">{board.name}</CardTitle>
+                        )}
                         <CardDescription className="line-clamp-2 mt-1">
                           {board.description}
                         </CardDescription>
@@ -204,11 +242,45 @@ const Dashboard = () => {
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
+                            setRenamingBoardId(board.id);
+                            setNewBoardName(board.name);
+                          }}
+                          title="Renommer"
+                        >
+                          <FileEdit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
                             handleDuplicateBoard(board);
                           }}
                           title="Dupliquer"
                         >
                           <Copy className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleExportBoard(board);
+                          }}
+                          title="Exporter"
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleShareBoard(board);
+                          }}
+                          title="Partager"
+                        >
+                          <Share2 className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"
@@ -256,7 +328,30 @@ const Dashboard = () => {
                           <Star className={`h-4 w-4 ${board.isFavorite ? 'fill-current text-yellow-500' : ''}`} />
                         </Button>
                         <div className="flex-1">
-                          <h3 className="font-semibold">{board.name}</h3>
+                          {renamingBoardId === board.id ? (
+                            <Input
+                              value={newBoardName}
+                              onChange={(e) => setNewBoardName(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleRenameBoard(board.id, newBoardName);
+                                if (e.key === 'Escape') {
+                                  setRenamingBoardId(null);
+                                  setNewBoardName("");
+                                }
+                              }}
+                              onBlur={() => {
+                                if (newBoardName.trim()) handleRenameBoard(board.id, newBoardName);
+                                else {
+                                  setRenamingBoardId(null);
+                                  setNewBoardName("");
+                                }
+                              }}
+                              autoFocus
+                              className="h-7 font-semibold"
+                            />
+                          ) : (
+                            <h3 className="font-semibold">{board.name}</h3>
+                          )}
                           <p className="text-sm text-muted-foreground">{board.description}</p>
                         </div>
                         <div className="flex items-center gap-6 text-sm text-muted-foreground">
@@ -268,14 +363,43 @@ const Dashboard = () => {
                         <Button
                           variant="ghost"
                           size="sm"
+                          onClick={() => {
+                            setRenamingBoardId(board.id);
+                            setNewBoardName(board.name);
+                          }}
+                          title="Renommer"
+                        >
+                          <FileEdit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => handleDuplicateBoard(board)}
+                          title="Dupliquer"
                         >
                           <Copy className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"
                           size="sm"
+                          onClick={() => handleExportBoard(board)}
+                          title="Exporter"
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleShareBoard(board)}
+                          title="Partager"
+                        >
+                          <Share2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => setBoardToDelete(board.id)}
+                          title="Supprimer"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

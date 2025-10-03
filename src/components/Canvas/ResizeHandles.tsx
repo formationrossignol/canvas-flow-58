@@ -140,19 +140,28 @@ export const ResizeHandles = ({ element, onUpdate, isVisible }: ResizeHandlesPro
   };
 
   return (
-    <>
+    <div
+      className="absolute pointer-events-none"
+      style={{
+        left: element.x,
+        top: element.y,
+        width: element.width,
+        height: element.height,
+      }}
+    >
       {handles.map((handle) => (
         <div
           key={handle.position}
-          className="absolute w-2 h-2 bg-primary border border-primary-foreground rounded-sm shadow-soft hover:scale-125 transition-transform"
+          className="absolute w-3 h-3 bg-primary border-2 border-background rounded-full shadow-elegant hover:scale-150 transition-all pointer-events-auto"
           style={{
             left: handle.x,
             top: handle.y,
             cursor: getCursor(handle.position),
+            zIndex: 1000,
           }}
           onMouseDown={(e) => handleMouseDown(e, handle.position)}
         />
       ))}
-    </>
+    </div>
   );
 };

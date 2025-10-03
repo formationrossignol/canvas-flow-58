@@ -104,22 +104,43 @@ export const ConnectionSystem = ({
     const dx = toPoint.x - fromPoint.x;
     const dy = toPoint.y - fromPoint.y;
     const angle = Math.atan2(dy, dx);
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    // Create smooth bezier curve
+    const controlPointOffset = distance * 0.3;
+    const fromSide = 'fromSide' in connection ? connection.fromSide : undefined;
+    const toSide = 'toSide' in connection ? connection.toSide : undefined;
+    
+    // Calculate control points based on connection sides
+    let cp1x = fromPoint.x, cp1y = fromPoint.y;
+    let cp2x = toPoint.x, cp2y = toPoint.y;
+    
+    if (fromSide === 'right') cp1x += controlPointOffset;
+    else if (fromSide === 'left') cp1x -= controlPointOffset;
+    else if (fromSide === 'bottom') cp1y += controlPointOffset;
+    else if (fromSide === 'top') cp1y -= controlPointOffset;
+    
+    if (toSide === 'right') cp2x += controlPointOffset;
+    else if (toSide === 'left') cp2x -= controlPointOffset;
+    else if (toSide === 'bottom') cp2y += controlPointOffset;
+    else if (toSide === 'top') cp2y -= controlPointOffset;
+    
+    const path = `M ${fromPoint.x},${fromPoint.y} C ${cp1x},${cp1y} ${cp2x},${cp2y} ${toPoint.x},${toPoint.y}`;
     
     // Arrow head size
-    const arrowSize = 10;
+    const arrowSize = 12;
     const arrowAngle = Math.PI / 6;
     
     return (
       <g key={'id' in connection ? connection.id : 'temp'}>
-        {/* Main line */}
-        <line
-          x1={fromPoint.x}
-          y1={fromPoint.y}
-          x2={toPoint.x}
-          y2={toPoint.y}
+        {/* Main curved line */}
+        <path
+          d={path}
           stroke={color}
-          strokeWidth="2"
-          markerEnd="url(#arrowhead)"
+          strokeWidth="3"
+          fill="none"
+          strokeLinecap="round"
+          className="drop-shadow-sm"
         />
         
         {/* Arrow head */}
@@ -130,6 +151,7 @@ export const ConnectionSystem = ({
             ${toPoint.x - arrowSize * Math.cos(angle + arrowAngle)},${toPoint.y - arrowSize * Math.sin(angle + arrowAngle)}
           `}
           fill={color}
+          className="drop-shadow-sm"
         />
       </g>
     );
@@ -229,16 +251,16 @@ export const ConnectionSystem = ({
                 key={`connection-point-${element.id}-${point.side}`}
                 className={`absolute rounded-full border-2 transition-all pointer-events-auto cursor-pointer ${
                   isFromPoint 
-                    ? 'w-5 h-5 bg-primary border-primary-foreground scale-125 shadow-glow animate-pulse' 
-                    : 'w-3 h-3 bg-background border-primary hover:scale-150 hover:shadow-soft'
+                    ? 'w-6 h-6 bg-primary border-background scale-125 shadow-glow animate-pulse' 
+                    : 'w-4 h-4 bg-card border-primary hover:scale-150 hover:shadow-elegant hover:bg-primary/20'
                 }`}
                 style={{
-                  left: point.x - (isFromPoint ? 10 : 6),
-                  top: point.y - (isFromPoint ? 10 : 6),
+                  left: point.x - (isFromPoint ? 12 : 8),
+                  top: point.y - (isFromPoint ? 12 : 8),
                   zIndex: 100,
                 }}
                 onClick={(e) => handleConnectionPointClick(element.id, point.side, e)}
-                title={`${element.id} - ${point.side}`}
+                title={`Connexion ${point.side}`}
               />
             );
           });
