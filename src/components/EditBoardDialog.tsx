@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+import { X, Upload } from "lucide-react";
 
 interface EditBoardDialogProps {
   isOpen: boolean;
@@ -17,6 +17,7 @@ interface EditBoardDialogProps {
     description: string;
     teamId?: string;
     tags?: string[];
+    headerImage?: string;
   };
 }
 
@@ -25,6 +26,7 @@ export interface EditBoardData {
   description: string;
   teamId?: string;
   tags: string[];
+  headerImage?: string;
 }
 
 const teams = [
@@ -38,7 +40,8 @@ export const EditBoardDialog = ({ isOpen, onClose, onSave, initialData }: EditBo
     name: initialData.name,
     description: initialData.description,
     teamId: initialData.teamId,
-    tags: initialData.tags || []
+    tags: initialData.tags || [],
+    headerImage: initialData.headerImage
   });
   const [tagInput, setTagInput] = useState("");
 
@@ -47,7 +50,8 @@ export const EditBoardDialog = ({ isOpen, onClose, onSave, initialData }: EditBo
       name: initialData.name,
       description: initialData.description,
       teamId: initialData.teamId,
-      tags: initialData.tags || []
+      tags: initialData.tags || [],
+      headerImage: initialData.headerImage
     });
   }, [initialData]);
 
@@ -74,9 +78,20 @@ export const EditBoardDialog = ({ isOpen, onClose, onSave, initialData }: EditBo
     onClose();
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({ ...prev, headerImage: reader.result as string }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">Modifier le tableau</DialogTitle>
           <DialogDescription>
@@ -85,6 +100,55 @@ export const EditBoardDialog = ({ isOpen, onClose, onSave, initialData }: EditBo
         </DialogHeader>
 
         <div className="space-y-5 py-4">
+          {/* Header Image */}
+          <div className="space-y-2">
+            <Label htmlFor="header-image" className="text-sm font-medium">
+              Image d'en-tête
+            </Label>
+            <div className="space-y-2">
+              {formData.headerImage ? (
+                <div className="relative w-full h-40 rounded-xl overflow-hidden border-2 border-dashed border-border group">
+                  <img 
+                    src={formData.headerImage} 
+                    alt="Header" 
+                    className="w-full h-full object-cover"
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => setFormData(prev => ({ ...prev, headerImage: undefined }))}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <label 
+                  htmlFor="headerImageInput"
+                  className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-border rounded-xl cursor-pointer hover:bg-accent/50 transition-colors group"
+                >
+                  <div className="flex flex-col items-center justify-center">
+                    <Upload className="h-10 w-10 text-muted-foreground mb-2 group-hover:text-primary transition-colors" />
+                    <p className="text-sm text-muted-foreground font-medium">
+                      Cliquez pour ajouter une image
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      PNG, JPG jusqu'à 10MB
+                    </p>
+                  </div>
+                  <input 
+                    id="headerImageInput" 
+                    type="file" 
+                    className="hidden" 
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                  />
+                </label>
+              )}
+            </div>
+          </div>
+
           {/* Name */}
           <div className="space-y-2">
             <Label htmlFor="board-name" className="text-sm font-medium">
