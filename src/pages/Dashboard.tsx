@@ -38,7 +38,8 @@ const Dashboard = () => {
       lastModified: new Date(2024, 0, 15),
       elementsCount: 12,
       isFavorite: true,
-      teamId: "team2"
+      teamId: "team2",
+      tags: ["Sprint", "Dev"]
     },
     {
       id: "2", 
@@ -47,7 +48,8 @@ const Dashboard = () => {
       lastModified: new Date(2024, 0, 10),
       elementsCount: 8,
       isFavorite: false,
-      teamId: "team1"
+      teamId: "team1",
+      tags: ["Produit", "Q1"]
     }
   ]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -423,7 +425,16 @@ const Dashboard = () => {
           {viewMode === "grid" ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {paginatedBoards.map((board) => (
-                <Card key={board.id} className="hover:shadow-lg transition-shadow">
+                <Card key={board.id} className="hover:shadow-lg transition-shadow overflow-hidden">
+                  {board.tags && board.tags.length > 0 && (
+                    <div className="px-4 pt-4 flex flex-wrap gap-2">
+                      {board.tags.map(tag => (
+                        <Badge key={tag} variant="secondary" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex-1">
@@ -449,43 +460,37 @@ const Dashboard = () => {
                             className="h-7 text-lg font-semibold"
                           />
                         ) : (
-                          <CardTitle className="text-lg line-clamp-1">{board.name}</CardTitle>
+                          <div className="flex items-center gap-2">
+                            <CardTitle className="text-lg line-clamp-1 flex-1">{board.name}</CardTitle>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleFavorite(board.id);
+                              }}
+                              className="h-6 w-6 p-0"
+                            >
+                              <Star className={`h-4 w-4 ${board.isFavorite ? 'fill-current text-yellow-500' : ''}`} />
+                            </Button>
+                          </div>
                         )}
                         <CardDescription className="line-clamp-2 mt-1">
                           {board.description}
                         </CardDescription>
                       </div>
-                      <div className="flex gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleFavorite(board.id);
-                          }}
-                          className="h-8 w-8 p-0"
-                        >
-                          <Star className={`h-4 w-4 ${board.isFavorite ? 'fill-current text-yellow-500' : ''}`} />
-                        </Button>
-                        <DropdownMenu>
+                      <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={(e) => e.stopPropagation()}
-                            className="h-8 w-8 p-0 ml-2"
+                            className="h-8 w-8 p-0"
                           >
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48">
-                          <DropdownMenuItem onClick={(e) => {
-                            e.stopPropagation();
-                            toggleFavorite(board.id);
-                          }}>
-                            <Star className={`h-4 w-4 mr-2 ${board.isFavorite ? 'fill-current text-yellow-500' : ''}`} />
-                            {board.isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
-                          </DropdownMenuItem>
                           <DropdownMenuItem onClick={(e) => {
                             e.stopPropagation();
                             setRenamingBoardId(board.id);
@@ -541,14 +546,13 @@ const Dashboard = () => {
                               e.stopPropagation();
                               setBoardToDelete(board.id);
                             }}
-                            className="text-destructive hover:text-destructive focus:text-destructive"
+                            className="text-destructive focus:text-destructive"
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Supprimer
                           </DropdownMenuItem>
                         </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
+                      </DropdownMenu>
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -688,7 +692,7 @@ const Dashboard = () => {
                                 e.stopPropagation();
                                 setBoardToDelete(board.id);
                               }}
-                              className="text-destructive hover:text-destructive focus:text-destructive"
+                              className="text-destructive focus:text-destructive"
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
                               Supprimer
