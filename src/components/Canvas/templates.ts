@@ -572,6 +572,7 @@ export const templates = [
     icon: Map,
     color: '#00BCD4',
     category: 'Product',
+    imageUrl: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=400&h=200&fit=crop',
     elements: [
       {
         id: 'title-usm',
@@ -656,6 +657,7 @@ export const templates = [
     icon: Trophy,
     color: '#FF9800',
     category: 'Stratégie',
+    imageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=200&fit=crop',
     elements: [
       {
         id: 'title-okr',
@@ -740,6 +742,7 @@ export const templates = [
     icon: TrendingUp,
     color: '#009688',
     category: 'Qualité',
+    imageUrl: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400&h=200&fit=crop&sat=-50',
     elements: [
       {
         id: 'title-kaizen',
@@ -841,6 +844,7 @@ export const templates = [
     icon: AlertTriangle,
     color: '#F44336',
     category: 'Priorisation',
+    imageUrl: 'https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=400&h=200&fit=crop',
     elements: [
       {
         id: 'title-eisenhower',
@@ -946,6 +950,7 @@ export const templates = [
     icon: GitBranch,
     color: '#3F51B5',
     category: 'SAFe',
+    imageUrl: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400&h=200&fit=crop',
     elements: [
       {
         id: 'title-pi',
@@ -1052,6 +1057,7 @@ export const templates = [
     icon: Network,
     color: '#607D8B',
     category: 'Qualité',
+    imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=200&fit=crop',
     elements: [
       {
         id: 'title-ishikawa',
@@ -1138,6 +1144,7 @@ export const templates = [
     icon: ArrowUpDown,
     color: '#9C27B0',
     category: 'Lean',
+    imageUrl: 'https://images.unsplash.com/photo-1553877522-43269d4ea984?w=400&h=200&fit=crop',
     elements: [
       {
         id: 'title-vsm',
@@ -1292,6 +1299,7 @@ export const templates = [
     icon: BarChart3,
     color: '#4CAF50',
     category: 'Stratégie',
+    imageUrl: 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=400&h=200&fit=crop',
     elements: [
       {
         id: 'title-swot',
@@ -1445,6 +1453,7 @@ export const templates = [
     icon: Route,
     color: '#FF9800',
     category: 'Planification',
+    imageUrl: 'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=400&h=200&fit=crop',
     elements: [
       {
         id: 'title-roadmap',

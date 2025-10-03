@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Grid, Trash2, Edit, Copy, Search, Download, LayoutGrid, List, Star, Share2, FileEdit, MoreVertical, Folder } from "lucide-react";
+import { Plus, Grid, Trash2, Edit, Copy, Search, Download, LayoutGrid, List, Star, Share2, FileEdit, MoreVertical, Folder, X } from "lucide-react";
 import { toast } from "sonner";
 import { Toggle } from "@/components/ui/toggle";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
@@ -23,6 +23,7 @@ interface SavedBoard {
   thumbnail?: string;
   isFavorite?: boolean;
   teamId?: string;
+  tags?: string[];
 }
 
 // Dashboard component for managing boards
@@ -59,8 +60,11 @@ const Dashboard = () => {
   const [newBoard, setNewBoard] = useState({
     name: "",
     description: "",
-    teamId: "team1"
+    teamId: "team1",
+    tags: [] as string[]
   });
+  const [tagInput, setTagInput] = useState("");
+  const [selectedBoardTags, setSelectedBoardTags] = useState<string[]>([]);
   
   const teams = [
     { id: "all", name: "Tous les tableaux" },
@@ -68,6 +72,9 @@ const Dashboard = () => {
     { id: "team2", name: "Équipe Dev" },
     { id: "team3", name: "Projets Perso" }
   ];
+
+  // Get all unique tags from boards
+  const allBoardTags = Array.from(new Set(savedBoards.flatMap(b => b.tags || [])));
 
   const handleCreateNewBoard = () => {
     setIsCreateDialogOpen(true);
@@ -86,14 +93,40 @@ const Dashboard = () => {
       lastModified: new Date(),
       elementsCount: 0,
       isFavorite: false,
-      teamId: newBoard.teamId
+      teamId: newBoard.teamId,
+      tags: newBoard.tags
     };
 
     setSavedBoards(prev => [...prev, board]);
     toast.success("Tableau créé");
     setIsCreateDialogOpen(false);
-    setNewBoard({ name: "", description: "", teamId: "team1" });
+    setNewBoard({ name: "", description: "", teamId: "team1", tags: [] });
     navigate(`/canvas/${board.id}`);
+  };
+
+  const handleAddTag = () => {
+    if (tagInput.trim() && !newBoard.tags.includes(tagInput.trim())) {
+      setNewBoard(prev => ({
+        ...prev,
+        tags: [...prev.tags, tagInput.trim()]
+      }));
+      setTagInput("");
+    }
+  };
+
+  const handleRemoveTag = (tag: string) => {
+    setNewBoard(prev => ({
+      ...prev,
+      tags: prev.tags.filter(t => t !== tag)
+    }));
+  };
+
+  const toggleBoardTag = (tag: string) => {
+    setSelectedBoardTags(prev =>
+      prev.includes(tag)
+        ? prev.filter(t => t !== tag)
+        : [...prev, tag]
+    );
   };
 
   const handleOpenBoard = (boardId: string) => {
@@ -162,7 +195,9 @@ const Dashboard = () => {
       board.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFavorite = !showFavoritesOnly || board.isFavorite;
     const matchesTeam = selectedTeam === "all" || board.teamId === selectedTeam;
-    return matchesSearch && matchesFavorite && matchesTeam;
+    const matchesTags = selectedBoardTags.length === 0 || 
+      (board.tags && board.tags.some(tag => selectedBoardTags.includes(tag)));
+    return matchesSearch && matchesFavorite && matchesTeam && matchesTags;
   });
 
   return (
@@ -210,11 +245,41 @@ const Dashboard = () => {
                 </SelectContent>
               </Select>
             </div>
+            <div className="space-y-2">
+              <Label>Tags</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddTag();
+                    }
+                  }}
+                  placeholder="Ajouter un tag..."
+                />
+                <Button type="button" onClick={handleAddTag} size="sm">
+                  Ajouter
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {newBoard.tags.map(tag => (
+                  <Badge key={tag} variant="secondary" className="gap-1">
+                    {tag}
+                    <X 
+                      className="h-3 w-3 cursor-pointer" 
+                      onClick={() => handleRemoveTag(tag)}
+                    />
+                  </Badge>
+                ))}
+              </div>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => {
               setIsCreateDialogOpen(false);
-              setNewBoard({ name: "", description: "", teamId: "team1" });
+              setNewBoard({ name: "", description: "", teamId: "team1", tags: [] });
             }}>
               Annuler
             </Button>
@@ -237,7 +302,8 @@ const Dashboard = () => {
 
       {/* Search Bar and View Controls */}
       {savedBoards.length > 0 && (
-        <div className="mb-6 flex items-center justify-between gap-4">
+        <div className="mb-6 space-y-4">
+          <div className="flex items-center justify-between gap-4">
           <div className="relative max-w-md flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -291,7 +357,33 @@ const Dashboard = () => {
                 <List className="h-4 w-4" />
               </Button>
             </div>
+            </div>
           </div>
+          {allBoardTags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              <span className="text-sm font-medium text-muted-foreground">Filtrer par tags:</span>
+              {allBoardTags.map(tag => (
+                <Badge
+                  key={tag}
+                  variant={selectedBoardTags.includes(tag) ? "default" : "outline"}
+                  className="cursor-pointer"
+                  onClick={() => toggleBoardTag(tag)}
+                >
+                  {tag}
+                </Badge>
+              ))}
+              {selectedBoardTags.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedBoardTags([])}
+                  className="h-6 px-2"
+                >
+                  Réinitialiser
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       )}
 
