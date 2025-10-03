@@ -120,7 +120,7 @@ const Teams = () => {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <Users className="h-6 w-6" />
-          <h2 className="text-2xl font-semibold">Gestion des Équipes</h2>
+          <h2 className="text-2xl font-semibold">Gestion des équipes</h2>
         </div>
         <Button onClick={() => setIsCreateDialogOpen(true)} className="gap-2">
           <Plus className="h-4 w-4" />
