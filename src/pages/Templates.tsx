@@ -254,8 +254,35 @@ const Templates = () => {
             </div>
           </div>
           {allTags.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredTemplates.map((template) => {
+            <div className="flex flex-wrap gap-2">
+              <span className="text-sm font-medium text-muted-foreground">Filtrer par tags:</span>
+              {allTags.map(tag => (
+                <Badge
+                  key={tag}
+                  variant={selectedTags.includes(tag) ? "default" : "outline"}
+                  className="cursor-pointer"
+                  onClick={() => toggleTag(tag)}
+                >
+                  {tag}
+                </Badge>
+              ))}
+              {selectedTags.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedTags([])}
+                  className="h-6 px-2"
+                >
+                  Réinitialiser
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
+
+        {viewMode === "grid" ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredTemplates.map((template) => {
             return (
               <Card key={template.id} className="hover:shadow-lg transition-shadow overflow-hidden">
                 {template.imageUrl && (
@@ -304,11 +331,11 @@ const Templates = () => {
                   </Button>
                 </CardContent>
               </Card>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="space-y-3">
+              );
+            })}
+          </div>
+        ) : (
+          <div className="space-y-3">
           {filteredTemplates.map((template) => {
             return (
               <Card key={template.id} className="hover:shadow-md transition-shadow">
@@ -355,12 +382,12 @@ const Templates = () => {
                   </div>
                 </CardContent>
               </Card>
-            );
-          })}
-        </div>
-      )}
+              );
+            })}
+          </div>
+        )}
 
-      {filteredTemplates.length === 0 && (
+        {filteredTemplates.length === 0 && (
         <Card className="text-center py-12">
           <CardContent>
             <Search className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -370,7 +397,7 @@ const Templates = () => {
             </p>
           </CardContent>
         </Card>
-      )}
+        )}
       </div>
     </ScrollArea>
   );
