@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import { ThemeProvider } from "next-themes";
 import Dashboard from "./pages/Dashboard";
 import Recent from "./pages/Recent";
 import Templates from "./pages/Templates";
@@ -33,24 +34,26 @@ const DashboardLayout = () => (
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<DashboardLayout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="recent" element={<Recent />} />
-            <Route path="templates" element={<Templates />} />
-            <Route path="teams" element={<Teams />} />
-            <Route path="settings" element={<Settings />} />
-          </Route>
-          <Route path="/canvas/:id" element={<Canvas />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<DashboardLayout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="recent" element={<Recent />} />
+              <Route path="templates" element={<Templates />} />
+              <Route path="teams" element={<Teams />} />
+              <Route path="settings" element={<Settings />} />
+            </Route>
+            <Route path="/canvas/:id" element={<Canvas />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

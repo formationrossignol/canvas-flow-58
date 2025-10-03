@@ -2,8 +2,11 @@ import { Settings as SettingsIcon } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { useTheme } from "next-themes";
 
 const Settings = () => {
+  const { theme, setTheme } = useTheme();
+  
   return (
     <div className="p-8">
       <div className="flex items-center gap-3 mb-6">
@@ -20,7 +23,11 @@ const Settings = () => {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <Label htmlFor="dark-mode">Mode sombre</Label>
-              <Switch id="dark-mode" />
+              <Switch 
+                id="dark-mode" 
+                checked={theme === "dark"}
+                onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+              />
             </div>
             <div className="flex items-center justify-between">
               <Label htmlFor="animations">Animations</Label>
