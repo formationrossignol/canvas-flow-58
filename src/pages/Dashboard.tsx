@@ -298,11 +298,11 @@ const Dashboard = () => {
       </Dialog>
 
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold">Mes Tableaux</h2>
+        <h2 className="text-2xl font-semibold">Mes tableaux</h2>
         <div className="flex gap-2">
           <Button onClick={handleCreateNewBoard} className="gap-2">
             <Plus className="h-4 w-4" />
-            Nouveau Tableau
+            Nouveau tableau
           </Button>
         </div>
       </div>
