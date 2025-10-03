@@ -55,7 +55,7 @@ export function AppSidebar() {
 
         {/* Navigation */}
         <SidebarGroup className="flex-1">
-          <SidebarGroupLabel className="text-sm uppercase tracking-wider px-6 py-4 font-semibold">Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-sm uppercase tracking-wider px-6 py-4 font-semibold"></SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-3 px-3">
               {menuItems.map((item) => (
