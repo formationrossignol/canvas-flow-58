@@ -1,4 +1,4 @@
-import { X, Square, Circle, Triangle, Diamond, Star, Heart, Hexagon, Pentagon, Shapes, LucideIcon } from "lucide-react";
+import { X, Square, Circle, Triangle, Diamond, Star, Heart, Hexagon, Pentagon, Shapes, LucideIcon, Octagon, CloudRain, Sun, Moon, Zap, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -43,6 +43,12 @@ const shapeCategories: ShapeCategory[] = [
         label: 'Triangle',
         description: 'Triangle équilatéral'
       },
+      {
+        id: 'sticky',
+        icon: Square,
+        label: 'Post-it',
+        description: 'Note adhésive'
+      },
     ]
   },
   {
@@ -66,6 +72,12 @@ const shapeCategories: ShapeCategory[] = [
         label: 'Pentagone',
         description: 'Forme à cinq côtés'
       },
+      {
+        id: 'octagon' as CanvasElement['type'],
+        icon: Octagon,
+        label: 'Octogone',
+        description: 'Forme à huit côtés'
+      },
     ]
   },
   {
@@ -83,6 +95,30 @@ const shapeCategories: ShapeCategory[] = [
         label: 'Cœur',
         description: 'Forme de cœur'
       },
+      {
+        id: 'cloud' as CanvasElement['type'],
+        icon: CloudRain,
+        label: 'Nuage',
+        description: 'Forme de nuage'
+      },
+      {
+        id: 'sun' as CanvasElement['type'],
+        icon: Sun,
+        label: 'Soleil',
+        description: 'Forme de soleil'
+      },
+      {
+        id: 'moon' as CanvasElement['type'],
+        icon: Moon,
+        label: 'Lune',
+        description: 'Forme de lune'
+      },
+      {
+        id: 'lightning' as CanvasElement['type'],
+        icon: Zap,
+        label: 'Éclair',
+        description: 'Forme d\'éclair'
+      },
     ]
   }
 ];
@@ -96,7 +132,7 @@ export const ShapeLibrary = ({ isVisible, onClose, onAddShape }: ShapeLibraryPro
 
   return (
     <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center animate-fade-in">
-      <div className="bg-card border border-border rounded-xl shadow-elegant max-w-4xl w-full max-h-[80vh] overflow-hidden animate-scale-in">
+      <div className="bg-card/95 backdrop-blur-sm border border-border rounded-xl shadow-elegant max-w-4xl w-full max-h-[80vh] overflow-hidden animate-scale-in">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-border">
           <div className="flex items-center gap-3">

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Settings, Download, Share2, Users, MessageCircle, Layout, Lock, Unlock, Copy, QrCode, Mail } from "lucide-react";
+import { Settings, Download, Share2, Users, MessageCircle, Layout, Lock, Unlock, Copy, QrCode, Mail, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +14,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -24,6 +31,7 @@ interface CanvasHeaderProps {
   collaborators: Array<{ id: string; name: string; avatar: string; color: string }>;
   onOpenTemplates: () => void;
   onOpenExport: () => void;
+  onOpenComments: () => void;
   selectedCount?: number;
   onLockSelected?: () => void;
   onUnlockSelected?: () => void;
@@ -36,6 +44,7 @@ export const CanvasHeader = ({
   collaborators,
   onOpenTemplates,
   onOpenExport,
+  onOpenComments,
   selectedCount = 0,
   onLockSelected,
   onUnlockSelected,
@@ -72,10 +81,12 @@ export const CanvasHeader = ({
           <SidebarTrigger />
           
           <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => navigate('/')}>
-            <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
-              <span className="text-sm font-bold text-white">CB</span>
+            <div className="w-10 h-10 rounded-lg bg-gradient-primary flex items-center justify-center shadow-glow">
+              <span className="text-lg font-bold text-white">CB</span>
             </div>
-            <h1 className="text-xl font-semibold text-foreground">CollabBoard</h1>
+            <h1 className="text-2xl font-bold text-foreground bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              CollabBoard
+            </h1>
           </div>
           
           <div className="h-6 w-px bg-border" />
@@ -154,21 +165,6 @@ export const CanvasHeader = ({
           
           <div className="h-6 w-px bg-border mx-2" />
           
-          <Button variant="ghost" size="sm" className="gap-2">
-            <MessageCircle size={16} />
-            Chat
-          </Button>
-          
-          <Button variant="ghost" size="sm" className="gap-2" onClick={onOpenTemplates}>
-            <Layout size={16} />
-            Templates
-          </Button>
-          
-          <Button variant="ghost" size="sm" className="gap-2" onClick={onOpenExport}>
-            <Download size={16} />
-            Export
-          </Button>
-          
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="default" size="sm" className="gap-2 bg-gradient-primary">
@@ -232,7 +228,6 @@ export const CanvasHeader = ({
                       variant="outline" 
                       size="sm"
                       onClick={() => {
-                        // Download QR code as PNG
                         const svg = document.querySelector('svg');
                         if (svg) {
                           const svgData = new XMLSerializer().serializeToString(svg);
@@ -285,9 +280,32 @@ export const CanvasHeader = ({
             </DialogContent>
           </Dialog>
           
-          <Button variant="ghost" size="sm" onClick={() => navigate('/settings')}>
-            <Settings size={16} />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm">
+                <Menu size={16} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48 bg-card border-border">
+              <DropdownMenuItem onClick={onOpenComments} className="gap-2 cursor-pointer">
+                <MessageCircle size={16} />
+                <span>Commentaires</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={onOpenTemplates} className="gap-2 cursor-pointer">
+                <Layout size={16} />
+                <span>Templates</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={onOpenExport} className="gap-2 cursor-pointer">
+                <Download size={16} />
+                <span>Export</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate('/settings')} className="gap-2 cursor-pointer">
+                <Settings size={16} />
+                <span>Paramètres</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>

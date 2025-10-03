@@ -2,7 +2,6 @@ import { Type, StickyNote, MousePointer2, ArrowRight, Palette, Image, Edit3, Tim
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { CanvasElement } from "./Canvas";
-import { ShapeSelector } from "./ShapeSelector";
 
 interface CanvasToolbarProps {
   selectedTool: string;
@@ -127,13 +126,6 @@ export const CanvasToolbar = ({
             );
           })}
           
-          {/* Shape Selector */}
-          <ShapeSelector
-            selectedShape={selectedTool}
-            onShapeSelect={onToolSelect}
-            onAddElement={onAddElement}
-          />
-          
           {/* Shape Library Button */}
           {onToggleShapeLibrary && (
             <Button
@@ -141,13 +133,13 @@ export const CanvasToolbar = ({
               size="sm"
               className="w-10 h-10 p-0 tool-button hover:bg-tool-hover relative group"
               onClick={onToggleShapeLibrary}
-              title="Bibliothèque de formes"
+              title="Formes & Bibliothèque"
             >
               <Shapes size={18} />
               
               {/* Tooltip */}
               <div className="absolute left-full ml-3 px-2 py-1 bg-foreground text-background text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
-                Bibliothèque
+                Formes
               </div>
             </Button>
           )}

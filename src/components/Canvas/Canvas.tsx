@@ -11,6 +11,7 @@ import { ResizeHandles } from "./ResizeHandles";
 import { TemplatePanel } from "./TemplatePanel";
 import { ShapeLibrary } from "./ShapeLibrary";
 import { ExportImportModal } from "./ExportImportModal";
+import { CommentsList } from "./CommentsList";
 import { ConnectionSystem, Connection } from "./ConnectionSystem";
 import { DrawingTool, DrawingStroke } from "./DrawingTool";
 import { Timer } from "./Timer";
@@ -19,6 +20,7 @@ import { TextEditor } from "./TextEditor";
 import { useCanvasInteraction } from "./hooks/useCanvasInteraction";
 import { useSelection } from "./hooks/useSelection";
 import { useHistory } from "./hooks/useHistory";
+import { templates } from "./templates";
 
 export interface Comment {
   id: string;
@@ -69,6 +71,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   const [isTemplatePanelVisible, setIsTemplatePanelVisible] = useState(false);
   const [isShapeLibraryVisible, setIsShapeLibraryVisible] = useState(false);
   const [isExportModalVisible, setIsExportModalVisible] = useState(false);
+  const [isCommentsListVisible, setIsCommentsListVisible] = useState(false);
   const [connections, setConnections] = useState<Connection[]>([]);
   const [isConnecting, setIsConnecting] = useState(false);
   const [drawingStrokes, setDrawingStrokes] = useState<DrawingStroke[]>([]);
@@ -358,6 +361,17 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     selectElement(id, isMultiSelect);
   }, [selectElement]);
 
+  // Load template if templateId is provided
+  useEffect(() => {
+    if (templateId) {
+      const template = templates.find(t => t.id === templateId);
+      if (template && template.elements.length > 0) {
+        setElements(template.elements);
+        addToHistory(template.elements);
+      }
+    }
+  }, [templateId, addToHistory]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Delete' || e.key === 'Backspace') {
@@ -487,6 +501,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         collaborators={collaborators}
         onOpenTemplates={() => setIsTemplatePanelVisible(true)}
         onOpenExport={() => setIsExportModalVisible(true)}
+        onOpenComments={() => setIsCommentsListVisible(true)}
         selectedCount={selection.selectedIds.length}
         onLockSelected={handleLockSelectedElements}
         onUnlockSelected={handleUnlockSelectedElements}
@@ -639,6 +654,13 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         isVisible={isShapeLibraryVisible}
         onClose={() => setIsShapeLibraryVisible(false)}
         onAddShape={handleAddElement}
+      />
+
+      {/* Comments List */}
+      <CommentsList
+        isVisible={isCommentsListVisible}
+        onClose={() => setIsCommentsListVisible(false)}
+        elements={elements}
       />
 
       {/* Export/Import Modal */}

@@ -27,7 +27,7 @@ export function AppSidebar() {
       <SidebarContent>
         <div className="p-4 border-b border-sidebar-border">
           <h1 className={`font-bold text-xl text-sidebar-foreground transition-opacity ${!open && 'opacity-0'}`}>
-            Canvas Board
+            CollabBoard
           </h1>
         </div>
 
@@ -78,15 +78,6 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <div className="mt-auto p-4 border-t border-sidebar-border">
-          <Button 
-            className="w-full justify-start gap-2" 
-            onClick={() => window.location.href = `/canvas/${Date.now()}`}
-          >
-            <Plus className="h-4 w-4" />
-            {open && <span>Nouveau tableau</span>}
-          </Button>
-        </div>
       </SidebarContent>
     </Sidebar>
   );
