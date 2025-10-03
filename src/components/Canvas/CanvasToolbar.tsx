@@ -148,36 +148,34 @@ export const CanvasToolbar = ({
         {/* Color Separator */}
         <div className="w-full h-px bg-border mb-3" />
 
-        {/* Color Palette */}
+        {/* Color Picker */}
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 mb-2">
             <Palette size={14} className="text-muted-foreground" />
-            <span className="text-xs text-muted-foreground">Couleurs</span>
+            <span className="text-xs text-muted-foreground">Couleur</span>
           </div>
           
-          <div className="grid grid-cols-2 gap-2">
-            {colors.map((color) => {
-              const isSelected = selectedColor === color;
-              
-              return (
-                <button
-                  key={color}
-                  className={`
-                    w-8 h-8 rounded-lg border-2 transition-all duration-200 tool-button
-                    ${isSelected ? 'border-foreground shadow-soft' : 'border-border hover:border-muted-foreground'}
-                  `}
-                  style={{ backgroundColor: color }}
-                  onClick={() => onColorSelect(color)}
-                  title={`Couleur ${color}`}
-                >
-                  {isSelected && (
-                    <div className="w-full h-full rounded-md flex items-center justify-center">
-                      <div className="w-2 h-2 bg-foreground rounded-full" />
-                    </div>
-                  )}
-                </button>
-              );
-            })}
+          <input
+            type="color"
+            value={selectedColor}
+            onChange={(e) => onColorSelect(e.target.value)}
+            className="w-full h-10 rounded-lg cursor-pointer border-2 border-border hover:border-muted-foreground transition-colors"
+            title="Sélecteur de couleur"
+          />
+          
+          <div className="grid grid-cols-4 gap-1 mt-2">
+            {colors.map((color) => (
+              <button
+                key={color}
+                className={`
+                  w-full h-6 rounded-md border-2 transition-all duration-200 tool-button
+                  ${selectedColor === color ? 'border-foreground scale-110' : 'border-border hover:border-muted-foreground'}
+                `}
+                style={{ backgroundColor: color }}
+                onClick={() => onColorSelect(color)}
+                title={color}
+              />
+            ))}
           </div>
         </div>
 
@@ -209,33 +207,27 @@ export const CanvasToolbar = ({
 
         {/* History Controls */}
         <div className="w-full h-px bg-border my-3" />
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2 mb-2">
-            <Undo2 size={14} className="text-muted-foreground" />
-            <span className="text-xs text-muted-foreground">Historique</span>
-          </div>
-          <div className="flex gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onUndo}
-              disabled={!canUndo}
-              className="flex-1 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30"
-              title="Annuler (Ctrl+Z)"
-            >
-              <Undo2 size={14} />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onRedo}
-              disabled={!canRedo}
-              className="flex-1 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30"
-              title="Refaire (Ctrl+Y)"
-            >
-              <Redo2 size={14} />
-            </Button>
-          </div>
+        <div className="flex gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onUndo}
+            disabled={!canUndo}
+            className="flex-1 p-0 w-10 h-10 text-muted-foreground hover:text-foreground hover:bg-tool-hover transition-all disabled:opacity-30 tool-button"
+            title="Annuler (Ctrl+Z)"
+          >
+            <Undo2 size={18} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onRedo}
+            disabled={!canRedo}
+            className="flex-1 p-0 w-10 h-10 text-muted-foreground hover:text-foreground hover:bg-tool-hover transition-all disabled:opacity-30 tool-button"
+            title="Refaire (Ctrl+Y)"
+          >
+            <Redo2 size={18} />
+          </Button>
         </div>
 
         {/* Export PDF and Options Buttons */}

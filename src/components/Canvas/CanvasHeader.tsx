@@ -80,15 +80,6 @@ export const CanvasHeader = ({
         <div className="flex items-center gap-4">
           <SidebarTrigger />
           
-          <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => navigate('/')}>
-            <div className="w-10 h-10 rounded-lg bg-gradient-primary flex items-center justify-center shadow-glow">
-              <span className="text-lg font-bold text-white">CB</span>
-            </div>
-            <h1 className="text-2xl font-bold text-foreground bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-              CollabBoard
-            </h1>
-          </div>
-          
           <div className="h-6 w-px bg-border" />
           
           <input
@@ -282,11 +273,12 @@ export const CanvasHeader = ({
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm">
+              <Button variant="default" size="sm" className="gap-2">
                 <Menu size={16} />
+                <span>Menu</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 bg-card border-border">
+            <DropdownMenuContent align="end" className="w-48 bg-card/95 backdrop-blur-sm border-border z-50">
               <DropdownMenuItem onClick={onOpenComments} className="gap-2 cursor-pointer">
                 <MessageCircle size={16} />
                 <span>Commentaires</span>

@@ -132,7 +132,7 @@ export const ShapeLibrary = ({ isVisible, onClose, onAddShape }: ShapeLibraryPro
 
   return (
     <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center animate-fade-in">
-      <div className="bg-card/95 backdrop-blur-sm border border-border rounded-xl shadow-elegant max-w-4xl w-full max-h-[80vh] overflow-hidden animate-scale-in">
+      <div className="bg-card backdrop-blur-sm border border-border rounded-xl shadow-float max-w-4xl w-full max-h-[80vh] overflow-hidden animate-scale-in">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-border">
           <div className="flex items-center gap-3">

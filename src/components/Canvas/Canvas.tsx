@@ -635,11 +635,13 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       />
 
       {/* Mini Map */}
-      <MiniMap
-        elements={elements}
-        canvasTransform={canvasTransform}
-        onNavigate={(x, y) => setCanvasTransform(prev => ({ ...prev, x, y }))}
-      />
+      <div className="absolute bottom-6 right-6">
+        <MiniMap
+          elements={elements}
+          canvasTransform={canvasTransform}
+          onNavigate={(x, y) => setCanvasTransform(prev => ({ ...prev, x, y }))}
+        />
+      </div>
 
       {/* Template Panel */}
       <TemplatePanel
