@@ -22,6 +22,7 @@ interface SavedBoard {
   teamId?: string;
 }
 
+// Dashboard component for managing boards
 const Dashboard = () => {
   const navigate = useNavigate();
   const [savedBoards, setSavedBoards] = useState<SavedBoard[]>([
