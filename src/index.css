@@ -16,6 +16,10 @@ All colors MUST be HSL.
     --canvas: 0 0% 98%;
     --card: 0 0% 100%;
     --card-foreground: 220 15% 15%;
+    
+    /* Popover - Solid white background for dropdowns */
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 15% 15%;
 
     /* Primary - Deep sophisticated blue */
     --primary: 224 45% 42%;

@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import Recent from "./pages/Recent";
 import Templates from "./pages/Templates";
 import Settings from "./pages/Settings";
+import Teams from "./pages/Teams";
 import Canvas from "./pages/Canvas";
 import NotFound from "./pages/NotFound";
 
@@ -41,6 +42,7 @@ const App = () => (
             <Route index element={<Dashboard />} />
             <Route path="recent" element={<Recent />} />
             <Route path="templates" element={<Templates />} />
+            <Route path="teams" element={<Teams />} />
             <Route path="settings" element={<Settings />} />
           </Route>
           <Route path="/canvas/:id" element={<Canvas />} />
