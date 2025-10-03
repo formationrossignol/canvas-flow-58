@@ -35,6 +35,30 @@ export default {
           dark: "hsl(var(--accent-dark))",
           foreground: "hsl(var(--accent-foreground))",
         },
+        teal: {
+          DEFAULT: "hsl(var(--teal))",
+          foreground: "hsl(var(--teal-foreground))",
+        },
+        orange: {
+          DEFAULT: "hsl(var(--orange))",
+          foreground: "hsl(var(--orange-foreground))",
+        },
+        purple: {
+          DEFAULT: "hsl(var(--purple))",
+          foreground: "hsl(var(--purple-foreground))",
+        },
+        pink: {
+          DEFAULT: "hsl(var(--pink))",
+          foreground: "hsl(var(--pink-foreground))",
+        },
+        green: {
+          DEFAULT: "hsl(var(--green))",
+          foreground: "hsl(var(--green-foreground))",
+        },
+        yellow: {
+          DEFAULT: "hsl(var(--yellow))",
+          foreground: "hsl(var(--yellow-foreground))",
+        },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
@@ -74,12 +98,17 @@ export default {
         "gradient-primary": "var(--gradient-primary)",
         "gradient-warm": "var(--gradient-warm)",
         "gradient-cool": "var(--gradient-cool)",
+        "gradient-sunset": "var(--gradient-sunset)",
+        "gradient-ocean": "var(--gradient-ocean)",
+        "gradient-purple": "var(--gradient-purple)",
         "gradient-subtle": "var(--gradient-subtle)",
       },
       boxShadow: {
         "soft": "var(--shadow-soft)",
         "float": "var(--shadow-float)",
         "glow": "var(--shadow-glow)",
+        "glow-purple": "var(--shadow-glow-purple)",
+        "glow-pink": "var(--shadow-glow-pink)",
       },
       borderRadius: {
         lg: "var(--radius)",
