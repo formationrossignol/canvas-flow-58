@@ -94,7 +94,7 @@ export const CanvasToolbar = ({
   };
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 animate-float-in">
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30 animate-float-in">
       <div className="floating-element bg-card backdrop-blur-sm rounded-xl border border-border shadow-float p-3">
         <div className="flex items-center gap-3">
           {/* Tools */}

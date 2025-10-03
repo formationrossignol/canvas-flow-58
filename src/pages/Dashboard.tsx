@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Grid, Trash2, Edit, Copy, Search, Download, LayoutGrid, List, Star, Share2, FileEdit, MoreVertical, Folder, X } from "lucide-react";
+import { Plus, Grid, Trash2, Edit, Copy, Search, Download, LayoutGrid, List, Star, Share2, FileEdit, MoreVertical, Folder, X, Settings } from "lucide-react";
 import { toast } from "sonner";
 import { Toggle } from "@/components/ui/toggle";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { EditBoardDialog, EditBoardData } from "@/components/EditBoardDialog";
 
 interface SavedBoard {
   id: string;
@@ -70,6 +71,7 @@ const Dashboard = () => {
   const [selectedBoardTags, setSelectedBoardTags] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 9;
+  const [editingBoardId, setEditingBoardId] = useState<string | null>(null);
   
   const teams = [
     { id: "all", name: "Tous les tableaux" },
@@ -193,6 +195,17 @@ const Dashboard = () => {
     const shareUrl = `${window.location.origin}/canvas/${board.id}`;
     navigator.clipboard.writeText(shareUrl);
     toast.success("Lien copié dans le presse-papiers!");
+  };
+
+  const handleEditBoard = (boardId: string, data: EditBoardData) => {
+    setSavedBoards(prev =>
+      prev.map(board =>
+        board.id === boardId
+          ? { ...board, ...data }
+          : board
+      )
+    );
+    toast.success("Tableau modifié avec succès");
   };
 
   const filteredBoards = savedBoards.filter(board => {
@@ -493,11 +506,10 @@ const Dashboard = () => {
                         <DropdownMenuContent align="end" className="w-48">
                           <DropdownMenuItem onClick={(e) => {
                             e.stopPropagation();
-                            setRenamingBoardId(board.id);
-                            setNewBoardName(board.name);
+                            setEditingBoardId(board.id);
                           }}>
-                            <FileEdit className="h-4 w-4 mr-2" />
-                            Renommer
+                            <Settings className="h-4 w-4 mr-2" />
+                            Modifier
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={(e) => {
                             e.stopPropagation();
@@ -639,11 +651,10 @@ const Dashboard = () => {
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={(e) => {
                               e.stopPropagation();
-                              setRenamingBoardId(board.id);
-                              setNewBoardName(board.name);
+                              setEditingBoardId(board.id);
                             }}>
-                              <FileEdit className="h-4 w-4 mr-2" />
-                              Renommer
+                              <Settings className="h-4 w-4 mr-2" />
+                              Modifier
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={(e) => {
                               e.stopPropagation();
@@ -716,9 +727,10 @@ const Dashboard = () => {
           )}
           
           {filteredBoards.length > itemsPerPage && (
-            <div className="mt-8">
-              <Pagination>
-                <PaginationContent>
+            <div className="mt-12 flex justify-center">
+              <div className="bg-card rounded-lg border border-border shadow-soft p-2">
+                <Pagination>
+                  <PaginationContent>
                   <PaginationItem>
                     <PaginationPrevious 
                       onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
@@ -757,8 +769,9 @@ const Dashboard = () => {
                       className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
                     />
                   </PaginationItem>
-                </PaginationContent>
-              </Pagination>
+                  </PaginationContent>
+                </Pagination>
+              </div>
             </div>
           )}
           
@@ -782,6 +795,21 @@ const Dashboard = () => {
             </div>
           )}
         </>
+      )}
+
+      {/* Edit Board Dialog */}
+      {editingBoardId && (
+        <EditBoardDialog
+          isOpen={!!editingBoardId}
+          onClose={() => setEditingBoardId(null)}
+          onSave={(data) => handleEditBoard(editingBoardId, data)}
+          initialData={{
+            name: savedBoards.find(b => b.id === editingBoardId)?.name || "",
+            description: savedBoards.find(b => b.id === editingBoardId)?.description || "",
+            teamId: savedBoards.find(b => b.id === editingBoardId)?.teamId,
+            tags: savedBoards.find(b => b.id === editingBoardId)?.tags || []
+          }}
+        />
       )}
 
       {/* Delete Confirmation Dialog */}

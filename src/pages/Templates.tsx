@@ -407,9 +407,10 @@ const Templates = () => {
         )}
 
         {filteredTemplates.length > itemsPerPage && (
-          <div className="mt-8">
-            <Pagination>
-              <PaginationContent>
+          <div className="mt-12 flex justify-center">
+            <div className="bg-card rounded-lg border border-border shadow-soft p-2">
+              <Pagination>
+                <PaginationContent>
                 <PaginationItem>
                   <PaginationPrevious 
                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
@@ -448,8 +449,9 @@ const Templates = () => {
                     className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
                   />
                 </PaginationItem>
-              </PaginationContent>
-            </Pagination>
+                </PaginationContent>
+              </Pagination>
+            </div>
           </div>
         )}
       </div>
