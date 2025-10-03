@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 
 const Templates = () => {
   const navigate = useNavigate();
@@ -27,6 +28,8 @@ const Templates = () => {
     headerFile: null as File | null
   });
   const [tagInput, setTagInput] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 9;
 
   // Get all unique tags/categories from templates
   const allTags = Array.from(new Set(templates.map(t => t.category)));
@@ -38,6 +41,10 @@ const Templates = () => {
     const matchesTags = selectedTags.length === 0 || selectedTags.includes(template.category);
     return matchesSearch && matchesTags;
   });
+
+  const totalPages = Math.ceil(filteredTemplates.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedTemplates = filteredTemplates.slice(startIndex, startIndex + itemsPerPage);
 
   const toggleFavorite = (templateId: string) => {
     setFavoriteTemplates(prev =>
@@ -282,7 +289,7 @@ const Templates = () => {
 
         {viewMode === "grid" ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredTemplates.map((template) => {
+            {paginatedTemplates.map((template) => {
             return (
               <Card key={template.id} className="hover:shadow-lg transition-shadow overflow-hidden">
                 {template.imageUrl && (
@@ -295,25 +302,25 @@ const Templates = () => {
                   </div>
                 )}
                 <CardHeader>
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex gap-2 items-center">
-                      <Badge variant="secondary">
-                        {template.category}
-                      </Badge>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleFavorite(template.id);
-                        }}
-                        className="h-6 w-6 p-0"
-                      >
-                        <Star className={`h-4 w-4 ${favoriteTemplates.includes(template.id) ? 'fill-current text-yellow-500' : ''}`} />
-                      </Button>
-                    </div>
+                  <div className="mb-2">
+                    <Badge variant="secondary">
+                      {template.category}
+                    </Badge>
                   </div>
-                  <CardTitle className="text-lg">{template.name}</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <CardTitle className="text-lg flex-1">{template.name}</CardTitle>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFavorite(template.id);
+                      }}
+                      className="h-6 w-6 p-0"
+                    >
+                      <Star className={`h-4 w-4 ${favoriteTemplates.includes(template.id) ? 'fill-current text-yellow-500' : ''}`} />
+                    </Button>
+                  </div>
                   <CardDescription>
                     {template.description}
                   </CardDescription>
@@ -336,7 +343,7 @@ const Templates = () => {
           </div>
         ) : (
           <div className="space-y-3">
-          {filteredTemplates.map((template) => {
+          {paginatedTemplates.map((template) => {
             return (
               <Card key={template.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-4">
@@ -397,6 +404,53 @@ const Templates = () => {
             </p>
           </CardContent>
         </Card>
+        )}
+
+        {filteredTemplates.length > itemsPerPage && (
+          <div className="mt-8">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious 
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                  if (
+                    page === 1 ||
+                    page === totalPages ||
+                    (page >= currentPage - 1 && page <= currentPage + 1)
+                  ) {
+                    return (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          onClick={() => setCurrentPage(page)}
+                          isActive={currentPage === page}
+                          className="cursor-pointer"
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  } else if (page === currentPage - 2 || page === currentPage + 2) {
+                    return (
+                      <PaginationItem key={page}>
+                        <PaginationEllipsis />
+                      </PaginationItem>
+                    );
+                  }
+                  return null;
+                })}
+                <PaginationItem>
+                  <PaginationNext 
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
         )}
       </div>
     </ScrollArea>

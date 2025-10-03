@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 
 interface SavedBoard {
   id: string;
@@ -65,6 +66,8 @@ const Dashboard = () => {
   });
   const [tagInput, setTagInput] = useState("");
   const [selectedBoardTags, setSelectedBoardTags] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 9;
   
   const teams = [
     { id: "all", name: "Tous les tableaux" },
@@ -199,6 +202,10 @@ const Dashboard = () => {
       (board.tags && board.tags.some(tag => selectedBoardTags.includes(tag)));
     return matchesSearch && matchesFavorite && matchesTeam && matchesTags;
   });
+
+  const totalPages = Math.ceil(filteredBoards.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedBoards = filteredBoards.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <div className="p-8">
@@ -415,10 +422,10 @@ const Dashboard = () => {
         <>
           {viewMode === "grid" ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredBoards.map((board) => (
+              {paginatedBoards.map((board) => (
                 <Card key={board.id} className="hover:shadow-lg transition-shadow">
                   <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-center justify-between gap-2">
                       <div className="flex-1">
                         {renamingBoardId === board.id ? (
                           <Input
@@ -448,7 +455,19 @@ const Dashboard = () => {
                           {board.description}
                         </CardDescription>
                       </div>
-                      <DropdownMenu>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFavorite(board.id);
+                          }}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Star className={`h-4 w-4 ${board.isFavorite ? 'fill-current text-yellow-500' : ''}`} />
+                        </Button>
+                        <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="ghost"
@@ -528,7 +547,8 @@ const Dashboard = () => {
                             Supprimer
                           </DropdownMenuItem>
                         </DropdownMenuContent>
-                      </DropdownMenu>
+                        </DropdownMenu>
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -549,7 +569,7 @@ const Dashboard = () => {
             </div>
           ) : (
             <div className="space-y-3">
-              {filteredBoards.map((board) => (
+              {paginatedBoards.map((board) => (
                 <Card key={board.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
@@ -688,6 +708,53 @@ const Dashboard = () => {
                   </CardContent>
                 </Card>
               ))}
+            </div>
+          )}
+          
+          {filteredBoards.length > itemsPerPage && (
+            <div className="mt-8">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                    if (
+                      page === 1 ||
+                      page === totalPages ||
+                      (page >= currentPage - 1 && page <= currentPage + 1)
+                    ) {
+                      return (
+                        <PaginationItem key={page}>
+                          <PaginationLink
+                            onClick={() => setCurrentPage(page)}
+                            isActive={currentPage === page}
+                            className="cursor-pointer"
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    } else if (page === currentPage - 2 || page === currentPage + 2) {
+                      return (
+                        <PaginationItem key={page}>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      );
+                    }
+                    return null;
+                  })}
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
             </div>
           )}
           
