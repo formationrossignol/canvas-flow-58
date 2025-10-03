@@ -1,4 +1,4 @@
-import { Type, StickyNote, MousePointer2, ArrowRight, Palette, Image, Edit3, Timer, Link2, Eye, Settings, Download, Undo2, Redo2, FileDown, Shapes, MessageCircle } from "lucide-react";
+import { Type, StickyNote, MousePointer2, Palette, Image, Edit3, Timer, Link2, Eye, Settings, Download, Undo2, Redo2, FileDown, Shapes, MessageCircle, Eraser } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { CanvasElement } from "./Canvas";
@@ -30,14 +30,14 @@ interface CanvasToolbarProps {
 const tools = [
   { id: 'select', icon: MousePointer2, label: 'Sélection', shortcut: 'V' },
   { id: 'pen', icon: Edit3, label: 'Crayon', shortcut: 'P' },
+  { id: 'eraser', icon: Eraser, label: 'Gomme', shortcut: 'E' },
   { id: 'sticky', icon: StickyNote, label: 'Post-it', shortcut: 'S' },
   { id: 'text', icon: Type, label: 'Texte', shortcut: 'T' },
   { id: 'comment', icon: MessageCircle, label: 'Commentaire', shortcut: 'C' },
   { id: 'image', icon: Image, label: 'Image', shortcut: 'I' },
-  { id: 'arrow', icon: ArrowRight, label: 'Flèche', shortcut: 'A' },
   { id: 'connect', icon: Link2, label: 'Connecter', shortcut: 'L' },
   { id: 'timer', icon: Timer, label: 'Timer', shortcut: 'M' },
-  { id: 'view', icon: Eye, label: 'Vue', shortcut: 'E' },
+  { id: 'view', icon: Eye, label: 'Vue', shortcut: 'W' },
 ];
 
 const colors = [
@@ -87,167 +87,157 @@ export const CanvasToolbar = ({
       onToolSelect(toolId);
       
       // Auto-add element for certain tools (but as pending element)
-      if (toolId !== 'select' && toolId !== 'pen' && toolId !== 'connect' && toolId !== 'timer' && toolId !== 'text') {
+      if (toolId !== 'select' && toolId !== 'pen' && toolId !== 'eraser' && toolId !== 'connect' && toolId !== 'timer' && toolId !== 'text') {
         onAddElement(toolId as CanvasElement['type']);
       }
     }
   };
 
   return (
-    <div className="absolute top-20 left-6 z-40 animate-float-in">
-      <div className="floating-element bg-card/95 backdrop-blur-sm rounded-xl border border-border p-3">
-        {/* Tools */}
-        <div className="flex flex-col gap-2 mb-4">
-        {tools.map((tool) => {
-          const Icon = tool.icon;
-          const isSelected = selectedTool === tool.id || 
-                           (tool.id === 'connect' && isConnecting) ||
-                           (tool.id === 'timer' && isTimerVisible);
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 animate-float-in">
+      <div className="floating-element bg-card backdrop-blur-sm rounded-xl border border-border shadow-float p-3">
+        <div className="flex items-center gap-3">
+          {/* Tools */}
+          <div className="flex gap-2">
+            {tools.map((tool) => {
+              const Icon = tool.icon;
+              const isSelected = selectedTool === tool.id || 
+                               (tool.id === 'connect' && isConnecting) ||
+                               (tool.id === 'timer' && isTimerVisible);
+                
+              return (
+                <Button
+                  key={tool.id}
+                  variant={isSelected ? "default" : "ghost"}
+                  size="sm"
+                  className={`
+                    w-10 h-10 p-0 tool-button relative group
+                    ${isSelected ? 'bg-primary text-primary-foreground shadow-glow' : 'hover:bg-tool-hover'}
+                  `}
+                  onClick={() => handleToolClick(tool.id)}
+                  title={`${tool.label} (${tool.shortcut})`}
+                >
+                  <Icon size={18} />
+                  
+                  {/* Tooltip */}
+                  <div className="absolute bottom-full mb-3 px-2 py-1 bg-foreground text-background text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
+                    {tool.label} ({tool.shortcut})
+                  </div>
+                </Button>
+              );
+            })}
             
-            return (
+            {/* Shape Library Button */}
+            {onToggleShapeLibrary && (
               <Button
-                key={tool.id}
-                variant={isSelected ? "default" : "ghost"}
+                variant="ghost"
                 size="sm"
-                className={`
-                  w-10 h-10 p-0 tool-button relative group
-                  ${isSelected ? 'bg-primary text-primary-foreground shadow-glow' : 'hover:bg-tool-hover'}
-                `}
-                onClick={() => handleToolClick(tool.id)}
-                title={`${tool.label} (${tool.shortcut})`}
+                className="w-10 h-10 p-0 tool-button hover:bg-tool-hover relative group"
+                onClick={onToggleShapeLibrary}
+                title="Formes & Bibliothèque"
               >
-                <Icon size={18} />
+                <Shapes size={18} />
                 
                 {/* Tooltip */}
-                <div className="absolute left-full ml-3 px-2 py-1 bg-foreground text-background text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
-                  {tool.label} ({tool.shortcut})
+                <div className="absolute bottom-full mb-3 px-2 py-1 bg-foreground text-background text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
+                  Formes
                 </div>
               </Button>
-            );
-          })}
-          
-          {/* Shape Library Button */}
-          {onToggleShapeLibrary && (
+            )}
+          </div>
+
+          {/* Separator */}
+          <div className="h-8 w-px bg-border" />
+
+          {/* Color Picker */}
+          <div className="flex items-center gap-2">
+            <Palette size={16} className="text-muted-foreground" />
+            <input
+              type="color"
+              value={selectedColor}
+              onChange={(e) => onColorSelect(e.target.value)}
+              className="w-10 h-10 rounded-lg cursor-pointer border-2 border-border hover:border-muted-foreground transition-colors"
+              title="Sélecteur de couleur"
+            />
+            
+            <div className="flex gap-1">
+              {colors.map((color) => (
+                <button
+                  key={color}
+                  className={`
+                    w-6 h-6 rounded-md border-2 transition-all duration-200 tool-button
+                    ${selectedColor === color ? 'border-foreground scale-110' : 'border-border hover:border-muted-foreground'}
+                  `}
+                  style={{ backgroundColor: color }}
+                  onClick={() => onColorSelect(color)}
+                  title={color}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Brush Thickness for Pen Tool */}
+          {selectedTool === 'pen' && (
+            <>
+              <div className="h-8 w-px bg-border" />
+              <div className="flex items-center gap-2">
+                <Edit3 size={16} className="text-muted-foreground" />
+                <div className="w-24">
+                  <Slider
+                    value={[brushThickness]}
+                    onValueChange={(value) => onBrushThicknessChange(value[0])}
+                    min={1}
+                    max={20}
+                    step={1}
+                    className="w-full"
+                  />
+                </div>
+                <span className="text-xs text-muted-foreground w-8">{brushThickness}px</span>
+              </div>
+            </>
+          )}
+
+          {/* Separator */}
+          <div className="h-8 w-px bg-border" />
+
+          {/* History Controls */}
+          <div className="flex gap-1">
             <Button
               variant="ghost"
               size="sm"
-              className="w-10 h-10 p-0 tool-button hover:bg-tool-hover relative group"
-              onClick={onToggleShapeLibrary}
-              title="Formes & Bibliothèque"
+              onClick={onUndo}
+              disabled={!canUndo}
+              className="w-10 h-10 p-0 text-foreground hover:text-foreground hover:bg-tool-hover transition-all disabled:opacity-30 tool-button"
+              title="Annuler (Ctrl+Z)"
             >
-              <Shapes size={18} />
-              
-              {/* Tooltip */}
-              <div className="absolute left-full ml-3 px-2 py-1 bg-foreground text-background text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
-                Formes
-              </div>
+              <Undo2 size={20} />
             </Button>
-          )}
-        </div>
-
-        {/* Color Separator */}
-        <div className="w-full h-px bg-border mb-3" />
-
-        {/* Color Picker */}
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2 mb-2">
-            <Palette size={14} className="text-muted-foreground" />
-            <span className="text-xs text-muted-foreground">Couleur</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onRedo}
+              disabled={!canRedo}
+              className="w-10 h-10 p-0 text-foreground hover:text-foreground hover:bg-tool-hover transition-all disabled:opacity-30 tool-button"
+              title="Refaire (Ctrl+Y)"
+            >
+              <Redo2 size={20} />
+            </Button>
           </div>
-          
-          <input
-            type="color"
-            value={selectedColor}
-            onChange={(e) => onColorSelect(e.target.value)}
-            className="w-full h-10 rounded-lg cursor-pointer border-2 border-border hover:border-muted-foreground transition-colors"
-            title="Sélecteur de couleur"
-          />
-          
-          <div className="grid grid-cols-4 gap-1 mt-2">
-            {colors.map((color) => (
-              <button
-                key={color}
-                className={`
-                  w-full h-6 rounded-md border-2 transition-all duration-200 tool-button
-                  ${selectedColor === color ? 'border-foreground scale-110' : 'border-border hover:border-muted-foreground'}
-                `}
-                style={{ backgroundColor: color }}
-                onClick={() => onColorSelect(color)}
-                title={color}
-              />
-            ))}
-          </div>
-        </div>
 
-        {/* Brush Thickness for Pen Tool */}
-        {selectedTool === 'pen' && (
-          <>
-            <div className="w-full h-px bg-border my-3" />
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2 mb-2">
-                <Edit3 size={14} className="text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">Épaisseur</span>
-              </div>
-              <div className="px-1">
-                <Slider
-                  value={[brushThickness]}
-                  onValueChange={(value) => onBrushThicknessChange(value[0])}
-                  min={1}
-                  max={20}
-                  step={1}
-                  className="w-full"
-                />
-                <div className="text-xs text-center text-muted-foreground mt-1">
-                  {brushThickness}px
-                </div>
-              </div>
-            </div>
-          </>
-        )}
+          {/* Separator */}
+          <div className="h-8 w-px bg-border" />
 
-        {/* History Controls */}
-        <div className="w-full h-px bg-border my-3" />
-        <div className="flex gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onUndo}
-            disabled={!canUndo}
-            className="flex-1 p-0 w-10 h-10 text-muted-foreground hover:text-foreground hover:bg-tool-hover transition-all disabled:opacity-30 tool-button"
-            title="Annuler (Ctrl+Z)"
-          >
-            <Undo2 size={18} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onRedo}
-            disabled={!canRedo}
-            className="flex-1 p-0 w-10 h-10 text-muted-foreground hover:text-foreground hover:bg-tool-hover transition-all disabled:opacity-30 tool-button"
-            title="Refaire (Ctrl+Y)"
-          >
-            <Redo2 size={18} />
-          </Button>
-        </div>
-
-        {/* Export PDF and Options Buttons */}
-        <div className="w-full h-px bg-border my-3" />
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2 mb-2">
-            <Download size={14} className="text-muted-foreground" />
-            <span className="text-xs text-muted-foreground">Export</span>
-          </div>
-          <div className="flex flex-col gap-1">
+          {/* Export and Options */}
+          <div className="flex gap-1">
             {onExportPDF && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={onExportPDF}
-                className="text-muted-foreground hover:text-foreground transition-colors justify-start"
+                className="w-10 h-10 p-0 text-muted-foreground hover:text-foreground hover:bg-tool-hover transition-colors tool-button"
                 title="Exporter tout en PDF"
               >
-                <Download size={14} />
-                <span className="text-xs ml-1">Tout</span>
+                <Download size={18} />
               </Button>
             )}
             {onExportSelectedArea && hasSelection && (
@@ -255,24 +245,22 @@ export const CanvasToolbar = ({
                 variant="ghost"
                 size="sm"
                 onClick={onExportSelectedArea}
-                className="text-muted-foreground hover:text-foreground transition-colors justify-start"
+                className="w-10 h-10 p-0 text-muted-foreground hover:text-foreground hover:bg-tool-hover transition-colors tool-button"
                 title="Exporter la sélection en PDF"
               >
-                <FileDown size={14} />
-                <span className="text-xs ml-1">Sélection</span>
+                <FileDown size={18} />
               </Button>
             )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onToggleOptions}
+              className="w-10 h-10 p-0 text-muted-foreground hover:text-foreground hover:bg-tool-hover transition-colors tool-button"
+              title="Options du board"
+            >
+              <Settings size={18} />
+            </Button>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onToggleOptions}
-            className="text-muted-foreground hover:text-foreground transition-colors justify-start mt-1"
-            title="Options du board"
-          >
-            <Settings size={14} />
-            <span className="text-xs ml-1">Options</span>
-          </Button>
         </div>
       </div>
     </div>
