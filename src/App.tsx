@@ -32,29 +32,33 @@ const DashboardLayout = () => (
   </SidebarProvider>
 );
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<DashboardLayout />}>
-              <Route index element={<Dashboard />} />
-              <Route path="recent" element={<Recent />} />
-              <Route path="templates" element={<Templates />} />
-              <Route path="teams" element={<Teams />} />
-              <Route path="settings" element={<Settings />} />
-            </Route>
-            <Route path="/canvas/:id" element={<Canvas />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  const basename = import.meta.env.BASE_URL ?? "/";
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter basename={basename}>
+            <Routes>
+              <Route path="/" element={<DashboardLayout />}>
+                <Route index element={<Dashboard />} />
+                <Route path="recent" element={<Recent />} />
+                <Route path="templates" element={<Templates />} />
+                <Route path="teams" element={<Teams />} />
+                <Route path="settings" element={<Settings />} />
+              </Route>
+              <Route path="/canvas/:id" element={<Canvas />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

@@ -4,8 +4,13 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
+const repoBasePath = "/kanban/";
+
 export default defineConfig(({ mode }) => ({
-  base: mode === "production" ? "./" : "/",
+  base:
+    mode === "production"
+      ? process.env.VITE_BASE_PATH ?? repoBasePath
+      : "/",
   server: {
     host: "::",
     port: 8080,
