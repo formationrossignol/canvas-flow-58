@@ -4,7 +4,7 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 export default defineConfig({
-  base: '/portal/',
+  base: '/kanban/',
   plugins: [react()],
   server: {
     port: 8080,
