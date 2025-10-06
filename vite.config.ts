@@ -4,7 +4,7 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
-const fallbackBasePath = "./";
+const fallbackBasePath = "/kanban/";
 
 const normalizeBasePath = (basePath?: string | null) => {
   if (!basePath) return undefined;
