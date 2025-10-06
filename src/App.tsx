@@ -33,7 +33,12 @@ const DashboardLayout = () => (
 );
 
 const App = () => {
-  const basename = import.meta.env.BASE_URL ?? "/";
+  const rawBaseUrl = import.meta.env.BASE_URL ?? "/";
+  const normalizedBaseUrl = rawBaseUrl === "./" ? "/" : rawBaseUrl;
+  const basename =
+    normalizedBaseUrl.endsWith("/") && normalizedBaseUrl !== "/"
+      ? normalizedBaseUrl.slice(0, -1)
+      : normalizedBaseUrl || "/";
 
   return (
     <QueryClientProvider client={queryClient}>
