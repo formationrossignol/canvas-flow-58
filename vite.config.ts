@@ -4,10 +4,15 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 export default defineConfig({
-  base: '/kanban/',
+  base: "/kanban/",
   plugins: [react()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "src"),
+    },
+  },
   server: {
     port: 8080,
-    host: true
-  }
+    host: true,
+  },
 });
