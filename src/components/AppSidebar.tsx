@@ -1,4 +1,4 @@
-import { Home, Clock, Layout, Settings, Users, Search, Workflow, UserCog } from "lucide-react";
+import { Home, Clock, Layout, Settings, Users, Search, Workflow, UserCog, Folder } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useState } from "react";
 import {
@@ -14,14 +14,33 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { SearchDialog } from "@/components/SearchDialog";
+import { cn } from "@/lib/utils";
 
-const menuItems = [
+const quickLinks = [
   { title: "Mes tableaux", url: "/", icon: Home },
   { title: "Récents", url: "/recent", icon: Clock },
   { title: "Templates", url: "/templates", icon: Layout },
   { title: "Workflow", url: "/workflow", icon: Workflow },
   { title: "Équipes", url: "/teams", icon: Users },
   { title: "Utilisateurs", url: "/users", icon: UserCog },
+];
+
+const projectTree = [
+  {
+    id: "projet-1",
+    name: "Projet 1",
+    boardUrl: "/canvas/projet-1",
+  },
+  {
+    id: "projet-2",
+    name: "Projet 2",
+    boardUrl: "/canvas/projet-2",
+  },
+  {
+    id: "projet-3",
+    name: "Projet 3",
+    boardUrl: "/canvas/projet-3",
+  },
 ];
 
 export function AppSidebar() {
@@ -55,17 +74,60 @@ export function AppSidebar() {
             </div>
           )}
 
-        {/* Navigation */}
+        {/* Projects navigation */}
         <SidebarGroup className="flex-1">
-          <SidebarGroupLabel className="text-sm uppercase tracking-wider px-6 py-4 font-semibold"></SidebarGroupLabel>
+          <SidebarGroupLabel className="text-sm uppercase tracking-wider px-6 py-4 font-semibold">
+            {open ? "Projets" : ""}
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-3 px-3">
-              {menuItems.map((item) => (
+              <SidebarMenuItem>
+                <SidebarMenuButton className="px-5 py-4 rounded-xl" size="lg">
+                  <Folder className="h-6 w-6 flex-shrink-0" />
+                  {open && <span className="text-base font-semibold">Projets</span>}
+                </SidebarMenuButton>
+                {open && (
+                  <div className="space-y-2 pt-2">
+                    {projectTree.map((project) => {
+                      const badgeLabel = project.name.split(" ").slice(-1)[0] ?? project.name.charAt(0);
+                      return (
+                        <div key={project.id} className="space-y-1">
+                          <div className="flex items-center gap-2 px-3 text-sm font-semibold text-sidebar-foreground">
+                            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary">
+                              {badgeLabel}
+                            </span>
+                            <span>{project.name}</span>
+                          </div>
+                          <div className="pl-8">
+                            <NavLink
+                              to={project.boardUrl}
+                              className={({ isActive }) =>
+                                cn(
+                                  "flex h-8 items-center gap-2 rounded-lg px-3 text-sm transition-colors",
+                                  "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                  isActive && "bg-sidebar-accent font-medium text-sidebar-accent-foreground",
+                                )
+                              }
+                            >
+                              <Layout className="h-4 w-4" />
+                              <span>Tableau</span>
+                            </NavLink>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </SidebarMenuItem>
+
+              <div className="h-px bg-sidebar-border" />
+
+              {quickLinks.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink 
+                    <NavLink
                       to={item.url}
-                      className={({ isActive }) => 
+                      className={({ isActive }) =>
                         `flex items-center gap-4 px-5 py-4 rounded-xl transition-all duration-200 ${
                           isActive 
                             ? "bg-gradient-primary font-semibold scale-[1.02]" 

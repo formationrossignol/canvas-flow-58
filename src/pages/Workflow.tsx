@@ -546,7 +546,50 @@ const WorkflowPlanner = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>1. Choisir le nom du projet</CardTitle>
+          <CardTitle>1. Sélectionner la méthodologie</CardTitle>
+          <CardDescription>Comparez les approches pour choisir la meilleure cadence.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="mx-auto grid w-full max-w-4xl gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {(Object.keys(methodologies) as MethodologyKey[]).map((key) => {
+              const method = methodologies[key];
+              const Icon = method.icon;
+              const isSelected = selectedMethodology === key;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setSelectedMethodology(key)}
+                  className={`rounded-xl border p-4 text-left transition-all ${
+                    isSelected ? "border-primary bg-primary/10" : "hover:border-primary/40"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="rounded-full bg-primary/10 p-2 text-primary">
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    {isSelected && <Badge variant="default">Sélectionné</Badge>}
+                  </div>
+                  <h3 className="mt-4 text-lg font-semibold">{method.label}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">{method.description}</p>
+                  <div className="mt-4 space-y-1 text-sm text-muted-foreground">
+                    {method.focus.map((item) => (
+                      <div key={item} className="flex items-center gap-2">
+                        <ArrowRight className="h-3.5 w-3.5" />
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>2. Nommer le projet</CardTitle>
           <CardDescription>Un intitulé clair favorise l'alignement entre équipes.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3 md:grid-cols-[2fr_1fr]">
@@ -558,47 +601,6 @@ const WorkflowPlanner = () => {
           <div className="rounded-lg border bg-muted/40 p-3 text-sm text-muted-foreground">
             <p>Utilisez un nom évocateur : produit, initiative stratégique ou train agile.</p>
           </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>2. Sélectionner la méthodologie</CardTitle>
-          <CardDescription>Comparez les approches pour choisir la meilleure cadence.</CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4 lg:grid-cols-4">
-          {(Object.keys(methodologies) as MethodologyKey[]).map((key) => {
-            const method = methodologies[key];
-            const Icon = method.icon;
-            const isSelected = selectedMethodology === key;
-            return (
-              <button
-                key={key}
-                type="button"
-                onClick={() => setSelectedMethodology(key)}
-                className={`rounded-xl border p-4 text-left transition-all ${
-                  isSelected ? "border-primary bg-primary/10" : "hover:border-primary/40"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="rounded-full bg-primary/10 p-2 text-primary">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  {isSelected && <Badge variant="default">Sélectionné</Badge>}
-                </div>
-                <h3 className="mt-4 text-lg font-semibold">{method.label}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{method.description}</p>
-                <div className="mt-4 space-y-1 text-sm text-muted-foreground">
-                  {method.focus.map((item) => (
-                    <div key={item} className="flex items-center gap-2">
-                      <ArrowRight className="h-3.5 w-3.5" />
-                      <span>{item}</span>
-                    </div>
-                  ))}
-                </div>
-              </button>
-            );
-          })}
         </CardContent>
       </Card>
 
