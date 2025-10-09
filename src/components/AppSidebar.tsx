@@ -1,4 +1,4 @@
-import { Home, Clock, Layout, Settings, Users, Search, Workflow, UserCog, Folder } from "lucide-react";
+import { Home, Clock, Layout, Settings, Users, Search, Folder } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useState } from "react";
 import {
@@ -20,9 +20,7 @@ const quickLinks = [
   { title: "Mes tableaux", url: "/", icon: Home },
   { title: "Récents", url: "/recent", icon: Clock },
   { title: "Templates", url: "/templates", icon: Layout },
-  { title: "Workflow", url: "/workflow", icon: Workflow },
   { title: "Équipes", url: "/teams", icon: Users },
-  { title: "Utilisateurs", url: "/users", icon: UserCog },
 ];
 
 const projectTree = [
