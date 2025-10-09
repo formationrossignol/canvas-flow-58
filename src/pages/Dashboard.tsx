@@ -5,7 +5,27 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Grid, Trash2, Edit, Copy, Search, Download, LayoutGrid, List, Star, Share2, FileEdit, MoreVertical, Folder, X, Settings } from "lucide-react";
+import {
+  Plus,
+  Grid,
+  Trash2,
+  Edit,
+  Copy,
+  Search,
+  Download,
+  LayoutGrid,
+  List,
+  Star,
+  Share2,
+  FileEdit,
+  MoreVertical,
+  Folder,
+  X,
+  Settings,
+  UserCog,
+  Users,
+  ArrowRight,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Toggle } from "@/components/ui/toggle";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
@@ -320,6 +340,38 @@ const Dashboard = () => {
             Nouveau tableau
           </Button>
         </div>
+      </div>
+
+      <div className="grid gap-4 mb-8 md:grid-cols-2 xl:grid-cols-3">
+        <Card className="border-2 border-dashed border-primary/40 bg-primary/5">
+          <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-3">
+            <div className="space-y-1">
+              <CardTitle className="text-lg">Gestion des profils</CardTitle>
+              <CardDescription>
+                Retrouvez le module complet pour attribuer les rôles, squads et accès de vos collaborateurs.
+              </CardDescription>
+            </div>
+            <Badge variant="secondary" className="uppercase tracking-wide">
+              Nouveau
+            </Badge>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Centralisez vos utilisateurs, ajustez leurs responsabilités et gardez une vision claire des équipes agiles.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={() => navigate("/users")} className="gap-2">
+                <UserCog className="h-4 w-4" />
+                Ouvrir la gestion des utilisateurs
+              </Button>
+              <Button variant="ghost" onClick={() => navigate("/teams")} className="gap-2">
+                <Users className="h-4 w-4" />
+                Ajuster les équipes
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Search Bar and View Controls */}
