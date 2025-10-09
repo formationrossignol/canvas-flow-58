@@ -1,4 +1,4 @@
-import { Home, Clock, Layout, Settings, Users, Search } from "lucide-react";
+import { Home, Clock, Layout, Settings, Users, Search, Workflow, UserCog } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useState } from "react";
 import {
@@ -19,7 +19,9 @@ const menuItems = [
   { title: "Mes tableaux", url: "/", icon: Home },
   { title: "Récents", url: "/recent", icon: Clock },
   { title: "Templates", url: "/templates", icon: Layout },
+  { title: "Workflow", url: "/workflow", icon: Workflow },
   { title: "Équipes", url: "/teams", icon: Users },
+  { title: "Utilisateurs", url: "/users", icon: UserCog },
 ];
 
 export function AppSidebar() {
