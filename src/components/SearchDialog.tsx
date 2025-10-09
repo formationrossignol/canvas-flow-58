@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Search, LayoutGrid, FileText, X } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Search, LayoutGrid, FileText, X, UserCog } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -15,23 +16,86 @@ interface SearchDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+type SearchResultType = "board" | "template" | "page";
+
+interface SearchResult {
+  id: number;
+  name: string;
+  type: SearchResultType;
+  tags: string[];
+  url?: string;
+  description?: string;
+}
+
 export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<"all" | "boards" | "templates">("all");
+  const navigate = useNavigate();
 
   // Mock data - remplacer par de vraies données plus tard
-  const mockResults = [
-    { id: 1, name: "Projet Marketing Q1", type: "board", tags: ["Marketing", "2024"] },
-    { id: 2, name: "Wireframe Dashboard", type: "template", tags: ["UI", "Design"] },
-    { id: 3, name: "Sprint Planning", type: "board", tags: ["Agile", "Dev"] },
-    { id: 4, name: "User Flow Template", type: "template", tags: ["UX", "Flow"] },
-  ];
+  const mockResults: SearchResult[] = useMemo(
+    () => [
+      { id: 1, name: "Projet Marketing Q1", type: "board", tags: ["Marketing", "2024"] },
+      { id: 2, name: "Wireframe Dashboard", type: "template", tags: ["UI", "Design"] },
+      { id: 3, name: "Sprint Planning", type: "board", tags: ["Agile", "Dev"] },
+      { id: 4, name: "User Flow Template", type: "template", tags: ["UX", "Flow"] },
+      {
+        id: 5,
+        name: "Gestion des utilisateurs",
+        type: "page",
+        tags: ["Administration", "Rôles"],
+        url: "/users",
+        description: "Attribuer des rôles et suivre les squads de chaque collaborateur",
+      },
+    ],
+    [],
+  );
 
-  const filteredResults = mockResults.filter((item) => {
-    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesType = filterType === "all" || item.type === filterType;
-    return matchesSearch && matchesType;
-  });
+  const filteredResults = useMemo(
+    () =>
+      mockResults.filter((item) => {
+        const matchesSearch =
+          item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+        const matchesType = filterType === "all" || item.type === filterType;
+        return matchesSearch && matchesType;
+      }),
+    [mockResults, searchQuery, filterType],
+  );
+
+  const handleSelect = (result: SearchResult) => {
+    if (result.url) {
+      navigate(result.url);
+      onOpenChange(false);
+    }
+  };
+
+  const renderTypeBadge = (type: SearchResultType) => {
+    switch (type) {
+      case "board":
+        return "Tableau";
+      case "template":
+        return "Template";
+      case "page":
+        return "Section";
+      default:
+        return type;
+    }
+  };
+
+  const renderTypeIcon = (type: SearchResultType) => {
+    switch (type) {
+      case "board":
+        return <LayoutGrid className="h-5 w-5 text-primary" />;
+      case "template":
+        return <FileText className="h-5 w-5 text-secondary" />;
+      case "page":
+        return <UserCog className="h-5 w-5 text-muted-foreground" />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -93,15 +157,15 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
                 <div
                   key={result.id}
                   className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent/50 transition-colors cursor-pointer group"
+                  onClick={() => handleSelect(result)}
                 >
                   <div className="flex items-center gap-3">
-                    {result.type === "board" ? (
-                      <LayoutGrid className="h-5 w-5 text-primary" />
-                    ) : (
-                      <FileText className="h-5 w-5 text-secondary" />
-                    )}
+                    {renderTypeIcon(result.type)}
                     <div>
                       <p className="font-medium">{result.name}</p>
+                      {result.description && (
+                        <p className="text-sm text-muted-foreground">{result.description}</p>
+                      )}
                       <div className="flex gap-1 mt-1">
                         {result.tags.map((tag) => (
                           <Badge key={tag} variant="outline" className="text-xs">
@@ -111,8 +175,8 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
                       </div>
                     </div>
                   </div>
-                  <Badge variant={result.type === "board" ? "default" : "secondary"}>
-                    {result.type === "board" ? "Tableau" : "Template"}
+                  <Badge variant={result.type === "page" ? "secondary" : result.type === "board" ? "default" : "secondary"}>
+                    {renderTypeBadge(result.type)}
                   </Badge>
                 </div>
               ))
