@@ -4,7 +4,7 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 export default defineConfig({
-  base: "/kanban/",
+  base: "/",
   plugins: [react()],
   resolve: {
     alias: {
