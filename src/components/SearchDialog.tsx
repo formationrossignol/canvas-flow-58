@@ -58,7 +58,9 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
           item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           item.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
           item.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-        const matchesType = filterType === "all" || item.type === filterType;
+        const matchesType = filterType === "all" || 
+          (filterType === "boards" && item.type === "board") ||
+          (filterType === "templates" && item.type === "template");
         return matchesSearch && matchesType;
       }),
     [mockResults, searchQuery, filterType],

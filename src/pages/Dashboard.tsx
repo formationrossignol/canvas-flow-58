@@ -81,11 +81,13 @@ const Dashboard = () => {
   const [newBoardName, setNewBoardName] = useState("");
   const [selectedTeam, setSelectedTeam] = useState<string>("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isDiagramDialogOpen, setIsDiagramDialogOpen] = useState(false);
   const [newBoard, setNewBoard] = useState({
     name: "",
     description: "",
     teamId: "team1",
-    tags: [] as string[]
+    tags: [] as string[],
+    headerImage: ""
   });
   const [tagInput, setTagInput] = useState("");
   const [selectedBoardTags, setSelectedBoardTags] = useState<string[]>([]);
@@ -127,7 +129,31 @@ const Dashboard = () => {
     setSavedBoards(prev => [...prev, board]);
     toast.success("Tableau créé");
     setIsCreateDialogOpen(false);
-    setNewBoard({ name: "", description: "", teamId: "team1", tags: [] });
+    setNewBoard({ name: "", description: "", teamId: "team1", tags: [], headerImage: "" });
+    navigate(`/canvas/${board.id}`);
+  };
+
+  const handleCreateDiagram = () => {
+    if (!newBoard.name.trim()) {
+      toast.error("Le nom du diagramme est requis");
+      return;
+    }
+
+    const board: SavedBoard = {
+      id: `diagram-${Date.now()}`,
+      name: newBoard.name,
+      description: newBoard.description,
+      lastModified: new Date(),
+      elementsCount: 0,
+      isFavorite: false,
+      teamId: newBoard.teamId,
+      tags: [...newBoard.tags, "Diagramme"]
+    };
+
+    setSavedBoards(prev => [...prev, board]);
+    toast.success("Diagramme créé");
+    setIsDiagramDialogOpen(false);
+    setNewBoard({ name: "", description: "", teamId: "team1", tags: [], headerImage: "" });
     navigate(`/canvas/${board.id}`);
   };
 
@@ -321,7 +347,7 @@ const Dashboard = () => {
           <DialogFooter>
             <Button variant="outline" onClick={() => {
               setIsCreateDialogOpen(false);
-              setNewBoard({ name: "", description: "", teamId: "team1", tags: [] });
+              setNewBoard({ name: "", description: "", teamId: "team1", tags: [], headerImage: "" });
             }}>
               Annuler
             </Button>
@@ -339,8 +365,101 @@ const Dashboard = () => {
             <Plus className="h-4 w-4" />
             Nouveau tableau
           </Button>
+          <Button onClick={() => setIsDiagramDialogOpen(true)} variant="outline" className="gap-2">
+            <FileEdit className="h-4 w-4" />
+            Créer un diagramme
+          </Button>
         </div>
       </div>
+
+      {/* Diagram Dialog */}
+      <Dialog open={isDiagramDialogOpen} onOpenChange={setIsDiagramDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Créer un nouveau diagramme</DialogTitle>
+            <DialogDescription>
+              Définissez les propriétés de votre nouveau diagramme
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="diagram-name">Nom du diagramme *</Label>
+              <Input
+                id="diagram-name"
+                value={newBoard.name}
+                onChange={(e) => setNewBoard(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Ex: Architecture système"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="diagram-description">Description</Label>
+              <Textarea
+                id="diagram-description"
+                value={newBoard.description}
+                onChange={(e) => setNewBoard(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Décrivez le contenu de ce diagramme..."
+                rows={3}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="diagram-team">Équipe</Label>
+              <Select value={newBoard.teamId} onValueChange={(value) => setNewBoard(prev => ({ ...prev, teamId: value }))}>
+                <SelectTrigger id="diagram-team">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {teams.filter(t => t.id !== "all").map(team => (
+                    <SelectItem key={team.id} value={team.id}>
+                      {team.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Tags</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddTag();
+                    }
+                  }}
+                  placeholder="Ajouter un tag..."
+                />
+                <Button type="button" onClick={handleAddTag} size="sm">
+                  Ajouter
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {newBoard.tags.map(tag => (
+                  <Badge key={tag} variant="secondary" className="gap-1">
+                    {tag}
+                    <X 
+                      className="h-3 w-3 cursor-pointer" 
+                      onClick={() => handleRemoveTag(tag)}
+                    />
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setIsDiagramDialogOpen(false);
+              setNewBoard({ name: "", description: "", teamId: "team1", tags: [], headerImage: "" });
+            }}>
+              Annuler
+            </Button>
+            <Button onClick={handleCreateDiagram}>
+              Créer le diagramme
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="grid gap-4 mb-8 md:grid-cols-2 xl:grid-cols-3">
         <Card className="border-2 border-dashed border-primary/40 bg-primary/5">

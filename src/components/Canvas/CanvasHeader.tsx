@@ -96,20 +96,6 @@ export const CanvasHeader = ({
           <div className="flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-lg">
             <Badge variant="secondary">{selectedCount} élément{selectedCount > 1 ? 's' : ''} sélectionné{selectedCount > 1 ? 's' : ''}</Badge>
             
-            {onLockSelected && (
-              <Button variant="ghost" size="sm" onClick={onLockSelected} className="gap-2">
-                <Lock size={16} />
-                Verrouiller
-              </Button>
-            )}
-            
-            {onUnlockSelected && (
-              <Button variant="ghost" size="sm" onClick={onUnlockSelected} className="gap-2">
-                <Unlock size={16} />
-                Déverrouiller
-              </Button>
-            )}
-            
             {onDuplicateSelected && (
               <Button variant="ghost" size="sm" onClick={onDuplicateSelected} className="gap-2">
                 <Copy size={16} />

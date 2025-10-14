@@ -285,7 +285,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
 
   // Enhanced selection and interaction handlers
   const handleCanvasMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    // If we have a pending element, create it at click position
+    // If we have a pending element, create it at click position and keep it pending
     if (pendingElement && !isSpacePressed) {
       const rect = containerRef.current?.getBoundingClientRect();
       if (!rect) return;
@@ -293,7 +293,41 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       const x = (e.clientX - rect.left - canvasTransform.x) / canvasTransform.scale;
       const y = (e.clientY - rect.top - canvasTransform.y) / canvasTransform.scale;
 
-      createElementAtPosition(pendingElement, x, y);
+      // Create the element but DON'T clear pendingElement
+      const newElement: CanvasElement = {
+        id: `${pendingElement}-${Date.now()}`,
+        type: pendingElement,
+        x,
+        y,
+        width: pendingElement === 'sticky' ? 200 : 
+               pendingElement === 'circle' ? 120 : 
+               pendingElement === 'comment' ? 300 :
+               ['triangle', 'hexagon', 'pentagon', 'star', 'diamond', 'heart'].includes(pendingElement) ? 120 : 160,
+        height: pendingElement === 'sticky' ? 200 : 
+                pendingElement === 'circle' ? 120 : 
+                pendingElement === 'comment' ? 150 :
+                ['triangle', 'hexagon', 'pentagon', 'star', 'diamond', 'heart'].includes(pendingElement) ? 120 : 100,
+        color: selectedColor,
+        content: pendingElement === 'sticky' ? 'Nouvelle idée...' : 
+                 pendingElement === 'text' ? 'Tapez votre texte' : 
+                 pendingElement === 'comment' ? '' : '',
+        fontSize: pendingElement === 'text' ? 16 : 14,
+        borderRadius: pendingElement === 'rectangle' ? 8 : pendingElement === 'comment' ? 12 : 0,
+        imageUrl: pendingElement === 'image' ? (window as any).__pendingImageUrl : undefined,
+        comments: pendingElement === 'comment' ? [] : undefined,
+      };
+      
+      if (pendingElement === 'image') {
+        delete (window as any).__pendingImageUrl;
+      }
+      
+      setElements(prev => {
+        const newElements = [...prev, newElement];
+        addToHistory(newElements);
+        return newElements;
+      });
+      
+      // Keep pendingElement active so user can continue creating
       return;
     }
 
@@ -310,7 +344,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     } else {
       canvasMouseDown(e);
     }
-  }, [pendingElement, selectedTool, isSpacePressed, canvasTransform, createElementAtPosition, startSelectionBox, clearSelection, canvasMouseDown]);
+  }, [pendingElement, selectedTool, isSpacePressed, canvasTransform, selectedColor, addToHistory, startSelectionBox, clearSelection, canvasMouseDown]);
 
   const handleCanvasMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (selection.selectionBox.isActive) {
