@@ -1,6 +1,7 @@
-import { useRef, useState, useCallback, useEffect } from "react";
+import { useRef, useState, useCallback, useEffect, useMemo } from "react";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { toast } from "sonner";
 import { CanvasToolbar } from "./CanvasToolbar";
 import { CanvasObject } from "./CanvasObject";
 import { CanvasHeader } from "./CanvasHeader";
@@ -21,6 +22,7 @@ import { useCanvasInteraction } from "./hooks/useCanvasInteraction";
 import { useSelection } from "./hooks/useSelection";
 import { useHistory } from "./hooks/useHistory";
 import { templates } from "./templates";
+import { useBoardPersistence, type StoredBoardSnapshot } from "@/hooks/useBoardPersistence";
 
 export interface Comment {
   id: string;
@@ -63,7 +65,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   const [pendingElement, setPendingElement] = useState<CanvasElement['type'] | null>(null);
   
   // History management
-  const { addToHistory, undo, redo, canUndo, canRedo } = useHistory(elements);
+  const { addToHistory, undo, redo, canUndo, canRedo, resetHistory } = useHistory(elements);
   const [selectedColor, setSelectedColor] = useState('#FFE066');
   const [boardTitle, setBoardTitle] = useState('Tableau sans titre');
   const [isOptionsMenuVisible, setIsOptionsMenuVisible] = useState(false);
@@ -107,6 +109,62 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     { id: '2', name: 'Alice Martin', avatar: '', color: '#10B981' },
     { id: '3', name: 'Bob Dupont', avatar: '', color: '#F59E0B' },
   ];
+
+  const restoreBoardFromSnapshot = useCallback((snapshot: StoredBoardSnapshot) => {
+    const nextElements = snapshot.elements ?? [];
+    setElements(nextElements);
+    setConnections(snapshot.connections ?? []);
+    setDrawingStrokes(snapshot.drawingStrokes ?? []);
+    setBoardTitle(snapshot.boardTitle || 'Tableau sans titre');
+    clearSelection();
+    resetHistory(nextElements);
+  }, [clearSelection, resetHistory]);
+
+  const { lastSavedAt, isSaving, hasSnapshot, saveNow, resetBoard: resetBoardStorage } = useBoardPersistence({
+    boardId,
+    elements,
+    connections,
+    drawingStrokes,
+    boardTitle,
+    onLoad: restoreBoardFromSnapshot,
+  });
+
+  const totalComments = useMemo(
+    () => elements.reduce((acc, element) => acc + (element.comments?.length ?? 0), 0),
+    [elements]
+  );
+
+  const templateAppliedRef = useRef(false);
+
+  const handleForceSave = useCallback(() => {
+    saveNow();
+    toast.success("Tableau sauvegardé localement");
+  }, [saveNow]);
+
+  const handleResetBoard = useCallback(() => {
+    const confirmed = window.confirm("Voulez-vous réinitialiser ce tableau ? Cette action supprimera les éléments locaux.");
+    if (!confirmed) return;
+
+    setElements([]);
+    setConnections([]);
+    setDrawingStrokes([]);
+    clearSelection();
+    setBoardTitle('Tableau sans titre');
+    resetHistory([]);
+    resetBoardStorage();
+    templateAppliedRef.current = false;
+    toast.success("Tableau réinitialisé");
+  }, [clearSelection, resetBoardStorage, resetHistory]);
+
+  useEffect(() => {
+    setElements([]);
+    setConnections([]);
+    setDrawingStrokes([]);
+    clearSelection();
+    setBoardTitle('Tableau sans titre');
+    resetHistory([]);
+    templateAppliedRef.current = false;
+  }, [boardId, clearSelection, resetHistory]);
 
   const handleAddElement = useCallback((type: CanvasElement['type']) => {
     if (type === 'image') {
@@ -273,14 +331,20 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
 
   const handleApplyTemplate = useCallback((templateElements: CanvasElement[]) => {
     setElements(templateElements);
+    setConnections([]);
+    setDrawingStrokes([]);
     addToHistory(templateElements);
     clearSelection();
+    toast.success("Template appliqué au tableau");
   }, [clearSelection, addToHistory]);
 
   const handleImportElements = useCallback((importedElements: CanvasElement[]) => {
     setElements(importedElements);
+    setConnections([]);
+    setDrawingStrokes([]);
     addToHistory(importedElements);
     clearSelection();
+    toast.success("Données importées avec succès");
   }, [clearSelection, addToHistory]);
 
   // Enhanced selection and interaction handlers
@@ -395,16 +459,32 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     selectElement(id, isMultiSelect);
   }, [selectElement]);
 
-  // Load template if templateId is provided
+  // Load template if templateId is provided and no snapshot exists yet
   useEffect(() => {
-    if (templateId) {
-      const template = templates.find(t => t.id === templateId);
-      if (template && template.elements.length > 0) {
-        setElements(template.elements);
-        addToHistory(template.elements);
-      }
-    }
-  }, [templateId, addToHistory]);
+    if (!templateId || templateAppliedRef.current) return;
+    if (hasSnapshot) return;
+    if (elements.length > 0) return;
+
+    const template = templates.find(t => t.id === templateId);
+    if (!template || template.elements.length === 0) return;
+
+    const baseTime = Date.now();
+    const templateElements = template.elements.map((element, index) => ({
+      ...element,
+      id: `${element.type}-${baseTime}-${index}`,
+      comments: element.comments ? element.comments.map(comment => ({ ...comment })) : element.type === 'comment' ? [] : element.comments,
+      likedBy: element.likedBy ? [...element.likedBy] : [],
+    }));
+
+    setElements(templateElements);
+    setConnections([]);
+    setDrawingStrokes([]);
+    setBoardTitle(template.name);
+    clearSelection();
+    resetHistory(templateElements);
+    templateAppliedRef.current = true;
+    toast.success(`Template "${template.name}" appliqué`);
+  }, [templateId, hasSnapshot, elements.length, clearSelection, resetHistory]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -540,6 +620,13 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         onLockSelected={handleLockSelectedElements}
         onUnlockSelected={handleUnlockSelectedElements}
         onDuplicateSelected={handleDuplicateSelectedElements}
+        boardId={boardId ?? 'local'}
+        lastSavedAt={lastSavedAt}
+        isSaving={isSaving}
+        elementCount={elements.length}
+        commentCount={totalComments}
+        onSaveNow={handleForceSave}
+        onResetBoard={handleResetBoard}
       />
 
       {/* Canvas Container */}

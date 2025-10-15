@@ -1,11 +1,32 @@
 import { useState } from "react";
-import { Settings, Download, Share2, Users, MessageCircle, Layout, Lock, Unlock, Copy, QrCode, Mail, Menu } from "lucide-react";
+import {
+  Settings,
+  Download,
+  Share2,
+  Users,
+  MessageCircle,
+  Layout,
+  Lock,
+  Unlock,
+  Copy,
+  QrCode,
+  Mail,
+  Menu,
+  Loader2,
+  CheckCircle2,
+  Layers,
+  Save,
+  RefreshCcw,
+  ClipboardCopy,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { toast } from "sonner";
 import { QRCodeSVG } from 'qrcode.react';
+import { formatDistanceToNow } from "date-fns";
+import { fr } from "date-fns/locale";
 import {
   Dialog,
   DialogContent,
@@ -36,11 +57,18 @@ interface CanvasHeaderProps {
   onLockSelected?: () => void;
   onUnlockSelected?: () => void;
   onDuplicateSelected?: () => void;
+  boardId?: string;
+  lastSavedAt?: Date | null;
+  isSaving?: boolean;
+  elementCount?: number;
+  commentCount?: number;
+  onSaveNow?: () => void;
+  onResetBoard?: () => void;
 }
 
-export const CanvasHeader = ({ 
-  boardTitle, 
-  onTitleChange, 
+export const CanvasHeader = ({
+  boardTitle,
+  onTitleChange,
   collaborators,
   onOpenTemplates,
   onOpenExport,
@@ -49,14 +77,31 @@ export const CanvasHeader = ({
   onLockSelected,
   onUnlockSelected,
   onDuplicateSelected,
+  boardId,
+  lastSavedAt,
+  isSaving,
+  elementCount = 0,
+  commentCount = 0,
+  onSaveNow,
+  onResetBoard,
 }: CanvasHeaderProps) => {
   const navigate = useNavigate();
   const [emailInvite, setEmailInvite] = useState("");
-  
+
+  const savedLabel = lastSavedAt
+    ? `Enregistré ${formatDistanceToNow(lastSavedAt, { addSuffix: true, locale: fr })}`
+    : "Enregistrement en attente";
+
   const handleShare = () => {
     const shareLink = window.location.href;
     navigator.clipboard.writeText(shareLink);
     toast.success("Lien copié dans le presse-papier");
+  };
+
+  const handleCopyBoardId = () => {
+    if (!boardId) return;
+    navigator.clipboard.writeText(boardId);
+    toast.success("Identifiant du tableau copié");
   };
 
   const handleEmailInvite = () => {
@@ -81,7 +126,7 @@ export const CanvasHeader = ({
           <SidebarTrigger />
           
           <div className="h-6 w-px bg-border" />
-          
+
           <input
             type="text"
             value={boardTitle}
@@ -89,17 +134,43 @@ export const CanvasHeader = ({
             className="text-lg font-medium bg-transparent border-none outline-none text-foreground hover:bg-muted/50 px-2 py-1 rounded-md transition-colors"
             placeholder="Titre du tableau"
           />
+
+          {boardId && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-2 text-xs text-muted-foreground hover:text-foreground"
+              onClick={handleCopyBoardId}
+            >
+              <ClipboardCopy size={14} />
+              {boardId}
+            </Button>
+          )}
         </div>
 
         {/* Center Section - Collaborators or Selection Actions */}
         {selectedCount > 0 ? (
           <div className="flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-lg">
             <Badge variant="secondary">{selectedCount} élément{selectedCount > 1 ? 's' : ''} sélectionné{selectedCount > 1 ? 's' : ''}</Badge>
-            
+
             {onDuplicateSelected && (
               <Button variant="ghost" size="sm" onClick={onDuplicateSelected} className="gap-2">
                 <Copy size={16} />
                 Dupliquer
+              </Button>
+            )}
+
+            {onLockSelected && (
+              <Button variant="ghost" size="sm" onClick={onLockSelected} className="gap-2">
+                <Lock size={16} />
+                Verrouiller
+              </Button>
+            )}
+
+            {onUnlockSelected && (
+              <Button variant="ghost" size="sm" onClick={onUnlockSelected} className="gap-2">
+                <Unlock size={16} />
+                Déverrouiller
               </Button>
             )}
           </div>
@@ -139,9 +210,39 @@ export const CanvasHeader = ({
             <div className="w-2 h-2 bg-success rounded-full animate-pulse" />
             En ligne
           </Badge>
-          
+
+          <Badge variant="outline" className="hidden md:flex gap-1 text-muted-foreground">
+            <Layers size={14} />
+            {elementCount} élément{elementCount > 1 ? 's' : ''}
+          </Badge>
+
+          <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground">
+            {isSaving ? (
+              <span className="flex items-center gap-1">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Enregistrement...
+              </span>
+            ) : lastSavedAt ? (
+              <span className="flex items-center gap-1">
+                <CheckCircle2 className="h-3 w-3 text-success" />
+                {savedLabel}
+              </span>
+            ) : (
+              <span>{savedLabel}</span>
+            )}
+          </div>
+
           <div className="h-6 w-px bg-border mx-2" />
-          
+
+          <Button variant="ghost" size="sm" className="relative" onClick={onOpenComments}>
+            <MessageCircle size={16} />
+            {commentCount > 0 && (
+              <span className="absolute -top-1 -right-1 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium text-primary-foreground">
+                {commentCount}
+              </span>
+            )}
+          </Button>
+
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="default" size="sm" className="gap-2 bg-gradient-primary">
@@ -265,6 +366,30 @@ export const CanvasHeader = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 bg-card/95 backdrop-blur-sm border-border z-50">
+              {onSaveNow && (
+                <DropdownMenuItem onClick={onSaveNow} className="gap-2 cursor-pointer">
+                  <Save size={16} />
+                  <span>Enregistrer maintenant</span>
+                </DropdownMenuItem>
+              )}
+              {onResetBoard && (
+                <DropdownMenuItem
+                  onClick={onResetBoard}
+                  className="gap-2 cursor-pointer text-destructive focus:text-destructive"
+                >
+                  <RefreshCcw size={16} />
+                  <span>Réinitialiser le tableau</span>
+                </DropdownMenuItem>
+              )}
+              {boardId && (
+                <DropdownMenuItem onClick={handleCopyBoardId} className="gap-2 cursor-pointer">
+                  <ClipboardCopy size={16} />
+                  <span>Copier l'identifiant</span>
+                </DropdownMenuItem>
+              )}
+
+              {(onSaveNow || onResetBoard || boardId) && <DropdownMenuSeparator />}
+
               <DropdownMenuItem onClick={onOpenComments} className="gap-2 cursor-pointer">
                 <MessageCircle size={16} />
                 <span>Commentaires</span>
