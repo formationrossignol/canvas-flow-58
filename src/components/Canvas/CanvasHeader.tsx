@@ -64,6 +64,7 @@ interface CanvasHeaderProps {
   commentCount?: number;
   onSaveNow?: () => void;
   onResetBoard?: () => void;
+  isSelectionLocked?: boolean;
 }
 
 export const CanvasHeader = ({
@@ -84,6 +85,7 @@ export const CanvasHeader = ({
   commentCount = 0,
   onSaveNow,
   onResetBoard,
+  isSelectionLocked = false,
 }: CanvasHeaderProps) => {
   const navigate = useNavigate();
   const [emailInvite, setEmailInvite] = useState("");
@@ -160,17 +162,21 @@ export const CanvasHeader = ({
               </Button>
             )}
 
-            {onLockSelected && (
-              <Button variant="ghost" size="sm" onClick={onLockSelected} className="gap-2">
-                <Lock size={16} />
-                Verrouiller
-              </Button>
-            )}
-
-            {onUnlockSelected && (
-              <Button variant="ghost" size="sm" onClick={onUnlockSelected} className="gap-2">
-                <Unlock size={16} />
-                Déverrouiller
+            {(onLockSelected || onUnlockSelected) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  if (isSelectionLocked) {
+                    onUnlockSelected?.();
+                  } else {
+                    onLockSelected?.();
+                  }
+                }}
+                className="gap-2"
+              >
+                {isSelectionLocked ? <Unlock size={16} /> : <Lock size={16} />}
+                {isSelectionLocked ? 'Déverrouiller' : 'Verrouiller'}
               </Button>
             )}
           </div>

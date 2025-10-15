@@ -134,6 +134,17 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     [elements]
   );
 
+  const areAllSelectedLocked = useMemo(() => {
+    if (selection.selectedIds.length === 0) {
+      return false;
+    }
+
+    return selection.selectedIds.every((id) => {
+      const element = elements.find((el) => el.id === id);
+      return Boolean(element?.locked);
+    });
+  }, [selection.selectedIds, elements]);
+
   const templateAppliedRef = useRef(false);
 
   const handleForceSave = useCallback(() => {
@@ -607,7 +618,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   }, [handleExportPDF]);
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden bg-canvas">
+    <div className="relative w-full h-screen overflow-hidden bg-canvas">
       {/* Header */}
       <CanvasHeader
         boardTitle={boardTitle}
@@ -620,6 +631,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         onLockSelected={handleLockSelectedElements}
         onUnlockSelected={handleUnlockSelectedElements}
         onDuplicateSelected={handleDuplicateSelectedElements}
+        isSelectionLocked={areAllSelectedLocked}
         boardId={boardId ?? 'local'}
         lastSavedAt={lastSavedAt}
         isSaving={isSaving}
