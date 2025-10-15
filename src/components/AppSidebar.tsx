@@ -74,7 +74,7 @@ export function AppSidebar() {
       <Sidebar collapsible="icon" className="border-r border-sidebar-border">
         <SidebarContent>
           {/* Header */}
-          <div className="p-6 border-b border-sidebar-border">
+          <div className="flex h-14 items-center border-b border-sidebar-border px-6">
             <NavLink
               to="/"
               className={cn(

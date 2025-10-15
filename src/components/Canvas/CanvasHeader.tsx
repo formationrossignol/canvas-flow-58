@@ -156,7 +156,13 @@ export const CanvasHeader = ({
             <Badge variant="secondary">{selectedCount} élément{selectedCount > 1 ? 's' : ''} sélectionné{selectedCount > 1 ? 's' : ''}</Badge>
 
             {onDuplicateSelected && (
-              <Button variant="ghost" size="sm" onClick={onDuplicateSelected} className="gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onDuplicateSelected}
+                className="gap-2"
+                disabled={isSelectionLocked}
+              >
                 <Copy size={16} />
                 Dupliquer
               </Button>
