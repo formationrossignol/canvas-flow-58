@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { SearchDialog } from "@/components/SearchDialog";
 import { cn } from "@/lib/utils";
+import { useBranding } from "@/contexts/BrandingContext";
 
 const quickLinks = [
   { title: "Mes tableaux", url: "/", icon: Home },
@@ -57,6 +58,14 @@ export function AppSidebar() {
   const { open } = useSidebar();
   const [searchOpen, setSearchOpen] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState<string>("team1");
+  const { logoUrl, brandName } = useBranding();
+  const displayBrandName = brandName.trim().length > 0 ? brandName : "CollabBoard";
+  const brandInitials = displayBrandName
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => word[0]?.toUpperCase())
+    .join("")
+    .slice(0, 2) || "CB";
 
   return (
     <>
@@ -66,9 +75,31 @@ export function AppSidebar() {
         <SidebarContent>
           {/* Header */}
           <div className="p-6 border-b border-sidebar-border">
-            <h1 className={`font-bold text-2xl text-sidebar-foreground transition-opacity ${!open && 'opacity-0'}`}>
-              CollabBoard
-            </h1>
+            <NavLink
+              to="/"
+              className={cn(
+                "group flex items-center gap-3 rounded-xl px-2 py-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background",
+                !open && "justify-center"
+              )}
+            >
+              <div
+                className={cn(
+                  "flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl border border-sidebar-border bg-sidebar-accent/60",
+                  logoUrl && "bg-white/60"
+                )}
+              >
+                {logoUrl ? (
+                  <img src={logoUrl} alt={`${displayBrandName} logo`} className="h-full w-full object-contain" />
+                ) : (
+                  <span className="text-lg font-semibold text-sidebar-foreground">{brandInitials}</span>
+                )}
+              </div>
+              {open && (
+                <span className="text-2xl font-bold text-sidebar-foreground">
+                  {displayBrandName}
+                </span>
+              )}
+            </NavLink>
           </div>
 
           {/* Search Button */}

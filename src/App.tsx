@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ThemeProvider } from "next-themes";
+import { BrandingProvider } from "@/contexts/BrandingContext";
 import Dashboard from "./pages/Dashboard";
 import Recent from "./pages/Recent";
 import Templates from "./pages/Templates";
@@ -43,24 +44,26 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter basename={basename}>
-            <Routes>
-              <Route path="/" element={<DashboardLayout />}>
-                <Route index element={<Dashboard />} />
-                <Route path="recent" element={<Recent />} />
-                <Route path="templates" element={<Templates />} />
-                <Route path="teams" element={<Teams />} />
-                <Route path="settings" element={<Settings />} />
-              </Route>
-              <Route path="/canvas/:id" element={<Canvas />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
+        <BrandingProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter basename={basename}>
+              <Routes>
+                <Route path="/" element={<DashboardLayout />}>
+                  <Route index element={<Dashboard />} />
+                  <Route path="recent" element={<Recent />} />
+                  <Route path="templates" element={<Templates />} />
+                  <Route path="teams" element={<Teams />} />
+                  <Route path="settings" element={<Settings />} />
+                </Route>
+                <Route path="/canvas/:id" element={<Canvas />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </BrandingProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
