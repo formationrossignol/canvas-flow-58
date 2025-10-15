@@ -267,6 +267,10 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   const handleElementDuplicate = useCallback((id: string) => {
     const element = elements.find(el => el.id === id);
     if (!element) return;
+    if (element.locked) {
+      toast.error("Impossible de dupliquer un élément verrouillé");
+      return;
+    }
 
     const newElement: CanvasElement = {
       ...element,
@@ -274,8 +278,9 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       x: element.x + 20,
       y: element.y + 20,
       likedBy: [], // Reset likes for duplicated element
+      locked: false,
     };
-    
+
     setElements(prev => {
       const newElements = [...prev, newElement];
       addToHistory(newElements);
@@ -317,18 +322,24 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     const newElements: CanvasElement[] = [];
     selection.selectedIds.forEach(id => {
       const element = elements.find(el => el.id === id);
-      if (element) {
+      if (element && !element.locked) {
         const newElement: CanvasElement = {
           ...element,
           id: `${element.type}-${Date.now()}-${Math.random()}`,
           x: element.x + 20,
           y: element.y + 20,
           likedBy: [], // Reset likes for duplicated element
+          locked: false,
         };
         newElements.push(newElement);
       }
     });
-    
+
+    if (newElements.length === 0) {
+      toast.error("Impossible de dupliquer des éléments verrouillés");
+      return;
+    }
+
     if (newElements.length > 0) {
       setElements(prev => {
         const updated = [...prev, ...newElements];
