@@ -144,6 +144,165 @@ All colors MUST be HSL.
     --sidebar-border: 220 24% 18%;
     --sidebar-ring: 37 79% 65%;
   }
+
+  .theme-ocean {
+    --background: 199 74% 94%;
+    --foreground: 215 30% 20%;
+
+    --canvas: 199 74% 96%;
+    --card: 199 74% 98%;
+    --card-foreground: 215 30% 20%;
+
+    --popover: 199 74% 98%;
+    --popover-foreground: 215 30% 20%;
+
+    --primary: 199 89% 48%;
+    --primary-glow: 199 89% 58%;
+    --primary-foreground: 198 100% 96%;
+
+    --secondary: 187 85% 61%;
+    --secondary-dark: 187 85% 50%;
+    --secondary-foreground: 215 30% 18%;
+
+    --accent: 209 95% 68%;
+    --accent-dark: 209 95% 55%;
+    --accent-foreground: 215 30% 18%;
+
+    --muted: 201 40% 85%;
+    --muted-foreground: 215 25% 36%;
+    --border: 199 60% 82%;
+    --input: 199 60% 88%;
+    --ring: 199 89% 48%;
+
+    --sidebar-background: 199 74% 96%;
+    --sidebar-foreground: 215 30% 20%;
+    --sidebar-primary: 199 89% 48%;
+    --sidebar-primary-foreground: 198 100% 96%;
+    --sidebar-accent: 199 60% 90%;
+    --sidebar-accent-foreground: 215 30% 20%;
+    --sidebar-border: 199 52% 82%;
+    --sidebar-ring: 187 85% 61%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(199 89% 48%), hsl(187 85% 61%));
+    --gradient-warm: linear-gradient(135deg, hsl(187 85% 61%), hsl(199 89% 48%));
+    --gradient-cool: linear-gradient(135deg, hsl(199 89% 48%), hsl(215 30% 18% / 0.85));
+    --gradient-sunset: linear-gradient(135deg, hsl(187 85% 61%), hsl(199 89% 48%));
+    --gradient-ocean: linear-gradient(135deg, hsl(187 85% 61%), hsl(199 89% 48%));
+    --gradient-purple: linear-gradient(135deg, hsl(215 30% 22%), hsl(222 47% 30%));
+    --gradient-subtle: linear-gradient(180deg, hsl(199 74% 98%), hsl(199 74% 94%));
+  }
+
+  .theme-ocean body {
+    background-image: radial-gradient(circle at 12% 18%, hsl(187 85% 70% / 0.28), transparent 60%),
+      radial-gradient(circle at 82% 12%, hsl(199 89% 48% / 0.18), transparent 55%),
+      linear-gradient(135deg, hsl(200 70% 98%), hsl(199 74% 94%));
+  }
+
+  .theme-forest {
+    --background: 145 42% 92%;
+    --foreground: 161 30% 22%;
+
+    --canvas: 145 42% 95%;
+    --card: 145 46% 97%;
+    --card-foreground: 161 30% 22%;
+
+    --popover: 145 46% 97%;
+    --popover-foreground: 161 30% 22%;
+
+    --primary: 152 40% 38%;
+    --primary-glow: 152 40% 48%;
+    --primary-foreground: 140 50% 94%;
+
+    --secondary: 130 35% 45%;
+    --secondary-dark: 130 35% 35%;
+    --secondary-foreground: 35 70% 96%;
+
+    --accent: 48 78% 66%;
+    --accent-dark: 48 78% 54%;
+    --accent-foreground: 161 30% 18%;
+
+    --muted: 150 24% 85%;
+    --muted-foreground: 161 18% 36%;
+    --border: 140 25% 80%;
+    --input: 140 24% 86%;
+    --ring: 152 40% 38%;
+
+    --sidebar-background: 145 42% 95%;
+    --sidebar-foreground: 161 30% 22%;
+    --sidebar-primary: 152 40% 38%;
+    --sidebar-primary-foreground: 140 50% 94%;
+    --sidebar-accent: 145 28% 88%;
+    --sidebar-accent-foreground: 161 30% 22%;
+    --sidebar-border: 140 24% 78%;
+    --sidebar-ring: 130 35% 45%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(152 40% 38%), hsl(130 35% 45%));
+    --gradient-warm: linear-gradient(135deg, hsl(48 78% 66%), hsl(130 35% 45%));
+    --gradient-cool: linear-gradient(135deg, hsl(152 40% 38%), hsl(161 30% 18% / 0.85));
+    --gradient-sunset: linear-gradient(135deg, hsl(48 78% 66%), hsl(130 35% 45%));
+    --gradient-ocean: linear-gradient(135deg, hsl(152 40% 38%), hsl(130 35% 45%));
+    --gradient-purple: linear-gradient(135deg, hsl(161 30% 28%), hsl(210 30% 30%));
+    --gradient-subtle: linear-gradient(180deg, hsl(145 46% 97%), hsl(145 42% 92%));
+  }
+
+  .theme-forest body {
+    background-image: radial-gradient(circle at 14% 24%, hsl(152 40% 50% / 0.25), transparent 60%),
+      radial-gradient(circle at 78% 16%, hsl(130 35% 45% / 0.18), transparent 55%),
+      linear-gradient(135deg, hsl(145 46% 97%), hsl(145 42% 92%));
+  }
+
+  .theme-sunset {
+    --background: 32 96% 94%;
+    --foreground: 20 50% 22%;
+
+    --canvas: 32 96% 97%;
+    --card: 32 100% 99%;
+    --card-foreground: 20 50% 22%;
+
+    --popover: 32 100% 99%;
+    --popover-foreground: 20 50% 22%;
+
+    --primary: 16 86% 55%;
+    --primary-glow: 16 86% 60%;
+    --primary-foreground: 28 100% 98%;
+
+    --secondary: 28 92% 64%;
+    --secondary-dark: 28 92% 52%;
+    --secondary-foreground: 24 70% 14%;
+
+    --accent: 45 95% 65%;
+    --accent-dark: 45 95% 55%;
+    --accent-foreground: 24 70% 14%;
+
+    --muted: 32 60% 86%;
+    --muted-foreground: 24 42% 36%;
+    --border: 32 70% 82%;
+    --input: 32 68% 88%;
+    --ring: 16 86% 55%;
+
+    --sidebar-background: 32 96% 97%;
+    --sidebar-foreground: 24 70% 18%;
+    --sidebar-primary: 16 86% 55%;
+    --sidebar-primary-foreground: 28 100% 98%;
+    --sidebar-accent: 32 70% 90%;
+    --sidebar-accent-foreground: 24 70% 18%;
+    --sidebar-border: 32 60% 82%;
+    --sidebar-ring: 28 92% 64%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(16 86% 55%), hsl(28 92% 64%));
+    --gradient-warm: linear-gradient(135deg, hsl(45 95% 65%), hsl(16 86% 55%));
+    --gradient-cool: linear-gradient(135deg, hsl(16 86% 55%), hsl(24 70% 18% / 0.85));
+    --gradient-sunset: linear-gradient(135deg, hsl(45 95% 65%), hsl(16 86% 55%));
+    --gradient-ocean: linear-gradient(135deg, hsl(28 92% 64%), hsl(16 86% 55%));
+    --gradient-purple: linear-gradient(135deg, hsl(280 40% 45%), hsl(16 86% 55%));
+    --gradient-subtle: linear-gradient(180deg, hsl(32 100% 99%), hsl(32 96% 94%));
+  }
+
+  .theme-sunset body {
+    background-image: radial-gradient(circle at 15% 22%, hsl(45 95% 70% / 0.28), transparent 60%),
+      radial-gradient(circle at 80% 12%, hsl(16 86% 55% / 0.18), transparent 50%),
+      linear-gradient(135deg, hsl(32 100% 99%), hsl(32 96% 94%));
+  }
 }
 
 @layer base {
