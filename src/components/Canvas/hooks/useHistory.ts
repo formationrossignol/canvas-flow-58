@@ -70,6 +70,11 @@ export const useHistory = (initialElements: CanvasElement[] = []) => {
     return history[currentIndex]?.elements || [];
   }, [history, currentIndex]);
 
+  const resetHistory = useCallback((elements: CanvasElement[] = []) => {
+    setHistory([{ elements: [...elements], timestamp: Date.now() }]);
+    setCurrentIndex(0);
+  }, []);
+
   return {
     addToHistory,
     undo,
@@ -77,5 +82,6 @@ export const useHistory = (initialElements: CanvasElement[] = []) => {
     canUndo,
     canRedo,
     getCurrentElements,
+    resetHistory,
   };
 };
