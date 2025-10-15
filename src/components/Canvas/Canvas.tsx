@@ -23,6 +23,9 @@ import { useSelection } from "./hooks/useSelection";
 import { useHistory } from "./hooks/useHistory";
 import { templates } from "./templates";
 import { useBoardPersistence, type StoredBoardSnapshot } from "@/hooks/useBoardPersistence";
+import { useLocalCollaborator } from "@/hooks/useLocalCollaborator";
+import { useBoardPresence } from "@/hooks/useBoardPresence";
+import { CollaboratorCursors } from "./CollaboratorCursors";
 
 export interface Comment {
   id: string;
@@ -103,12 +106,22 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     isSelected,
   } = useSelection();
 
-  // Mock collaborators data
-  const collaborators = [
-    { id: '1', name: 'Vous', avatar: '', color: '#6366F1' },
-    { id: '2', name: 'Alice Martin', avatar: '', color: '#10B981' },
-    { id: '3', name: 'Bob Dupont', avatar: '', color: '#F59E0B' },
-  ];
+  const localCollaborator = useLocalCollaborator();
+  const { remoteParticipants, remoteCursors, updateCursor: updatePresenceCursor, hideCursor } = useBoardPresence({
+    boardId: boardId ?? 'local',
+    currentUser: localCollaborator,
+    containerRef,
+  });
+
+  const collaborators = useMemo(
+    () => [localCollaborator, ...remoteParticipants].map(participant => ({
+      id: participant.id,
+      name: participant.name,
+      color: participant.color,
+      avatar: participant.avatar ?? '',
+    })),
+    [localCollaborator, remoteParticipants]
+  );
 
   const restoreBoardFromSnapshot = useCallback((snapshot: StoredBoardSnapshot) => {
     const nextElements = snapshot.elements ?? [];
@@ -433,18 +446,24 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   }, [pendingElement, selectedTool, isSpacePressed, canvasTransform, selectedColor, addToHistory, startSelectionBox, clearSelection, canvasMouseDown]);
 
   const handleCanvasMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    updatePresenceCursor(e.clientX, e.clientY);
+
     if (selection.selectionBox.isActive) {
       const rect = containerRef.current?.getBoundingClientRect();
       if (!rect) return;
 
       const x = (e.clientX - rect.left - canvasTransform.x) / canvasTransform.scale;
       const y = (e.clientY - rect.top - canvasTransform.y) / canvasTransform.scale;
-      
+
       updateSelectionBox(x, y);
     } else {
       canvasMouseMove(e);
     }
-  }, [selection.selectionBox.isActive, canvasTransform, updateSelectionBox, canvasMouseMove]);
+  }, [updatePresenceCursor, selection.selectionBox.isActive, canvasTransform, updateSelectionBox, canvasMouseMove]);
+
+  const handleCanvasMouseLeave = useCallback(() => {
+    hideCursor();
+  }, [hideCursor]);
 
   const handleCanvasMouseUp = useCallback(() => {
     if (selection.selectionBox.isActive) {
@@ -659,9 +678,11 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         onMouseDown={handleCanvasMouseDown}
         onMouseMove={handleCanvasMouseMove}
         onMouseUp={handleCanvasMouseUp}
+        onMouseLeave={handleCanvasMouseLeave}
         onWheel={handleWheel}
         style={{ cursor: cursor === 'canvas-cursor-grab' ? 'grab' : cursor === 'canvas-cursor-grabbing' ? 'grabbing' : cursor }}
       >
+        <CollaboratorCursors cursors={remoteCursors} />
         {/* Canvas Content */}
         <div
           className="absolute inset-0 bg-canvas"
