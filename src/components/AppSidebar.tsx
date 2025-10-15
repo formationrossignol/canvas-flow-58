@@ -78,8 +78,8 @@ export function AppSidebar() {
             <NavLink
               to="/"
               className={cn(
-                "group flex items-center gap-3 rounded-xl px-2 py-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background",
-                !open && "justify-center"
+                "group flex items-center gap-3 rounded-xl py-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background",
+                open ? "px-2" : "px-0 justify-center"
               )}
             >
               <div
