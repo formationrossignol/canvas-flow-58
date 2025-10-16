@@ -29,95 +29,49 @@ const shapeCategories: ShapeCategory[] = [
         id: 'rectangle',
         icon: Square,
         label: 'Rectangle',
-        description: 'Forme rectangulaire classique'
+        description: 'Rectangle classique'
       },
       {
         id: 'circle',
         icon: Circle,
         label: 'Cercle',
-        description: 'Forme circulaire parfaite'
+        description: 'Cercle parfait'
       },
       {
         id: 'triangle',
         icon: Triangle,
         label: 'Triangle',
-        description: 'Triangle équilatéral'
+        description: 'Triangle'
       },
-      {
-        id: 'sticky',
-        icon: Square,
-        label: 'Post-it',
-        description: 'Note adhésive'
-      },
-    ]
-  },
-  {
-    name: "Formes géométriques",
-    shapes: [
       {
         id: 'diamond',
         icon: Diamond,
         label: 'Losange',
-        description: 'Forme en losange'
+        description: 'Losange'
       },
       {
         id: 'hexagon',
         icon: Hexagon,
         label: 'Hexagone',
-        description: 'Forme à six côtés'
+        description: 'Hexagone'
       },
       {
         id: 'pentagon',
         icon: Pentagon,
         label: 'Pentagone',
-        description: 'Forme à cinq côtés'
+        description: 'Pentagone'
       },
-      {
-        id: 'octagon' as CanvasElement['type'],
-        icon: Octagon,
-        label: 'Octogone',
-        description: 'Forme à huit côtés'
-      },
-    ]
-  },
-  {
-    name: "Formes décoratives",
-    shapes: [
       {
         id: 'star',
         icon: Star,
         label: 'Étoile',
-        description: 'Étoile à cinq branches'
+        description: 'Étoile'
       },
       {
         id: 'heart',
         icon: Heart,
         label: 'Cœur',
-        description: 'Forme de cœur'
-      },
-      {
-        id: 'cloud' as CanvasElement['type'],
-        icon: CloudRain,
-        label: 'Nuage',
-        description: 'Forme de nuage'
-      },
-      {
-        id: 'sun' as CanvasElement['type'],
-        icon: Sun,
-        label: 'Soleil',
-        description: 'Forme de soleil'
-      },
-      {
-        id: 'moon' as CanvasElement['type'],
-        icon: Moon,
-        label: 'Lune',
-        description: 'Forme de lune'
-      },
-      {
-        id: 'lightning' as CanvasElement['type'],
-        icon: Zap,
-        label: 'Éclair',
-        description: 'Forme d\'éclair'
+        description: 'Cœur'
       },
     ]
   }
@@ -128,11 +82,12 @@ export const ShapeLibrary = ({ isVisible, onClose, onAddShape }: ShapeLibraryPro
 
   const handleShapeClick = (shapeId: CanvasElement['type']) => {
     onAddShape(shapeId);
+    onClose();
   };
 
   return (
     <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center animate-fade-in">
-      <div className="bg-card backdrop-blur-sm border border-border rounded-xl shadow-float max-w-4xl w-full max-h-[80vh] overflow-hidden animate-scale-in">
+      <div className="bg-card backdrop-blur-sm border border-border rounded-xl shadow-float max-w-2xl w-full max-h-[80vh] overflow-hidden animate-scale-in">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-border">
           <div className="flex items-center gap-3">
@@ -140,9 +95,9 @@ export const ShapeLibrary = ({ isVisible, onClose, onAddShape }: ShapeLibraryPro
               <Shapes className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h2 className="text-xl font-semibold">Bibliothèque de formes</h2>
+              <h2 className="text-xl font-semibold">Formes</h2>
               <p className="text-sm text-muted-foreground">
-                Sélectionnez une forme pour l'ajouter au tableau
+                Cliquez pour ajouter une forme
               </p>
             </div>
           </div>
@@ -158,54 +113,24 @@ export const ShapeLibrary = ({ isVisible, onClose, onAddShape }: ShapeLibraryPro
 
         {/* Content */}
         <ScrollArea className="h-[calc(80vh-120px)]">
-          <div className="p-6 space-y-8">
-            {shapeCategories.map((category) => (
-              <div key={category.name}>
-                <div className="flex items-center gap-2 mb-4">
-                  <h3 className="text-lg font-semibold">{category.name}</h3>
-                  <Badge variant="secondary">{category.shapes.length}</Badge>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {category.shapes.map((shape) => {
-                    const Icon = shape.icon;
-                    return (
-                      <Card
-                        key={shape.id}
-                        className="cursor-pointer hover:shadow-lg hover:border-primary/50 transition-all group"
-                        onClick={() => handleShapeClick(shape.id)}
-                      >
-                        <CardHeader className="pb-3">
-                          <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                              <Icon size={24} className="text-primary" />
-                            </div>
-                            <div>
-                              <CardTitle className="text-base">{shape.label}</CardTitle>
-                              <CardDescription className="text-xs">
-                                {shape.description}
-                              </CardDescription>
-                            </div>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <Button
-                            size="sm"
-                            className="w-full"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleShapeClick(shape.id);
-                            }}
-                          >
-                            Ajouter au tableau
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
+          <div className="p-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {shapeCategories[0].shapes.map((shape) => {
+                const Icon = shape.icon;
+                return (
+                  <button
+                    key={shape.id}
+                    className="flex flex-col items-center gap-2 p-4 rounded-lg border border-border hover:border-primary hover:bg-primary/5 transition-all group"
+                    onClick={() => handleShapeClick(shape.id)}
+                  >
+                    <div className="w-12 h-12 flex items-center justify-center">
+                      <Icon size={32} className="text-foreground group-hover:text-primary transition-colors" />
+                    </div>
+                    <span className="text-sm font-medium">{shape.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </ScrollArea>
       </div>

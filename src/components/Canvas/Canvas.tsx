@@ -188,6 +188,8 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     setBoardTitle('Tableau sans titre');
     resetHistory([]);
     templateAppliedRef.current = false;
+    setPendingElement(null);
+    setSelectedTool('select');
   }, [boardId, clearSelection, resetHistory]);
 
   const handleAddElement = useCallback((type: CanvasElement['type']) => {
@@ -250,8 +252,6 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       addToHistory(newElements);
       return newElements;
     });
-    
-    setPendingElement(null);
   }, [selectedColor, addToHistory]);
 
   const handleElementUpdate = useCallback((id: string, updates: Partial<CanvasElement>) => {

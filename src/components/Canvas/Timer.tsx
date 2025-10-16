@@ -1,12 +1,20 @@
-import { useState, useEffect } from "react";
-import { Play, Pause, RotateCcw, Timer as TimerIcon, Plus, Minus } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Play, Pause, RotateCcw, Timer as TimerIcon, Plus, Minus, Music, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface TimerProps {
   isVisible: boolean;
   onToggle: () => void;
 }
+
+const musicTracks = [
+  { id: 1, name: "Lofi Study Beats", url: "https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3" },
+  { id: 2, name: "Ambient Focus", url: "https://assets.mixkit.co/music/preview/mixkit-sleepy-cat-135.mp3" },
+  { id: 3, name: "Peaceful Piano", url: "https://assets.mixkit.co/music/preview/mixkit-dreaming-big-31.mp3" },
+  { id: 4, name: "Nature Sounds", url: "https://assets.mixkit.co/music/preview/mixkit-forest-treasure-138.mp3" },
+];
 
 export const Timer = ({ isVisible, onToggle }: TimerProps) => {
   const [time, setTime] = useState(300); // 5 minutes par défaut
@@ -14,6 +22,9 @@ export const Timer = ({ isVisible, onToggle }: TimerProps) => {
   const [isRunning, setIsRunning] = useState(false);
   const [isCountdown, setIsCountdown] = useState(true);
   const [customMinutes, setCustomMinutes] = useState(5);
+  const [selectedTrack, setSelectedTrack] = useState<number | null>(null);
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -24,7 +35,10 @@ export const Timer = ({ isVisible, onToggle }: TimerProps) => {
           if (isCountdown) {
             if (prev <= 1) {
               setIsRunning(false);
-              // Play notification sound when countdown ends
+              setIsMusicPlaying(false);
+              if (audioRef.current) {
+                audioRef.current.pause();
+              }
               playNotificationSound();
               return 0;
             }
@@ -38,6 +52,29 @@ export const Timer = ({ isVisible, onToggle }: TimerProps) => {
     
     return () => clearInterval(interval);
   }, [isRunning, isCountdown]);
+
+  useEffect(() => {
+    if (selectedTrack !== null && isMusicPlaying) {
+      const track = musicTracks.find(t => t.id === selectedTrack);
+      if (track) {
+        if (audioRef.current) {
+          audioRef.current.pause();
+        }
+        audioRef.current = new Audio(track.url);
+        audioRef.current.loop = true;
+        audioRef.current.volume = 0.3;
+        audioRef.current.play();
+      }
+    } else if (audioRef.current) {
+      audioRef.current.pause();
+    }
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+    };
+  }, [selectedTrack, isMusicPlaying]);
 
   const playNotificationSound = () => {
     // Create a simple beep sound using Web Audio API
@@ -75,10 +112,23 @@ export const Timer = ({ isVisible, onToggle }: TimerProps) => {
 
   const resetTimer = () => {
     setIsRunning(false);
+    setIsMusicPlaying(false);
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
     if (isCountdown) {
       setTime(initialTime);
     } else {
       setTime(0);
+    }
+  };
+
+  const toggleMusic = (trackId: number) => {
+    if (selectedTrack === trackId && isMusicPlaying) {
+      setIsMusicPlaying(false);
+    } else {
+      setSelectedTrack(trackId);
+      setIsMusicPlaying(true);
     }
   };
 
@@ -105,7 +155,7 @@ export const Timer = ({ isVisible, onToggle }: TimerProps) => {
 
   return (
     <div className="absolute top-20 right-6 z-40 animate-float-in">
-      <div className="floating-element bg-card/95 backdrop-blur-sm rounded-xl border border-border p-4">
+      <div className="floating-element bg-card/95 backdrop-blur-sm rounded-xl border border-border p-4 w-80">
         <div className="flex items-center gap-3 mb-4">
           <TimerIcon size={20} className="text-primary" />
           <h3 className="font-semibold text-foreground">
@@ -199,7 +249,7 @@ export const Timer = ({ isVisible, onToggle }: TimerProps) => {
           </div>
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex gap-2 mb-4">
           <Button
             variant={isRunning ? "destructive" : "default"}
             size="sm"
@@ -220,6 +270,41 @@ export const Timer = ({ isVisible, onToggle }: TimerProps) => {
             Reset
           </Button>
         </div>
+
+        {/* Music List - Only show during countdown */}
+        {isCountdown && (
+          <div className="border-t border-border pt-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Music size={16} className="text-primary" />
+              <h4 className="text-sm font-semibold">Musique d'ambiance</h4>
+            </div>
+            <ScrollArea className="h-40">
+              <div className="space-y-2">
+                {musicTracks.map((track) => {
+                  const isActive = selectedTrack === track.id && isMusicPlaying;
+                  return (
+                    <button
+                      key={track.id}
+                      onClick={() => toggleMusic(track.id)}
+                      className={`w-full flex items-center justify-between p-2 rounded-lg transition-colors ${
+                        isActive 
+                          ? 'bg-primary/10 border border-primary/30' 
+                          : 'bg-muted/50 hover:bg-muted border border-transparent'
+                      }`}
+                    >
+                      <span className="text-sm text-foreground">{track.name}</span>
+                      {isActive ? (
+                        <Volume2 size={16} className="text-primary" />
+                      ) : (
+                        <VolumeX size={16} className="text-muted-foreground" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </ScrollArea>
+          </div>
+        )}
       </div>
     </div>
   );
