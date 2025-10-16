@@ -104,7 +104,7 @@ export const MiniMap = ({ elements, canvasTransform, onNavigate, onZoomChange }:
   return (
     <div 
       ref={containerRef}
-      className="absolute bottom-6 right-6 z-50 bg-card/95 backdrop-blur-sm rounded-lg border border-border p-3 shadow-float space-y-3"
+      className="absolute bottom-6 right-6 z-10 bg-card/95 backdrop-blur-sm rounded-lg border border-border p-3 shadow-float space-y-3"
     >
       {/* Zoom Controls */}
       <div className="space-y-2">

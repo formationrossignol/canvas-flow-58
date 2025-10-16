@@ -113,7 +113,7 @@ export const useCanvasInteraction = (containerRef: React.RefObject<HTMLDivElemen
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
     
-    // Calculate zoom center
+    // Calculate zoom center - keep the point under the mouse fixed
     const scaleChange = newScale / canvasTransform.scale;
     const newX = mouseX - (mouseX - canvasTransform.x) * scaleChange;
     const newY = mouseY - (mouseY - canvasTransform.y) * scaleChange;

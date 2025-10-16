@@ -674,7 +674,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       {/* Canvas Container */}
       <div
         ref={containerRef}
-        className={`absolute inset-0 pt-16 ${cursor}`}
+        className={`absolute inset-0 pt-16 overflow-hidden ${cursor}`}
         onMouseDown={handleCanvasMouseDown}
         onMouseMove={handleCanvasMouseMove}
         onMouseUp={handleCanvasMouseUp}
@@ -685,14 +685,17 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         <CollaboratorCursors cursors={remoteCursors} />
         {/* Canvas Content */}
         <div
-          className="absolute inset-0 bg-canvas"
+          className="absolute bg-canvas"
           style={{
             transform: `translate(${canvasTransform.x}px, ${canvasTransform.y}px) scale(${canvasTransform.scale})`,
-            width: '20000px',
-            height: '20000px',
+            transformOrigin: '0 0',
+            width: '100%',
+            height: '100%',
+            minWidth: '200vw',
+            minHeight: '200vh',
           }}
         >
-          {/* Grid Background with primary color */}
+          {/* Grid Background with primary color - fixed scale */}
           <div 
             className="absolute"
             style={{
@@ -701,8 +704,8 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
               width: '60000px',
               height: '60000px',
               backgroundImage: 'linear-gradient(rgba(99, 102, 241, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(99, 102, 241, 0.1) 1px, transparent 1px)',
-              backgroundSize: '32px 32px',
-              backgroundPosition: `${canvasTransform.x % 32}px ${canvasTransform.y % 32}px`,
+              backgroundSize: `${32 / canvasTransform.scale}px ${32 / canvasTransform.scale}px`,
+              backgroundPosition: `${canvasTransform.x}px ${canvasTransform.y}px`,
             }}
           />
 
