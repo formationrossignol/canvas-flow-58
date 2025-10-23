@@ -26,6 +26,7 @@ import { useBoardPersistence, type StoredBoardSnapshot } from "@/hooks/useBoardP
 import { useLocalCollaborator } from "@/hooks/useLocalCollaborator";
 import { useBoardPresence } from "@/hooks/useBoardPresence";
 import { CollaboratorCursors } from "./CollaboratorCursors";
+import { CollaboratorsList } from "./CollaboratorsList";
 
 export interface Comment {
   id: string;
@@ -683,6 +684,10 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         style={{ cursor: cursor === 'canvas-cursor-grab' ? 'grab' : cursor === 'canvas-cursor-grabbing' ? 'grabbing' : cursor }}
       >
         <CollaboratorCursors cursors={remoteCursors} />
+        <CollaboratorsList 
+          participants={remoteParticipants} 
+          currentUserName={localCollaborator.name}
+        />
         {/* Canvas Content */}
         <div
           className="absolute bg-canvas"
