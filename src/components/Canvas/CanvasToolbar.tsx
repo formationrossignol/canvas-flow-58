@@ -2,6 +2,7 @@ import { Type, StickyNote, MousePointer2, Palette, Image, Edit3, Timer, Link2, E
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { CanvasElement } from "./Canvas";
+import { useState } from "react";
 
 interface CanvasToolbarProps {
   selectedTool: string;
@@ -74,6 +75,8 @@ export const CanvasToolbar = ({
   onUndo,
   onRedo,
 }: CanvasToolbarProps) => {
+  const [showColors, setShowColors] = useState(false);
+  
   const handleToolClick = (toolId: string) => {
     if (toolId === 'connect') {
       onToggleConnecting();
@@ -151,21 +154,32 @@ export const CanvasToolbar = ({
 
           {/* Color Picker */}
           <div className="flex items-center gap-2">
-            <Palette size={16} className="text-muted-foreground" />
-            <div className="flex gap-1">
-              {colors.map((color) => (
-                <button
-                  key={color}
-                  className={`
-                    w-8 h-8 rounded-md border-2 transition-all duration-200 tool-button
-                    ${selectedColor === color ? 'border-foreground scale-110 shadow-md' : 'border-border hover:border-muted-foreground'}
-                  `}
-                  style={{ backgroundColor: color }}
-                  onClick={() => onColorSelect(color)}
-                  title={color}
-                />
-              ))}
-            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowColors(!showColors)}
+              className="w-10 h-10 p-0 tool-button hover:bg-tool-hover relative group"
+              title="Palette de couleurs"
+            >
+              <Palette size={18} className={showColors ? "text-primary" : "text-muted-foreground"} />
+            </Button>
+            
+            {showColors && (
+              <div className="flex gap-1 animate-in fade-in slide-in-from-left-2 duration-200">
+                {colors.map((color) => (
+                  <button
+                    key={color}
+                    className={`
+                      w-8 h-8 rounded-md border-2 transition-all duration-200 tool-button
+                      ${selectedColor === color ? 'border-foreground scale-110 shadow-md' : 'border-border hover:border-muted-foreground'}
+                    `}
+                    style={{ backgroundColor: color }}
+                    onClick={() => onColorSelect(color)}
+                    title={color}
+                  />
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Brush Thickness for Pen Tool */}
