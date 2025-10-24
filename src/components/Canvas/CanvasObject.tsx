@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback } from "react";
-import { Trash2, Edit3, Lock, Unlock, Heart, MessageCircle } from "lucide-react";
+import { Trash2, Edit3, Lock, Unlock, Heart, MessageCircle, Tag, User } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { CanvasElement, Comment } from "./Canvas";
 import { CommentThread } from "./CommentThread";
 
@@ -359,15 +360,38 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected 
     }
 
     return (
-      <div 
-        className="w-full h-full p-3 flex items-center justify-center text-center leading-relaxed select-none"
-        style={{ 
-          color: element.type === 'sticky' ? '#2D3748' : element.color,
-          fontSize: element.fontSize || 14,
-          ...element.textStyle,
-        }}
-      >
-        {element.content || (element.type === 'sticky' ? 'Double-clic pour éditer' : '')}
+      <div className="w-full h-full p-3 flex flex-col gap-2">
+        {/* Tags and Author for sticky notes */}
+        {element.type === 'sticky' && (element.tags?.length || element.author) && (
+          <div className="flex flex-col gap-1 mb-1">
+            {element.author && (
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <User size={10} />
+                <span className="font-medium">{element.author}</span>
+              </div>
+            )}
+            {element.tags && element.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {element.tags.map((tag) => (
+                  <Badge key={tag} variant="outline" className="text-xs px-1 py-0 h-4">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+        
+        <div 
+          className="flex-1 flex items-center justify-center text-center leading-relaxed select-none"
+          style={{ 
+            color: element.type === 'sticky' ? '#2D3748' : element.color,
+            fontSize: element.fontSize || 14,
+            ...element.textStyle,
+          }}
+        >
+          {element.content || (element.type === 'sticky' ? 'Double-clic pour éditer' : '')}
+        </div>
       </div>
     );
   };

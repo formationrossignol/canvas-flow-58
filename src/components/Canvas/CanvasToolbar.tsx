@@ -94,7 +94,7 @@ export const CanvasToolbar = ({
   };
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-20 animate-float-in">
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-10 animate-float-in">
       <div className="floating-element bg-card backdrop-blur-sm rounded-xl border border-border shadow-float p-3">
         <div className="flex items-center gap-3">
           {/* Tools */}
@@ -152,21 +152,13 @@ export const CanvasToolbar = ({
           {/* Color Picker */}
           <div className="flex items-center gap-2">
             <Palette size={16} className="text-muted-foreground" />
-            <input
-              type="color"
-              value={selectedColor}
-              onChange={(e) => onColorSelect(e.target.value)}
-              className="w-10 h-10 rounded-lg cursor-pointer border-2 border-border hover:border-muted-foreground transition-colors"
-              title="Sélecteur de couleur"
-            />
-            
             <div className="flex gap-1">
               {colors.map((color) => (
                 <button
                   key={color}
                   className={`
-                    w-6 h-6 rounded-md border-2 transition-all duration-200 tool-button
-                    ${selectedColor === color ? 'border-foreground scale-110' : 'border-border hover:border-muted-foreground'}
+                    w-8 h-8 rounded-md border-2 transition-all duration-200 tool-button
+                    ${selectedColor === color ? 'border-foreground scale-110 shadow-md' : 'border-border hover:border-muted-foreground'}
                   `}
                   style={{ backgroundColor: color }}
                   onClick={() => onColorSelect(color)}

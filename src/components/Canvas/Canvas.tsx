@@ -55,6 +55,8 @@ export interface CanvasElement {
   textStyle?: React.CSSProperties;
   likedBy?: string[];
   comments?: Comment[];
+  tags?: string[];
+  author?: string;
 }
 
 interface CanvasProps {

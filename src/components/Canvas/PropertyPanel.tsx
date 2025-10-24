@@ -1,7 +1,9 @@
 import React, { useState } from "react";
-import { Palette, Eye, EyeOff, Lock, Unlock, Copy, Trash2 } from "lucide-react";
+import { Palette, Eye, EyeOff, Lock, Unlock, Copy, Trash2, Tag, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { CanvasElement } from "./Canvas";
 
 interface PropertyPanelProps {
@@ -29,6 +31,8 @@ export const PropertyPanel = ({
   onToggle,
 }: PropertyPanelProps) => {
   const [panelTab, setPanelTab] = useState<'style' | 'arrange'>('style');
+  const [newTag, setNewTag] = useState('');
+  const [authorName, setAuthorName] = useState('');
   
   const hasSelection = selectedElements.length > 0;
   const firstElement = selectedElements[0];
@@ -64,6 +68,30 @@ export const PropertyPanel = ({
     selectedElements.forEach(element => {
       onDuplicate(element.id);
     });
+  };
+
+  const handleAddTag = () => {
+    if (newTag.trim() && firstElement) {
+      const currentTags = firstElement.tags || [];
+      if (!currentTags.includes(newTag.trim())) {
+        onUpdate(firstElement.id, { tags: [...currentTags, newTag.trim()] });
+      }
+      setNewTag('');
+    }
+  };
+
+  const handleRemoveTag = (tag: string) => {
+    if (firstElement) {
+      const currentTags = firstElement.tags || [];
+      onUpdate(firstElement.id, { tags: currentTags.filter(t => t !== tag) });
+    }
+  };
+
+  const handleUpdateAuthor = () => {
+    if (firstElement) {
+      onUpdate(firstElement.id, { author: authorName.trim() });
+      setAuthorName('');
+    }
   };
 
   if (!isVisible) {
@@ -136,6 +164,77 @@ export const PropertyPanel = ({
                   ))}
                 </div>
               </div>
+
+              {/* Tags - Only for sticky notes */}
+              {firstElement?.type === 'sticky' && (
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-2 flex items-center gap-2">
+                    <Tag size={14} />
+                    Tags
+                  </label>
+                  <div className="flex gap-2 mb-2">
+                    <Input
+                      value={newTag}
+                      onChange={(e) => setNewTag(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleAddTag()}
+                      placeholder="Nouveau tag..."
+                      className="h-8 text-xs flex-1"
+                    />
+                    <Button onClick={handleAddTag} size="sm" className="h-8">
+                      Ajouter
+                    </Button>
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {(firstElement.tags || []).map((tag) => (
+                      <Badge key={tag} variant="secondary" className="gap-1">
+                        {tag}
+                        <button
+                          onClick={() => handleRemoveTag(tag)}
+                          className="hover:text-destructive"
+                        >
+                          <X size={12} />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Author - Only for sticky notes */}
+              {firstElement?.type === 'sticky' && (
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-2 flex items-center gap-2">
+                    <User size={14} />
+                    Auteur
+                  </label>
+                  {firstElement.author ? (
+                    <div className="flex items-center justify-between p-2 bg-muted rounded-md">
+                      <span className="text-sm">{firstElement.author}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onUpdate(firstElement.id, { author: undefined })}
+                        className="h-6"
+                      >
+                        <X size={12} />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <Input
+                        value={authorName}
+                        onChange={(e) => setAuthorName(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleUpdateAuthor()}
+                        placeholder="Nom de l'auteur..."
+                        className="h-8 text-xs flex-1"
+                      />
+                      <Button onClick={handleUpdateAuthor} size="sm" className="h-8">
+                        Définir
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Font Size for text elements */}
               {(firstElement?.type === 'text' || firstElement?.type === 'sticky') && (
