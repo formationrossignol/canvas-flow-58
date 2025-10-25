@@ -46,6 +46,8 @@ export interface CanvasElement {
   color: string;
   content?: string;
   fontSize?: number;
+  fontFamily?: string;
+  textAlign?: 'left' | 'center' | 'right';
   borderRadius?: number;
   opacity?: number;
   rotation?: number;

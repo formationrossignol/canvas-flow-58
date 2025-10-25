@@ -71,7 +71,7 @@ export function AppSidebar() {
     <>
       <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
       
-      <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+      <Sidebar collapsible="icon" className="border-r border-sidebar-border z-50">
         <SidebarContent>
           {/* Header */}
           <div className="flex h-14 items-center border-b border-sidebar-border px-6">

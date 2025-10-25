@@ -352,6 +352,8 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected 
           style={{ 
             color: element.type === 'sticky' ? '#2D3748' : element.color,
             fontSize: element.fontSize || 14,
+            fontFamily: element.fontFamily || 'Arial',
+            textAlign: element.textAlign || 'left',
           }}
           autoFocus
           placeholder="Tapez votre contenu..."
@@ -383,10 +385,12 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected 
         )}
         
         <div 
-          className="flex-1 flex items-center justify-center text-center leading-relaxed select-none"
+          className="flex-1 flex items-center justify-center leading-relaxed select-none"
           style={{ 
             color: element.type === 'sticky' ? '#2D3748' : element.color,
             fontSize: element.fontSize || 14,
+            fontFamily: element.fontFamily || 'Arial',
+            textAlign: element.textAlign || 'left',
             ...element.textStyle,
           }}
         >

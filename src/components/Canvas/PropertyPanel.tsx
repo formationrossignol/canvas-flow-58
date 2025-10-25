@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { Palette, Eye, EyeOff, Lock, Unlock, Copy, Trash2, Tag, User, X } from "lucide-react";
+import { Palette, Eye, EyeOff, Lock, Unlock, Copy, Trash2, Tag, User, X, AlignLeft, AlignCenter, AlignRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CanvasElement } from "./Canvas";
 
 interface PropertyPanelProps {
@@ -236,6 +237,37 @@ export const PropertyPanel = ({
                 </div>
               )}
 
+              {/* Font Family for text elements */}
+              {(firstElement?.type === 'text' || firstElement?.type === 'sticky') && (
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-2 block">Police</label>
+                  <Select
+                    value={firstElement.fontFamily || 'Arial'}
+                    onValueChange={(value) => {
+                      selectedElements.forEach(element => {
+                        if (element.type === 'text' || element.type === 'sticky') {
+                          onUpdate(element.id, { fontFamily: value });
+                        }
+                      });
+                    }}
+                  >
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Arial">Arial</SelectItem>
+                      <SelectItem value="Times New Roman">Times New Roman</SelectItem>
+                      <SelectItem value="Courier New">Courier New</SelectItem>
+                      <SelectItem value="Georgia">Georgia</SelectItem>
+                      <SelectItem value="Verdana">Verdana</SelectItem>
+                      <SelectItem value="Comic Sans MS">Comic Sans MS</SelectItem>
+                      <SelectItem value="Impact">Impact</SelectItem>
+                      <SelectItem value="Trebuchet MS">Trebuchet MS</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
               {/* Font Size for text elements */}
               {(firstElement?.type === 'text' || firstElement?.type === 'sticky') && (
                 <div>
@@ -250,6 +282,57 @@ export const PropertyPanel = ({
                     step={1}
                     className="w-full"
                   />
+                </div>
+              )}
+
+              {/* Text Alignment for text elements */}
+              {(firstElement?.type === 'text' || firstElement?.type === 'sticky') && (
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-2 block">Alignement</label>
+                  <div className="flex gap-2">
+                    <Button
+                      variant={firstElement.textAlign === 'left' || !firstElement.textAlign ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => {
+                        selectedElements.forEach(element => {
+                          if (element.type === 'text' || element.type === 'sticky') {
+                            onUpdate(element.id, { textAlign: 'left' });
+                          }
+                        });
+                      }}
+                      className="flex-1"
+                    >
+                      <AlignLeft size={16} />
+                    </Button>
+                    <Button
+                      variant={firstElement.textAlign === 'center' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => {
+                        selectedElements.forEach(element => {
+                          if (element.type === 'text' || element.type === 'sticky') {
+                            onUpdate(element.id, { textAlign: 'center' });
+                          }
+                        });
+                      }}
+                      className="flex-1"
+                    >
+                      <AlignCenter size={16} />
+                    </Button>
+                    <Button
+                      variant={firstElement.textAlign === 'right' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => {
+                        selectedElements.forEach(element => {
+                          if (element.type === 'text' || element.type === 'sticky') {
+                            onUpdate(element.id, { textAlign: 'right' });
+                          }
+                        });
+                      }}
+                      className="flex-1"
+                    >
+                      <AlignRight size={16} />
+                    </Button>
+                  </div>
                 </div>
               )}
 
