@@ -27,6 +27,7 @@ import { useLocalCollaborator } from "@/hooks/useLocalCollaborator";
 import { useBoardPresence } from "@/hooks/useBoardPresence";
 import { CollaboratorCursors } from "./CollaboratorCursors";
 import { CollaboratorsList } from "./CollaboratorsList";
+import { PropertyPanel } from "./PropertyPanel";
 
 export interface Comment {
   id: string;
@@ -89,6 +90,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   const [isTimerVisible, setIsTimerVisible] = useState(false);
   const [isTextEditorVisible, setIsTextEditorVisible] = useState(false);
   const [textStyle, setTextStyle] = useState({});
+  const [isPropertyPanelVisible, setIsPropertyPanelVisible] = useState(true);
   
   const {
     canvasTransform,
@@ -871,6 +873,22 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
           position={editingElement.position}
         />
       )}
+
+      {/* Property Panel */}
+      <PropertyPanel
+        selectedElements={elements.filter(el => selection.selectedIds.includes(el.id))}
+        onUpdate={handleElementUpdate}
+        onDelete={handleElementDelete}
+        onDuplicate={handleElementDuplicate}
+        isVisible={isPropertyPanelVisible && selection.selectedIds.length > 0}
+        onToggle={() => setIsPropertyPanelVisible(!isPropertyPanelVisible)}
+        elementPosition={
+          selection.selectedIds.length > 0 
+            ? elements.find(el => el.id === selection.selectedIds[0])
+            : undefined
+        }
+        canvasTransform={canvasTransform}
+      />
 
     </div>
   );

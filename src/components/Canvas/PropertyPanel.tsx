@@ -14,6 +14,8 @@ interface PropertyPanelProps {
   onDuplicate: (id: string) => void;
   isVisible: boolean;
   onToggle: () => void;
+  elementPosition?: { x: number; y: number; width: number; height: number };
+  canvasTransform: { x: number; y: number; scale: number };
 }
 
 const colorOptions = [
@@ -30,6 +32,8 @@ export const PropertyPanel = ({
   onDuplicate,
   isVisible,
   onToggle,
+  elementPosition,
+  canvasTransform,
 }: PropertyPanelProps) => {
   const [panelTab, setPanelTab] = useState<'style' | 'arrange'>('style');
   const [newTag, setNewTag] = useState('');
@@ -95,20 +99,65 @@ export const PropertyPanel = ({
     }
   };
 
-  if (!isVisible) {
-    return (
-      <button
-        onClick={onToggle}
-        className="absolute top-20 right-6 z-40 w-10 h-10 bg-card/95 backdrop-blur-sm rounded-lg border border-border shadow-float flex items-center justify-center hover:bg-tool-hover transition-colors"
-        title="Ouvrir le panneau des propriétés"
-      >
-        <Eye size={16} />
-      </button>
-    );
+  if (!isVisible || !hasSelection) {
+    return null;
+  }
+
+  // Calculate panel position above the selected element
+  const panelWidth = 320;
+  const panelHeight = 500; // approximate max height
+  const padding = 16;
+  
+  let panelX = 0;
+  let panelY = 0;
+  
+  if (elementPosition) {
+    // Convert element position to screen coordinates
+    const screenX = elementPosition.x * canvasTransform.scale + canvasTransform.x;
+    const screenY = elementPosition.y * canvasTransform.scale + canvasTransform.y;
+    const screenWidth = elementPosition.width * canvasTransform.scale;
+    const screenHeight = elementPosition.height * canvasTransform.scale;
+    
+    // Position panel above the element, centered horizontally
+    panelX = screenX + (screenWidth / 2) - (panelWidth / 2);
+    panelY = screenY - panelHeight - padding;
+    
+    // Keep panel within viewport bounds
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    if (panelX < padding) panelX = padding;
+    if (panelX + panelWidth > viewportWidth - padding) {
+      panelX = viewportWidth - panelWidth - padding;
+    }
+    
+    // If panel would be above viewport, position it below the element
+    if (panelY < padding) {
+      panelY = screenY + screenHeight + padding;
+    }
+    
+    // If still doesn't fit, position on the side
+    if (panelY + panelHeight > viewportHeight - padding) {
+      panelY = screenY;
+      panelX = screenX + screenWidth + padding;
+      
+      // If doesn't fit on right, try left
+      if (panelX + panelWidth > viewportWidth - padding) {
+        panelX = screenX - panelWidth - padding;
+      }
+    }
   }
 
   return (
-    <div className="absolute top-20 right-6 z-40 w-80 bg-card/95 backdrop-blur-sm rounded-xl border border-border shadow-float animate-float-in">
+    <div 
+      className="fixed z-[60] w-80 bg-card/95 backdrop-blur-sm rounded-xl border border-border shadow-float animate-float-in"
+      style={{
+        left: `${panelX}px`,
+        top: `${panelY}px`,
+        maxHeight: '80vh',
+        overflowY: 'auto'
+      }}
+    >
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-border">
         <h3 className="font-semibold text-foreground">
