@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from "react";
-import { Trash2, Edit3, Lock, Unlock, Heart, MessageCircle, Tag, User } from "lucide-react";
+import { Trash2, Edit3, Lock, Unlock, Heart, MessageCircle, Tag, User, Settings } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { CanvasElement, Comment } from "./Canvas";
 import { CommentThread } from "./CommentThread";
@@ -10,9 +10,10 @@ interface CanvasObjectProps {
   onDelete: (id: string) => void;
   onClick: (id: string, e: React.MouseEvent) => void;
   isSelected: boolean;
+  onOpenProperties?: (id: string) => void;
 }
 
-export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected }: CanvasObjectProps) => {
+export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected, onOpenProperties }: CanvasObjectProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(element.content || '');
@@ -462,6 +463,19 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected 
           </button>
           {!element.locked && (
             <>
+              {/* Properties button - Only for sticky notes */}
+              {element.type === 'sticky' && onOpenProperties && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenProperties(element.id);
+                  }}
+                  className="w-6 h-6 bg-accent text-accent-foreground rounded-full flex items-center justify-center shadow-soft hover:scale-110 transition-transform"
+                  title="Propriétés"
+                >
+                  <Settings size={12} />
+                </button>
+              )}
               {element.type !== 'comment' && (
                 <button
                   onClick={(e) => {

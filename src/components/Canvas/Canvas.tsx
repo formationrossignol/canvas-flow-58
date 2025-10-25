@@ -90,7 +90,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   const [isTimerVisible, setIsTimerVisible] = useState(false);
   const [isTextEditorVisible, setIsTextEditorVisible] = useState(false);
   const [textStyle, setTextStyle] = useState({});
-  const [isPropertyPanelVisible, setIsPropertyPanelVisible] = useState(true);
+  const [propertyPanelElementId, setPropertyPanelElementId] = useState<string | null>(null);
   
   const {
     canvasTransform,
@@ -248,6 +248,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       borderRadius: type === 'rectangle' ? 8 : type === 'comment' ? 12 : 0,
       imageUrl: type === 'image' ? (window as any).__pendingImageUrl : undefined,
       comments: type === 'comment' ? [] : undefined,
+      author: type === 'sticky' ? localCollaborator.name : undefined,
     };
     
     if (type === 'image') {
@@ -259,7 +260,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       addToHistory(newElements);
       return newElements;
     });
-  }, [selectedColor, addToHistory]);
+  }, [selectedColor, addToHistory, localCollaborator]);
 
   const handleElementUpdate = useCallback((id: string, updates: Partial<CanvasElement>) => {
     setElements(prev => {
@@ -421,6 +422,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         borderRadius: pendingElement === 'rectangle' ? 8 : pendingElement === 'comment' ? 12 : 0,
         imageUrl: pendingElement === 'image' ? (window as any).__pendingImageUrl : undefined,
         comments: pendingElement === 'comment' ? [] : undefined,
+        author: pendingElement === 'sticky' ? localCollaborator.name : undefined,
       };
       
       if (pendingElement === 'image') {
@@ -450,7 +452,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     } else {
       canvasMouseDown(e);
     }
-  }, [pendingElement, selectedTool, isSpacePressed, canvasTransform, selectedColor, addToHistory, startSelectionBox, clearSelection, canvasMouseDown]);
+  }, [pendingElement, selectedTool, isSpacePressed, canvasTransform, selectedColor, addToHistory, startSelectionBox, clearSelection, canvasMouseDown, localCollaborator]);
 
   const handleCanvasMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     updatePresenceCursor(e.clientX, e.clientY);
@@ -752,6 +754,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
               onDelete={handleElementDelete}
               onClick={handleElementClick}
               isSelected={isSelected(element.id)}
+              onOpenProperties={(id) => setPropertyPanelElementId(id)}
             />
           ))}
 
@@ -876,15 +879,15 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
 
       {/* Property Panel */}
       <PropertyPanel
-        selectedElements={elements.filter(el => selection.selectedIds.includes(el.id))}
+        selectedElements={propertyPanelElementId ? elements.filter(el => el.id === propertyPanelElementId) : []}
         onUpdate={handleElementUpdate}
         onDelete={handleElementDelete}
         onDuplicate={handleElementDuplicate}
-        isVisible={isPropertyPanelVisible && selection.selectedIds.length > 0}
-        onToggle={() => setIsPropertyPanelVisible(!isPropertyPanelVisible)}
+        isVisible={propertyPanelElementId !== null}
+        onClose={() => setPropertyPanelElementId(null)}
         elementPosition={
-          selection.selectedIds.length > 0 
-            ? elements.find(el => el.id === selection.selectedIds[0])
+          propertyPanelElementId 
+            ? elements.find(el => el.id === propertyPanelElementId)
             : undefined
         }
         canvasTransform={canvasTransform}
