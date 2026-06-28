@@ -29,6 +29,7 @@ import { useBoardPresence } from "@/hooks/useBoardPresence";
 import { CollaboratorCursors } from "./CollaboratorCursors";
 import { CollaboratorsList } from "./CollaboratorsList";
 import { ContextualBar } from "./ContextualBar";
+import { ContextMenu } from "./ContextMenu";
 
 export interface Comment {
   id: string;
@@ -102,6 +103,16 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   }>({});
   const pendingImageUrlRef = useRef<string | null>(null);
   const lastCursorUpdateRef = useRef(0);
+
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    targetElement: CanvasElement | null;
+    canvasX: number;
+    canvasY: number;
+  } | null>(null);
+
+  const clipboardRef = useRef<CanvasElement | null>(null);
   
   const {
     canvasTransform,
@@ -572,6 +583,60 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     setCanvasTransform({ x, y, scale });
   }, [elements, setCanvasTransform]);
 
+  const handleCanvasContextMenu = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const canvasX = (e.clientX - rect.left - canvasTransform.x) / canvasTransform.scale;
+    const canvasY = (e.clientY - rect.top - canvasTransform.y) / canvasTransform.scale;
+    setContextMenu({ x: e.clientX, y: e.clientY, targetElement: null, canvasX, canvasY });
+  }, [canvasTransform]);
+
+  const handleElementContextMenu = useCallback((e: React.MouseEvent, element: CanvasElement) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenu({ x: e.clientX, y: e.clientY, targetElement: element, canvasX: 0, canvasY: 0 });
+  }, []);
+
+  const handleCopy = useCallback(() => {
+    if (!contextMenu?.targetElement) return;
+    clipboardRef.current = { ...contextMenu.targetElement };
+  }, [contextMenu]);
+
+  const handleCut = useCallback(() => {
+    if (!contextMenu?.targetElement) return;
+    clipboardRef.current = { ...contextMenu.targetElement };
+    handleElementDelete(contextMenu.targetElement.id);
+  }, [contextMenu, handleElementDelete]);
+
+  const handlePaste = useCallback(() => {
+    const el = clipboardRef.current;
+    if (!el) return;
+    const pasted: CanvasElement = {
+      ...el,
+      id: `${el.type}-${Date.now()}`,
+      x: el.x + 20,
+      y: el.y + 20,
+    };
+    setElements(prev => {
+      const next = [...prev, pasted];
+      addToHistory(next);
+      return next;
+    });
+  }, [addToHistory]);
+
+  const handleBringToFront = useCallback(() => {
+    if (!contextMenu?.targetElement) return;
+    const maxZ = elements.length > 0 ? Math.max(...elements.map(el => el.zIndex ?? 0)) : 0;
+    handleElementUpdate(contextMenu.targetElement.id, { zIndex: maxZ + 1 });
+  }, [contextMenu, elements, handleElementUpdate]);
+
+  const handleSendToBack = useCallback(() => {
+    if (!contextMenu?.targetElement) return;
+    const minZ = elements.length > 0 ? Math.min(...elements.map(el => el.zIndex ?? 0)) : 0;
+    handleElementUpdate(contextMenu.targetElement.id, { zIndex: minZ - 1 });
+  }, [contextMenu, elements, handleElementUpdate]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
@@ -748,6 +813,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         onMouseUp={handleCanvasMouseUp}
         onMouseLeave={handleCanvasMouseLeave}
         onWheel={handleWheel}
+        onContextMenu={handleCanvasContextMenu}
         style={{ cursor: cursor === 'canvas-cursor-grab' ? 'grab' : cursor === 'canvas-cursor-grabbing' ? 'grabbing' : cursor }}
       >
         <CollaboratorCursors cursors={remoteCursors} />
@@ -818,6 +884,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
               canvasScale={canvasTransform.scale}
               onMoveSelected={handleMoveSelected}
               onDragEnd={handleDragEnd}
+              onContextMenu={handleElementContextMenu}
             />
           ))}
 
@@ -940,6 +1007,31 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         onDelete={handleElementDelete}
         onDuplicate={handleElementDuplicate}
       />
+
+      {/* Context Menu */}
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          targetElement={contextMenu.targetElement}
+          isLocked={contextMenu.targetElement?.locked}
+          canvasX={contextMenu.canvasX}
+          canvasY={contextMenu.canvasY}
+          onClose={() => setContextMenu(null)}
+          onPaste={handlePaste}
+          onFitToScreen={handleFitToScreen}
+          onAddSticky={(x, y) => createElementAtPosition('sticky', x, y)}
+          onAddText={(x, y) => createElementAtPosition('text', x, y)}
+          onAddShape={() => setIsShapeLibraryVisible(true)}
+          onCopy={handleCopy}
+          onCut={handleCut}
+          onDuplicate={() => contextMenu.targetElement && handleElementDuplicate(contextMenu.targetElement.id)}
+          onDelete={() => contextMenu.targetElement && handleElementDelete(contextMenu.targetElement.id)}
+          onToggleLock={() => contextMenu.targetElement && handleElementUpdate(contextMenu.targetElement.id, { locked: !contextMenu.targetElement.locked })}
+          onBringToFront={handleBringToFront}
+          onSendToBack={handleSendToBack}
+        />
+      )}
 
     </div>
   );

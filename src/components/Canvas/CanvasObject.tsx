@@ -15,6 +15,7 @@ interface CanvasObjectProps {
   canvasScale: number;
   onMoveSelected: (dx: number, dy: number) => void;
   onDragEnd: () => void;
+  onContextMenu?: (e: React.MouseEvent, element: CanvasElement) => void;
 }
 
 const DRAG_THRESHOLD = 4;
@@ -30,6 +31,7 @@ export const CanvasObject = ({
   canvasScale,
   onMoveSelected,
   onDragEnd,
+  onContextMenu,
 }: CanvasObjectProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -411,6 +413,7 @@ export const CanvasObject = ({
         style={getElementStyle()}
         onMouseDown={handleMouseDown}
         onDoubleClick={handleDoubleClick}
+        onContextMenu={onContextMenu ? (e) => onContextMenu(e, element) : undefined}
         className="group animate-scale-in"
       >
         {renderContent()}
