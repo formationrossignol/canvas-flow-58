@@ -85,8 +85,8 @@ export const ContextMenu = ({
 
   const menuWidth = 210;
   const menuHeight = targetElement ? 240 : 160;
-  const clampedX = Math.min(x, window.innerWidth - menuWidth - 8);
-  const clampedY = Math.min(y, window.innerHeight - menuHeight - 8);
+  const clampedX = Math.max(8, Math.min(x, window.innerWidth - menuWidth - 8));
+  const clampedY = Math.max(8, Math.min(y, window.innerHeight - menuHeight - 8));
 
   const wrap = (fn: () => void) => () => { fn(); onClose(); };
 
