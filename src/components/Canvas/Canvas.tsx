@@ -729,17 +729,17 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         onOpenExport={() => setIsExportModalVisible(true)}
         onOpenComments={() => setIsCommentsListVisible(true)}
         selectedCount={selection.selectedIds.length}
-        onLockSelected={handleLockSelectedElements}
-        onUnlockSelected={handleUnlockSelectedElements}
-        onDuplicateSelected={handleDuplicateSelectedElements}
-        isSelectionLocked={areAllSelectedLocked}
-        boardId={boardId ?? 'local'}
+        onDuplicateSelected={
+          selection.selectedIds.length > 0
+            ? () => selection.selectedIds.forEach(id => handleElementDuplicate(id))
+            : undefined
+        }
+        boardId={boardId}
         lastSavedAt={lastSavedAt}
         isSaving={isSaving}
-        elementCount={elements.length}
-        commentCount={totalComments}
         onSaveNow={handleForceSave}
         onResetBoard={handleResetBoard}
+        onToggleTimer={() => setIsTimerVisible(!isTimerVisible)}
       />
 
       {/* Canvas Container */}
