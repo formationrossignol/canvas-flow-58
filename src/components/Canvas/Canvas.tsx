@@ -2,12 +2,11 @@ import { useRef, useState, useCallback, useEffect, useMemo } from "react";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { toast } from "sonner";
-import { CanvasToolbar } from "./CanvasToolbar";
+import { ToolbarLeft } from "./ToolbarLeft";
+import { BottomBar } from "./BottomBar";
 import { CanvasObject } from "./CanvasObject";
 import { CanvasHeader } from "./CanvasHeader";
 import { SelectionBox } from "./SelectionBox";
-import { OptionsMenu } from "./OptionsMenu";
-import { InlineEditor } from "./InlineEditor";
 import { ResizeHandles } from "./ResizeHandles";
 import { TemplatePanel } from "./TemplatePanel";
 import { ShapeLibrary } from "./ShapeLibrary";
@@ -27,7 +26,8 @@ import { useLocalCollaborator } from "@/hooks/useLocalCollaborator";
 import { useBoardPresence } from "@/hooks/useBoardPresence";
 import { CollaboratorCursors } from "./CollaboratorCursors";
 import { CollaboratorsList } from "./CollaboratorsList";
-import { PropertyPanel } from "./PropertyPanel";
+import { ContextualBar } from "./ContextualBar";
+import { ContextMenu } from "./ContextMenu";
 
 export interface Comment {
   id: string;
@@ -79,8 +79,6 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   const { addToHistory, undo, redo, canUndo, canRedo, resetHistory } = useHistory(elements);
   const [selectedColor, setSelectedColor] = useState('#FFE066');
   const [boardTitle, setBoardTitle] = useState('Tableau sans titre');
-  const [isOptionsMenuVisible, setIsOptionsMenuVisible] = useState(false);
-  const [editingElement, setEditingElement] = useState<{element: CanvasElement, position: {x: number, y: number}} | null>(null);
   const [isTemplatePanelVisible, setIsTemplatePanelVisible] = useState(false);
   const [isShapeLibraryVisible, setIsShapeLibraryVisible] = useState(false);
   const [isExportModalVisible, setIsExportModalVisible] = useState(false);
@@ -90,7 +88,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   const [drawingStrokes, setDrawingStrokes] = useState<DrawingStroke[]>([]);
   const [brushThickness, setBrushThickness] = useState(3);
   const [isTimerVisible, setIsTimerVisible] = useState(false);
-  const [isTextEditorVisible, setIsTextEditorVisible] = useState(false);
+  const isTextEditorVisible = selectedTool === 'text';
   const [textStyle, setTextStyle] = useState<{
     fontFamily?: string;
     fontWeight?: string;
@@ -99,9 +97,18 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     textAlign?: 'left' | 'center' | 'right';
     color?: string;
   }>({});
-  const [propertyPanelElementId, setPropertyPanelElementId] = useState<string | null>(null);
   const pendingImageUrlRef = useRef<string | null>(null);
   const lastCursorUpdateRef = useRef(0);
+
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    targetElement: CanvasElement | null;
+    canvasX: number;
+    canvasY: number;
+  } | null>(null);
+
+  const clipboardRef = useRef<CanvasElement | null>(null);
   
   const {
     canvasTransform,
@@ -319,8 +326,6 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       addToHistory(newElements);
       return newElements;
     });
-
-    setPropertyPanelElementId(prev => prev === id ? null : prev);
 
     // Also remove connections related to this element
     setConnections(prev =>
@@ -551,9 +556,101 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     toast.success(`Template "${template.name}" appliqué`);
   }, [templateId, hasSnapshot, elements.length, clearSelection, resetHistory]);
 
+  const handleFitToScreen = useCallback(() => {
+    if (!elements.length) {
+      setCanvasTransform({ x: 0, y: 0, scale: 1 });
+      return;
+    }
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const minX = Math.min(...elements.map(el => el.x));
+    const minY = Math.min(...elements.map(el => el.y));
+    const maxX = Math.max(...elements.map(el => el.x + el.width));
+    const maxY = Math.max(...elements.map(el => el.y + el.height));
+    const contentW = maxX - minX;
+    const contentH = maxY - minY;
+    const scale = Math.min(
+      (rect.width - 128) / contentW,
+      (rect.height - 128) / contentH,
+      1
+    );
+    const x = (rect.width - contentW * scale) / 2 - minX * scale;
+    const y = (rect.height - contentH * scale) / 2 - minY * scale;
+    setCanvasTransform({ x, y, scale });
+  }, [elements, setCanvasTransform]);
+
+  const handleCanvasContextMenu = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const canvasX = (e.clientX - rect.left - canvasTransform.x) / canvasTransform.scale;
+    const canvasY = (e.clientY - rect.top - canvasTransform.y) / canvasTransform.scale;
+    setContextMenu({ x: e.clientX, y: e.clientY, targetElement: null, canvasX, canvasY });
+  }, [canvasTransform]);
+
+  const handleElementContextMenu = useCallback((e: React.MouseEvent, element: CanvasElement) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenu({ x: e.clientX, y: e.clientY, targetElement: element, canvasX: 0, canvasY: 0 });
+  }, []);
+
+  const handleCopy = useCallback(() => {
+    if (!contextMenu?.targetElement) return;
+    clipboardRef.current = { ...contextMenu.targetElement };
+  }, [contextMenu]);
+
+  const handleCut = useCallback(() => {
+    if (!contextMenu?.targetElement) return;
+    clipboardRef.current = { ...contextMenu.targetElement };
+    handleElementDelete(contextMenu.targetElement.id);
+  }, [contextMenu, handleElementDelete]);
+
+  const handlePaste = useCallback(() => {
+    const el = clipboardRef.current;
+    if (!el) return;
+    const pasted: CanvasElement = {
+      ...el,
+      id: `${el.type}-${Date.now()}`,
+      x: el.x + 20,
+      y: el.y + 20,
+    };
+    setElements(prev => {
+      const next = [...prev, pasted];
+      addToHistory(next);
+      return next;
+    });
+  }, [addToHistory]);
+
+  const handleBringToFront = useCallback(() => {
+    if (!contextMenu?.targetElement) return;
+    const maxZ = elements.length > 0 ? Math.max(...elements.map(el => el.zIndex ?? 0)) : 0;
+    handleElementUpdate(contextMenu.targetElement.id, { zIndex: maxZ + 1 });
+  }, [contextMenu, elements, handleElementUpdate]);
+
+  const handleSendToBack = useCallback(() => {
+    if (!contextMenu?.targetElement) return;
+    const minZ = elements.length > 0 ? Math.min(...elements.map(el => el.zIndex ?? 0)) : 0;
+    handleElementUpdate(contextMenu.targetElement.id, { zIndex: minZ - 1 });
+  }, [contextMenu, elements, handleElementUpdate]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      // Tool shortcuts (single-key, no modifier)
+      if (!e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+        switch (e.key.toLowerCase()) {
+          case 'v': setSelectedTool('select'); return;
+          case 'p': setSelectedTool('pen'); return;
+          case 'e': setSelectedTool('eraser'); return;
+          case 's': setSelectedTool('sticky'); handleAddElement('sticky'); return;
+          case 't': setSelectedTool('text'); handleAddElement('text'); return;
+          case 'f': setSelectedTool('shapes'); setIsShapeLibraryVisible(true); return;
+          case 'i': setSelectedTool('image'); handleAddElement('image'); return;
+          case 'c': setSelectedTool('comment'); handleAddElement('comment'); return;
+          case 'l': setSelectedTool('connect'); setIsConnecting(prev => !prev); return;
+        }
+      }
 
       if (e.key === 'Delete' || e.key === 'Backspace') {
         selection.selectedIds.forEach(id => handleElementDelete(id));
@@ -572,6 +669,9 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         e.preventDefault();
         const nextElements = redo();
         if (nextElements) setElements(nextElements);
+      } else if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'H') {
+        e.preventDefault();
+        handleFitToScreen();
       } else if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
         if (selection.selectedIds.length > 0) {
           e.preventDefault();
@@ -599,7 +699,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selection.selectedIds, handleElementDelete, handleElementDuplicate, clearSelection, undo, redo, addToHistory, setCanvasTransform]);
+  }, [selection.selectedIds, handleElementDelete, handleElementDuplicate, clearSelection, undo, redo, addToHistory, setCanvasTransform, handleFitToScreen, handleAddElement]);
 
   const cursor = pendingElement 
     ? 'crosshair' 
@@ -702,28 +802,29 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         onOpenExport={() => setIsExportModalVisible(true)}
         onOpenComments={() => setIsCommentsListVisible(true)}
         selectedCount={selection.selectedIds.length}
-        onLockSelected={handleLockSelectedElements}
-        onUnlockSelected={handleUnlockSelectedElements}
-        onDuplicateSelected={handleDuplicateSelectedElements}
-        isSelectionLocked={areAllSelectedLocked}
-        boardId={boardId ?? 'local'}
+        onDuplicateSelected={
+          selection.selectedIds.length > 0
+            ? () => selection.selectedIds.forEach(id => handleElementDuplicate(id))
+            : undefined
+        }
+        boardId={boardId}
         lastSavedAt={lastSavedAt}
         isSaving={isSaving}
-        elementCount={elements.length}
-        commentCount={totalComments}
         onSaveNow={handleForceSave}
         onResetBoard={handleResetBoard}
+        onToggleTimer={() => setIsTimerVisible(!isTimerVisible)}
       />
 
       {/* Canvas Container */}
       <div
         ref={containerRef}
-        className={`absolute inset-0 pt-16 overflow-hidden ${cursor}`}
+        className={`absolute inset-0 pt-12 overflow-hidden ${cursor}`}
         onMouseDown={handleCanvasMouseDown}
         onMouseMove={handleCanvasMouseMove}
         onMouseUp={handleCanvasMouseUp}
         onMouseLeave={handleCanvasMouseLeave}
         onWheel={handleWheel}
+        onContextMenu={handleCanvasContextMenu}
         style={{ cursor: cursor === 'canvas-cursor-grab' ? 'grab' : cursor === 'canvas-cursor-grabbing' ? 'grabbing' : cursor }}
       >
         <CollaboratorCursors cursors={remoteCursors} />
@@ -794,7 +895,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
               canvasScale={canvasTransform.scale}
               onMoveSelected={handleMoveSelected}
               onDragEnd={handleDragEnd}
-              onOpenProperties={(id) => setPropertyPanelElementId(id)}
+              onContextMenu={handleElementContextMenu}
             />
           ))}
 
@@ -814,35 +915,25 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         </div>
       </div>
 
-      {/* Floating Toolbar */}
-      <CanvasToolbar
+      {/* Left Toolbar */}
+      <ToolbarLeft
         selectedTool={selectedTool}
-        selectedColor={selectedColor}
-        brushThickness={brushThickness}
-        onToolSelect={setSelectedTool}
-        onColorSelect={setSelectedColor}
-        onBrushThicknessChange={setBrushThickness}
-        onAddElement={handleAddElement}
         isConnecting={isConnecting}
+        onToolSelect={setSelectedTool}
+        onAddElement={handleAddElement}
         onToggleConnecting={() => setIsConnecting(!isConnecting)}
-        isTimerVisible={isTimerVisible}
-        onToggleTimer={() => setIsTimerVisible(!isTimerVisible)}
-        onToggleTextEditor={() => setIsTextEditorVisible(!isTextEditorVisible)}
-        onToggleOptions={() => setIsOptionsMenuVisible(!isOptionsMenuVisible)}
         onToggleShapeLibrary={() => setIsShapeLibraryVisible(!isShapeLibraryVisible)}
-        onExportPDF={() => handleExportPDF(false)}
-        onExportSelectedArea={handleExportSelectedArea}
-        hasSelection={selection.selectedIds.length > 0}
+      />
+
+      {/* Bottom Bar */}
+      <BottomBar
         canUndo={canUndo}
         canRedo={canRedo}
-        onUndo={() => {
-          const prevElements = undo();
-          if (prevElements) setElements(prevElements);
-        }}
-        onRedo={() => {
-          const nextElements = redo();
-          if (nextElements) setElements(nextElements);
-        }}
+        scale={canvasTransform.scale}
+        onUndo={() => { const prev = undo(); if (prev) setElements(prev); }}
+        onRedo={() => { const next = redo(); if (next) setElements(next); }}
+        onZoomChange={(scale) => setCanvasTransform(prev => ({ ...prev, scale }))}
+        onFitToScreen={handleFitToScreen}
       />
 
       {/* Timer */}
@@ -855,7 +946,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       <TextEditor
         style={textStyle}
         onStyleChange={setTextStyle}
-        isVisible={isTextEditorVisible && selectedTool === 'text'}
+        isVisible={isTextEditorVisible}
       />
 
       {/* Mini Map with Zoom Controls */}
@@ -900,40 +991,39 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         hasSelection={selection.selectedIds.length > 0}
       />
 
-      {/* Options Menu */}
-      <OptionsMenu
-        isVisible={isOptionsMenuVisible}
-        onToggle={() => setIsOptionsMenuVisible(!isOptionsMenuVisible)}
-      />
-
-      {/* Inline Editor */}
-      {editingElement && (
-        <InlineEditor
-          element={editingElement.element}
-          onUpdate={(updates) => {
-            handleElementUpdate(editingElement.element.id, updates);
-            setEditingElement(null);
-          }}
-          onClose={() => setEditingElement(null)}
-          position={editingElement.position}
-        />
-      )}
-
-      {/* Property Panel */}
-      <PropertyPanel
-        selectedElements={propertyPanelElementId ? elements.filter(el => el.id === propertyPanelElementId) : []}
+      {/* Contextual Bar */}
+      <ContextualBar
+        selectedElements={elements.filter(el => selection.selectedIds.includes(el.id))}
+        canvasTransform={canvasTransform}
         onUpdate={handleElementUpdate}
         onDelete={handleElementDelete}
         onDuplicate={handleElementDuplicate}
-        isVisible={propertyPanelElementId !== null}
-        onClose={() => setPropertyPanelElementId(null)}
-        elementPosition={
-          propertyPanelElementId 
-            ? elements.find(el => el.id === propertyPanelElementId)
-            : undefined
-        }
-        canvasTransform={canvasTransform}
       />
+
+      {/* Context Menu */}
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          targetElement={contextMenu.targetElement}
+          isLocked={contextMenu.targetElement?.locked}
+          canvasX={contextMenu.canvasX}
+          canvasY={contextMenu.canvasY}
+          onClose={() => setContextMenu(null)}
+          onPaste={handlePaste}
+          onFitToScreen={handleFitToScreen}
+          onAddSticky={(x, y) => createElementAtPosition('sticky', x, y)}
+          onAddText={(x, y) => createElementAtPosition('text', x, y)}
+          onAddShape={() => setIsShapeLibraryVisible(true)}
+          onCopy={handleCopy}
+          onCut={handleCut}
+          onDuplicate={() => contextMenu.targetElement && handleElementDuplicate(contextMenu.targetElement.id)}
+          onDelete={() => contextMenu.targetElement && handleElementDelete(contextMenu.targetElement.id)}
+          onToggleLock={() => contextMenu.targetElement && handleElementUpdate(contextMenu.targetElement.id, { locked: !contextMenu.targetElement.locked })}
+          onBringToFront={handleBringToFront}
+          onSendToBack={handleSendToBack}
+        />
+      )}
 
     </div>
   );
