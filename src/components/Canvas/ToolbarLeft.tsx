@@ -30,6 +30,8 @@ const collabTools = [
   { id: 'connect', icon: Link2,         label: 'Connecter',   shortcut: 'L' },
 ];
 
+const NO_ELEMENT_TOOLS = ['select', 'pen', 'eraser', 'connect', 'shapes'];
+
 export const ToolbarLeft = ({
   selectedTool,
   isConnecting,
@@ -38,7 +40,6 @@ export const ToolbarLeft = ({
   onToggleConnecting,
   onToggleShapeLibrary,
 }: ToolbarLeftProps) => {
-  const NO_ELEMENT_TOOLS = ['select', 'pen', 'eraser', 'connect', 'shapes'];
 
   const handleClick = (toolId: string) => {
     if (toolId === 'connect') {

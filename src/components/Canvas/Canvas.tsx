@@ -7,8 +7,6 @@ import { BottomBar } from "./BottomBar";
 import { CanvasObject } from "./CanvasObject";
 import { CanvasHeader } from "./CanvasHeader";
 import { SelectionBox } from "./SelectionBox";
-import { OptionsMenu } from "./OptionsMenu";
-import { InlineEditor } from "./InlineEditor";
 import { ResizeHandles } from "./ResizeHandles";
 import { TemplatePanel } from "./TemplatePanel";
 import { ShapeLibrary } from "./ShapeLibrary";
@@ -81,8 +79,6 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   const { addToHistory, undo, redo, canUndo, canRedo, resetHistory } = useHistory(elements);
   const [selectedColor, setSelectedColor] = useState('#FFE066');
   const [boardTitle, setBoardTitle] = useState('Tableau sans titre');
-  const [isOptionsMenuVisible, setIsOptionsMenuVisible] = useState(false);
-  const [editingElement, setEditingElement] = useState<{element: CanvasElement, position: {x: number, y: number}} | null>(null);
   const [isTemplatePanelVisible, setIsTemplatePanelVisible] = useState(false);
   const [isShapeLibraryVisible, setIsShapeLibraryVisible] = useState(false);
   const [isExportModalVisible, setIsExportModalVisible] = useState(false);
@@ -92,7 +88,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   const [drawingStrokes, setDrawingStrokes] = useState<DrawingStroke[]>([]);
   const [brushThickness, setBrushThickness] = useState(3);
   const [isTimerVisible, setIsTimerVisible] = useState(false);
-  const [isTextEditorVisible, setIsTextEditorVisible] = useState(false);
+  const isTextEditorVisible = selectedTool === 'text';
   const [textStyle, setTextStyle] = useState<{
     fontFamily?: string;
     fontWeight?: string;
@@ -641,6 +637,21 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
 
+      // Tool shortcuts (single-key, no modifier)
+      if (!e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+        switch (e.key.toLowerCase()) {
+          case 'v': setSelectedTool('select'); return;
+          case 'p': setSelectedTool('pen'); return;
+          case 'e': setSelectedTool('eraser'); return;
+          case 's': setSelectedTool('sticky'); handleAddElement('sticky'); return;
+          case 't': setSelectedTool('text'); handleAddElement('text'); return;
+          case 'f': setSelectedTool('shapes'); setIsShapeLibraryVisible(true); return;
+          case 'i': setSelectedTool('image'); handleAddElement('image'); return;
+          case 'c': setSelectedTool('comment'); handleAddElement('comment'); return;
+          case 'l': setSelectedTool('connect'); setIsConnecting(prev => !prev); return;
+        }
+      }
+
       if (e.key === 'Delete' || e.key === 'Backspace') {
         selection.selectedIds.forEach(id => handleElementDelete(id));
         clearSelection();
@@ -688,7 +699,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selection.selectedIds, handleElementDelete, handleElementDuplicate, clearSelection, undo, redo, addToHistory, setCanvasTransform, handleFitToScreen]);
+  }, [selection.selectedIds, handleElementDelete, handleElementDuplicate, clearSelection, undo, redo, addToHistory, setCanvasTransform, handleFitToScreen, handleAddElement]);
 
   const cursor = pendingElement 
     ? 'crosshair' 
@@ -807,7 +818,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       {/* Canvas Container */}
       <div
         ref={containerRef}
-        className={`absolute inset-0 pt-16 overflow-hidden ${cursor}`}
+        className={`absolute inset-0 pt-12 overflow-hidden ${cursor}`}
         onMouseDown={handleCanvasMouseDown}
         onMouseMove={handleCanvasMouseMove}
         onMouseUp={handleCanvasMouseUp}
@@ -935,7 +946,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       <TextEditor
         style={textStyle}
         onStyleChange={setTextStyle}
-        isVisible={isTextEditorVisible && selectedTool === 'text'}
+        isVisible={isTextEditorVisible}
       />
 
       {/* Mini Map with Zoom Controls */}
@@ -979,25 +990,6 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         onExportSelectedArea={handleExportSelectedArea}
         hasSelection={selection.selectedIds.length > 0}
       />
-
-      {/* Options Menu */}
-      <OptionsMenu
-        isVisible={isOptionsMenuVisible}
-        onToggle={() => setIsOptionsMenuVisible(!isOptionsMenuVisible)}
-      />
-
-      {/* Inline Editor */}
-      {editingElement && (
-        <InlineEditor
-          element={editingElement.element}
-          onUpdate={(updates) => {
-            handleElementUpdate(editingElement.element.id, updates);
-            setEditingElement(null);
-          }}
-          onClose={() => setEditingElement(null)}
-          position={editingElement.position}
-        />
-      )}
 
       {/* Contextual Bar */}
       <ContextualBar

@@ -36,6 +36,7 @@ export const ContextualBar = ({
   onDuplicate,
 }: ContextualBarProps) => {
   const [showAllColors, setShowAllColors] = useState(false);
+  const [showOpacitySlider, setShowOpacitySlider] = useState(false);
 
   if (!selectedElements.length) return null;
 
@@ -93,6 +94,17 @@ export const ContextualBar = ({
               >+</button>
             </div>
             <div className="w-px h-5 bg-border mx-0.5" />
+            <button
+              className={`w-7 h-7 flex items-center justify-center rounded text-sm font-bold transition-colors ${first.textStyle?.fontWeight === 'bold' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted'}`}
+              onClick={() => updateAll({ textStyle: { ...first.textStyle, fontWeight: first.textStyle?.fontWeight === 'bold' ? 'normal' : 'bold' } })}
+              title="Gras"
+            >B</button>
+            <button
+              className={`w-7 h-7 flex items-center justify-center rounded text-sm italic transition-colors ${first.textStyle?.fontStyle === 'italic' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted'}`}
+              onClick={() => updateAll({ textStyle: { ...first.textStyle, fontStyle: first.textStyle?.fontStyle === 'italic' ? 'normal' : 'italic' } })}
+              title="Italique"
+            >I</button>
+            <div className="w-px h-5 bg-border mx-0.5" />
           </>
         )}
 
@@ -135,6 +147,28 @@ export const ContextualBar = ({
           </div>
         </div>
 
+        {/* Opacity */}
+        <div className="w-px h-5 bg-border mx-0.5" />
+        <div className="relative">
+          <button
+            className="px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:bg-muted rounded transition-colors"
+            onClick={() => setShowOpacitySlider(p => !p)}
+            title="Opacité"
+          >
+            {Math.round((first.opacity ?? 1) * 100)}%
+          </button>
+          {showOpacitySlider && (
+            <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-card border border-border rounded-lg p-2 shadow-float z-50">
+              <input
+                type="range" min={0} max={100}
+                value={Math.round((first.opacity ?? 1) * 100)}
+                onChange={e => updateAll({ opacity: Number(e.target.value) / 100 })}
+                className="w-24 accent-purple-400"
+              />
+            </div>
+          )}
+        </div>
+
         <div className="w-px h-5 bg-border mx-0.5" />
 
         {/* Lock */}
@@ -148,18 +182,16 @@ export const ContextualBar = ({
           {isLocked ? <Unlock size={13} /> : <Lock size={13} />}
         </Button>
 
-        {/* Duplicate — single selection only */}
-        {!isMulti && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
-            onClick={() => onDuplicate(first.id)}
-            title="Dupliquer (⌘D)"
-          >
-            <Copy size={13} />
-          </Button>
-        )}
+        {/* Duplicate */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
+          onClick={() => selectedElements.forEach(el => onDuplicate(el.id))}
+          title="Dupliquer (⌘D)"
+        >
+          <Copy size={13} />
+        </Button>
 
         {/* Delete */}
         <Button

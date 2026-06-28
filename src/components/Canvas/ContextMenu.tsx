@@ -120,6 +120,14 @@ export const ContextMenu = ({
           <Item icon={Square}     label="Ajouter une forme"               onClick={wrap(() => onAddShape(canvasX, canvasY))} />
           <Separator />
           <Item icon={Clipboard}  label="Coller"              shortcut="⌘V" onClick={wrap(onPaste)} />
+          <button
+            className="w-full flex items-center gap-2.5 px-3 py-1.5 text-xs hover:bg-accent transition-colors text-left text-foreground"
+            onClick={() => { onFitToScreen(); onClose(); }}
+          >
+            <span className="text-[13px] flex-shrink-0 leading-none">⊡</span>
+            <span className="flex-1">Ajuster à l'écran</span>
+            <span className="text-muted-foreground text-[10px]">⌘⇧H</span>
+          </button>
         </>
       )}
     </div>
