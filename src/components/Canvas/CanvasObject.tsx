@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { Trash2, Edit3, Lock, Unlock, Heart, MessageCircle, Tag, User, Settings } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { CanvasElement, Comment } from "./Canvas";
@@ -7,49 +7,112 @@ import { CommentThread } from "./CommentThread";
 interface CanvasObjectProps {
   element: CanvasElement;
   onUpdate: (id: string, updates: Partial<CanvasElement>) => void;
+  onUpdateSilent: (id: string, updates: Partial<CanvasElement>) => void;
   onDelete: (id: string) => void;
   onClick: (id: string, e: React.MouseEvent) => void;
   isSelected: boolean;
+  selectedIds: string[];
+  canvasScale: number;
+  onMoveSelected: (dx: number, dy: number) => void;
+  onDragEnd: () => void;
   onOpenProperties?: (id: string) => void;
 }
 
-export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected, onOpenProperties }: CanvasObjectProps) => {
+const DRAG_THRESHOLD = 4;
+
+export const CanvasObject = ({
+  element,
+  onUpdate,
+  onUpdateSilent,
+  onDelete,
+  onClick,
+  isSelected,
+  selectedIds,
+  canvasScale,
+  onMoveSelected,
+  onDragEnd,
+  onOpenProperties,
+}: CanvasObjectProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(element.content || '');
   const [showComments, setShowComments] = useState(false);
-  const dragStart = useRef({ x: 0, y: 0 });
   const elementRef = useRef<HTMLDivElement>(null);
+
+  const hasMoved = useRef(false);
+  const mouseDownPos = useRef({ x: 0, y: 0 });
+  const lastMousePos = useRef({ x: 0, y: 0 });
+  const currentPos = useRef({ x: element.x, y: element.y });
+
+  // Stable refs so handlers never go stale
+  const canvasScaleRef = useRef(canvasScale);
+  canvasScaleRef.current = canvasScale;
+  const selectedIdsRef = useRef(selectedIds);
+  selectedIdsRef.current = selectedIds;
+  const onMoveSelectedRef = useRef(onMoveSelected);
+  onMoveSelectedRef.current = onMoveSelected;
+  const onUpdateSilentRef = useRef(onUpdateSilent);
+  onUpdateSilentRef.current = onUpdateSilent;
+  const onDragEndRef = useRef(onDragEnd);
+  onDragEndRef.current = onDragEnd;
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    onClick(element.id, e);
-    
-    // Don't allow dragging if locked
     if (element.locked) return;
-    
-    setIsDragging(true);
-    dragStart.current = {
-      x: e.clientX - element.x,
-      y: e.clientY - element.y,
-    };
-  }, [element.x, element.y, element.id, onClick, element.locked]);
 
+    // If element not in selection, select it immediately.
+    // If already in selection (no Ctrl), keep existing multi-selection for drag.
+    const inSelection = selectedIdsRef.current.includes(element.id);
+    if (!inSelection || e.ctrlKey || e.metaKey) {
+      onClick(element.id, e);
+    }
+
+    hasMoved.current = false;
+    mouseDownPos.current = { x: e.clientX, y: e.clientY };
+    lastMousePos.current = { x: e.clientX, y: e.clientY };
+    currentPos.current = { x: element.x, y: element.y };
+    setIsDragging(true);
+  }, [element.id, element.x, element.y, element.locked, onClick]);
+
+  // Stable handler — reads everything from refs
   const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!isDragging) return;
-    
-    const newX = e.clientX - dragStart.current.x;
-    const newY = e.clientY - dragStart.current.y;
-    
-    onUpdate(element.id, { x: newX, y: newY });
-  }, [isDragging, element.id, onUpdate]);
+    if (!hasMoved.current) {
+      const dist = Math.hypot(
+        e.clientX - mouseDownPos.current.x,
+        e.clientY - mouseDownPos.current.y
+      );
+      if (dist < DRAG_THRESHOLD) return;
+      hasMoved.current = true;
+    }
+
+    const scale = canvasScaleRef.current;
+    const dx = (e.clientX - lastMousePos.current.x) / scale;
+    const dy = (e.clientY - lastMousePos.current.y) / scale;
+    lastMousePos.current = { x: e.clientX, y: e.clientY };
+
+    if (selectedIdsRef.current.includes(element.id)) {
+      // Move all selected elements together
+      onMoveSelectedRef.current(dx, dy);
+    } else {
+      // Solo drag (element not in selection, shouldn't happen normally)
+      currentPos.current.x += dx;
+      currentPos.current.y += dy;
+      onUpdateSilentRef.current(element.id, {
+        x: currentPos.current.x,
+        y: currentPos.current.y,
+      });
+    }
+  }, [element.id]); // stable — deps via refs
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
-  }, []);
+    if (hasMoved.current) {
+      onDragEndRef.current();
+    }
+    hasMoved.current = false;
+  }, []); // stable
 
-  // Attach global mouse events when dragging
-  React.useEffect(() => {
+  useEffect(() => {
     if (isDragging) {
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
@@ -61,9 +124,7 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected,
   }, [isDragging, handleMouseMove, handleMouseUp]);
 
   const handleDoubleClick = useCallback(() => {
-    // Don't allow editing if locked
     if (element.locked) return;
-    
     if (element.type === 'sticky' || element.type === 'text') {
       setIsEditing(true);
       setEditContent(element.content || '');
@@ -88,7 +149,6 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected,
   }, [handleContentSave, element.content]);
 
   const getCurrentUserId = useCallback(() => {
-    // Get or create a unique user ID for this session
     let userId = localStorage.getItem('canvas_user_id');
     if (!userId) {
       userId = `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -101,13 +161,10 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected,
     e.stopPropagation();
     const userId = getCurrentUserId();
     const likedBy = element.likedBy || [];
-    
-    // Toggle like: if user already liked, remove; otherwise add
     const hasLiked = likedBy.includes(userId);
-    const updatedLikedBy = hasLiked 
+    const updatedLikedBy = hasLiked
       ? likedBy.filter(id => id !== userId)
       : [...likedBy, userId];
-    
     onUpdate(element.id, { likedBy: updatedLikedBy });
   }, [element.id, element.likedBy, onUpdate, getCurrentUserId]);
 
@@ -119,7 +176,7 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected,
     const newComment: Comment = {
       id: `comment-${Date.now()}`,
       userId: getCurrentUserId(),
-      userName: 'Utilisateur', // In a real app, get from auth
+      userName: 'Utilisateur',
       text,
       timestamp: new Date(),
     };
@@ -136,10 +193,8 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected,
       height: element.height,
       backgroundColor: element.color,
       cursor: element.locked ? 'not-allowed' : (isDragging ? 'grabbing' : 'grab'),
-      transition: isDragging ? 'none' : 'transform 0.2s ease-out',
-      transform: isSelected ? 'scale(1.02)' : 'scale(1)',
       opacity: element.locked ? (element.opacity || 1) * 0.7 : (element.opacity || 1),
-      zIndex: element.zIndex || 1,
+      zIndex: isDragging ? 1000 : (element.zIndex || 1),
     };
 
     switch (element.type) {
@@ -150,70 +205,31 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected,
           boxShadow: '0 4px 12px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.08)',
           border: '1px solid rgba(255,255,255,0.3)',
         };
-      
       case 'rectangle':
         return {
           ...baseStyle,
           borderRadius: element.borderRadius || 8,
           border: '2px solid rgba(0,0,0,0.1)',
         };
-      
       case 'circle':
         return {
           ...baseStyle,
           borderRadius: '50%',
           border: '2px solid rgba(0,0,0,0.1)',
         };
-      
       case 'triangle':
-        return {
-          ...baseStyle,
-          backgroundColor: 'transparent',
-          border: 'none',
-        };
-      
       case 'hexagon':
-        return {
-          ...baseStyle,
-          backgroundColor: 'transparent',
-          border: 'none',
-        };
-      
       case 'pentagon':
-        return {
-          ...baseStyle,
-          backgroundColor: 'transparent',
-          border: 'none',
-        };
-      
       case 'star':
-        return {
-          ...baseStyle,
-          backgroundColor: 'transparent',
-          border: 'none',
-        };
-      
       case 'diamond':
-        return {
-          ...baseStyle,
-          backgroundColor: 'transparent',
-          border: 'none',
-        };
-      
       case 'heart':
-        return {
-          ...baseStyle,
-          backgroundColor: 'transparent',
-          border: 'none',
-        };
-      
+        return { ...baseStyle, backgroundColor: 'transparent', border: 'none' };
       case 'text':
         return {
           ...baseStyle,
           backgroundColor: 'transparent',
           border: '1px dashed rgba(0,0,0,0.2)',
         };
-      
       case 'image':
         return {
           ...baseStyle,
@@ -221,7 +237,6 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected,
           borderRadius: 8,
           overflow: 'hidden',
         };
-      
       case 'comment':
         return {
           ...baseStyle,
@@ -230,7 +245,6 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected,
           border: '2px solid #E2E8F0',
           boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
         };
-      
       default:
         return baseStyle;
     }
@@ -273,24 +287,19 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected,
       );
     }
 
-    // Render SVG shapes
     const shapeTypes = ['triangle', 'hexagon', 'pentagon', 'star', 'diamond', 'heart'];
     if (shapeTypes.includes(element.type)) {
       const renderShape = () => {
         const w = element.width;
         const h = element.height;
-        
         switch (element.type) {
           case 'triangle':
             return `M ${w/2} 5 L ${w-5} ${h-5} L 5 ${h-5} Z`;
-          
           case 'hexagon':
             return `M ${w/2} 5 L ${w-5} ${h/4} L ${w-5} ${3*h/4} L ${w/2} ${h-5} L 5 ${3*h/4} L 5 ${h/4} Z`;
-          
           case 'pentagon':
             return `M ${w/2} 5 L ${w-5} ${h/3} L ${w-10} ${h-5} L 10 ${h-5} L 5 ${h/3} Z`;
-          
-          case 'star':
+          case 'star': {
             const cx = w / 2;
             const cy = h / 2;
             const spikes = 5;
@@ -305,30 +314,28 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected,
               path += `${i === 0 ? 'M' : 'L'} ${x} ${y} `;
             }
             return path + 'Z';
-          
+          }
           case 'diamond':
             return `M ${w/2} 5 L ${w-5} ${h/2} L ${w/2} ${h-5} L 5 ${h/2} Z`;
-          
-          case 'heart':
+          case 'heart': {
             const heartW = w - 10;
             const heartH = h - 10;
-            return `M ${heartW/2 + 5} ${heartH/4 + 10} 
+            return `M ${heartW/2 + 5} ${heartH/4 + 10}
                     C ${heartW/2 + 5} ${heartH/8 + 10}, ${heartW/4 + 5} 5, ${heartW/8 + 5} 5
                     C 5 5, 5 ${heartH/4 + 10}, 5 ${heartH/3 + 10}
                     C 5 ${heartH/2 + 10}, ${heartW/4 + 5} ${3*heartH/4 + 10}, ${heartW/2 + 5} ${heartH + 5}
                     C ${3*heartW/4 + 5} ${3*heartH/4 + 10}, ${heartW + 5} ${heartH/2 + 10}, ${heartW + 5} ${heartH/3 + 10}
                     C ${heartW + 5} ${heartH/4 + 10}, ${heartW + 5} 5, ${7*heartW/8 + 5} 5
                     C ${3*heartW/4 + 5} 5, ${heartW/2 + 5} ${heartH/8 + 10}, ${heartW/2 + 5} ${heartH/4 + 10} Z`;
-          
+          }
           default:
             return '';
         }
       };
-
       return (
-        <svg 
-          width={element.width} 
-          height={element.height} 
+        <svg
+          width={element.width}
+          height={element.height}
           className="absolute inset-0"
           style={{ pointerEvents: 'none' }}
         >
@@ -350,7 +357,7 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected,
           onBlur={handleContentSave}
           onKeyDown={handleKeyPress}
           className="w-full h-full p-3 bg-transparent border-none outline-none resize-none text-sm leading-relaxed"
-          style={{ 
+          style={{
             color: element.type === 'sticky' ? '#2D3748' : element.color,
             fontSize: element.fontSize || 14,
             fontFamily: element.fontFamily || 'Arial',
@@ -364,7 +371,6 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected,
 
     return (
       <div className="w-full h-full p-3 flex flex-col gap-2">
-        {/* Tags and Author for sticky notes */}
         {element.type === 'sticky' && (element.tags?.length || element.author) && (
           <div className="flex flex-col gap-1 mb-1">
             {element.author && (
@@ -384,10 +390,9 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected,
             )}
           </div>
         )}
-        
-        <div 
+        <div
           className="flex-1 flex items-center justify-center leading-relaxed select-none"
-          style={{ 
+          style={{
             color: element.type === 'sticky' ? '#2D3748' : element.color,
             fontSize: element.fontSize || 14,
             fontFamily: element.fontFamily || 'Arial',
@@ -411,30 +416,25 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected,
         className="group animate-scale-in"
       >
         {renderContent()}
-        
-        {/* Selection Border */}
+
         {isSelected && (
           <div className="absolute inset-0 border-2 border-primary rounded-lg pointer-events-none" />
         )}
-        
-        {/* Likes Badge */}
+
         {likesCount > 0 && (
           <div className="absolute -bottom-2 -left-2 bg-destructive text-destructive-foreground rounded-full px-2 py-1 flex items-center gap-1 text-xs font-medium shadow-soft animate-scale-in">
             <Heart size={12} fill="currentColor" />
             <span>{likesCount}</span>
           </div>
         )}
-        
-        {/* Comment Count Badge */}
+
         {element.type === 'comment' && (element.comments?.length || 0) > 0 && (
           <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-medium shadow-soft animate-scale-in">
             {element.comments?.length}
           </div>
         )}
-        
-        {/* Hover Controls */}
+
         <div className="absolute -top-3 -right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
-          {/* Like Button - Always visible */}
           <button
             onClick={handleLike}
             className={`w-6 h-6 rounded-full flex items-center justify-center shadow-soft hover:scale-110 transition-all ${
@@ -446,24 +446,24 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected,
           >
             <Heart size={12} fill={hasUserLiked ? "currentColor" : "none"} />
           </button>
-          
+
           <button
             onClick={(e) => {
               e.stopPropagation();
               onUpdate(element.id, { locked: !element.locked });
             }}
             className={`w-6 h-6 rounded-full flex items-center justify-center shadow-soft hover:scale-110 transition-transform ${
-              element.locked 
-                ? 'bg-warning text-warning-foreground' 
+              element.locked
+                ? 'bg-warning text-warning-foreground'
                 : 'bg-secondary text-secondary-foreground'
             }`}
             title={element.locked ? "Déverrouiller" : "Verrouiller"}
           >
             {element.locked ? <Lock size={12} /> : <Unlock size={12} />}
           </button>
+
           {!element.locked && (
             <>
-              {/* Properties button - Only for sticky notes */}
               {element.type === 'sticky' && onOpenProperties && (
                 <button
                   onClick={(e) => {
@@ -503,7 +503,6 @@ export const CanvasObject = ({ element, onUpdate, onDelete, onClick, isSelected,
         </div>
       </div>
 
-      {/* Comment Thread Modal */}
       {showComments && element.type === 'comment' && (
         <CommentThread
           comments={element.comments || []}

@@ -9,14 +9,26 @@ interface ResizeHandle {
 
 interface ResizeHandlesProps {
   element: CanvasElement;
-  onUpdate: (id: string, updates: Partial<CanvasElement>) => void;
+  onUpdateSilent: (id: string, updates: Partial<CanvasElement>) => void;
+  onResizeEnd: () => void;
   isVisible: boolean;
+  canvasScale: number;
 }
 
-export const ResizeHandles = ({ element, onUpdate, isVisible }: ResizeHandlesProps) => {
+export const ResizeHandles = ({ element, onUpdateSilent, onResizeEnd, isVisible, canvasScale }: ResizeHandlesProps) => {
   const [isResizing, setIsResizing] = useState(false);
   const [resizeHandle, setResizeHandle] = useState<string | null>(null);
-  const startPos = useRef({ x: 0, y: 0, width: 0, height: 0 });
+  const startPos = useRef({ mouseX: 0, mouseY: 0, width: 0, height: 0, elemX: 0, elemY: 0 });
+
+  // Stable refs so handler never goes stale
+  const canvasScaleRef = useRef(canvasScale);
+  canvasScaleRef.current = canvasScale;
+  const onUpdateSilentRef = useRef(onUpdateSilent);
+  onUpdateSilentRef.current = onUpdateSilent;
+  const onResizeEndRef = useRef(onResizeEnd);
+  onResizeEndRef.current = onResizeEnd;
+  const elementIdRef = useRef(element.id);
+  elementIdRef.current = element.id;
 
   const handles: ResizeHandle[] = [
     { position: 'nw', x: -4, y: -4 },
@@ -33,80 +45,81 @@ export const ResizeHandles = ({ element, onUpdate, isVisible }: ResizeHandlesPro
     e.stopPropagation();
     setIsResizing(true);
     setResizeHandle(handlePos);
-    
     startPos.current = {
-      x: e.clientX,
-      y: e.clientY,
+      mouseX: e.clientX,
+      mouseY: e.clientY,
       width: element.width,
       height: element.height,
+      elemX: element.x,
+      elemY: element.y,
     };
-  }, [element.width, element.height]);
+  }, [element.width, element.height, element.x, element.y]);
 
+  // Stable handler — reads everything from refs
   const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!isResizing || !resizeHandle) return;
+    if (!resizeHandle) return;
 
-    const deltaX = e.clientX - startPos.current.x;
-    const deltaY = e.clientY - startPos.current.y;
+    const scale = canvasScaleRef.current;
+    const deltaX = (e.clientX - startPos.current.mouseX) / scale;
+    const deltaY = (e.clientY - startPos.current.mouseY) / scale;
 
+    const minSize = 20;
     let newWidth = startPos.current.width;
     let newHeight = startPos.current.height;
-    let newX = element.x;
-    let newY = element.y;
-
-    // Minimum size constraints
-    const minSize = 20;
+    let newX = startPos.current.elemX;
+    let newY = startPos.current.elemY;
 
     switch (resizeHandle) {
-      case 'se': // Bottom-right
+      case 'se':
         newWidth = Math.max(minSize, startPos.current.width + deltaX);
         newHeight = Math.max(minSize, startPos.current.height + deltaY);
         break;
-      case 'sw': // Bottom-left
+      case 'sw':
         newWidth = Math.max(minSize, startPos.current.width - deltaX);
         newHeight = Math.max(minSize, startPos.current.height + deltaY);
-        if (newWidth > minSize) newX = element.x + deltaX;
+        if (newWidth > minSize) newX = startPos.current.elemX + deltaX;
         break;
-      case 'ne': // Top-right
+      case 'ne':
         newWidth = Math.max(minSize, startPos.current.width + deltaX);
         newHeight = Math.max(minSize, startPos.current.height - deltaY);
-        if (newHeight > minSize) newY = element.y + deltaY;
+        if (newHeight > minSize) newY = startPos.current.elemY + deltaY;
         break;
-      case 'nw': // Top-left
+      case 'nw':
         newWidth = Math.max(minSize, startPos.current.width - deltaX);
         newHeight = Math.max(minSize, startPos.current.height - deltaY);
-        if (newWidth > minSize) newX = element.x + deltaX;
-        if (newHeight > minSize) newY = element.y + deltaY;
+        if (newWidth > minSize) newX = startPos.current.elemX + deltaX;
+        if (newHeight > minSize) newY = startPos.current.elemY + deltaY;
         break;
-      case 'n': // Top
+      case 'n':
         newHeight = Math.max(minSize, startPos.current.height - deltaY);
-        if (newHeight > minSize) newY = element.y + deltaY;
+        if (newHeight > minSize) newY = startPos.current.elemY + deltaY;
         break;
-      case 's': // Bottom
+      case 's':
         newHeight = Math.max(minSize, startPos.current.height + deltaY);
         break;
-      case 'e': // Right
+      case 'e':
         newWidth = Math.max(minSize, startPos.current.width + deltaX);
         break;
-      case 'w': // Left
+      case 'w':
         newWidth = Math.max(minSize, startPos.current.width - deltaX);
-        if (newWidth > minSize) newX = element.x + deltaX;
+        if (newWidth > minSize) newX = startPos.current.elemX + deltaX;
         break;
     }
 
-    onUpdate(element.id, {
+    onUpdateSilentRef.current(elementIdRef.current, {
       x: newX,
       y: newY,
       width: newWidth,
       height: newHeight,
     });
-  }, [isResizing, resizeHandle, element, onUpdate]);
+  }, [resizeHandle]); // stable — deps via refs
 
   const handleMouseUp = useCallback(() => {
     setIsResizing(false);
     setResizeHandle(null);
-  }, []);
+    onResizeEndRef.current();
+  }, []); // stable
 
-  // Attach global mouse events when resizing
   React.useEffect(() => {
     if (isResizing) {
       window.addEventListener('mousemove', handleMouseMove);
@@ -122,20 +135,11 @@ export const ResizeHandles = ({ element, onUpdate, isVisible }: ResizeHandlesPro
 
   const getCursor = (position: string): string => {
     switch (position) {
-      case 'nw':
-      case 'se':
-        return 'nw-resize';
-      case 'ne':
-      case 'sw':
-        return 'ne-resize';
-      case 'n':
-      case 's':
-        return 'n-resize';
-      case 'e':
-      case 'w':
-        return 'e-resize';
-      default:
-        return 'default';
+      case 'nw': case 'se': return 'nw-resize';
+      case 'ne': case 'sw': return 'ne-resize';
+      case 'n': case 's': return 'n-resize';
+      case 'e': case 'w': return 'e-resize';
+      default: return 'default';
     }
   };
 

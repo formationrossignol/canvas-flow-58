@@ -70,6 +70,8 @@ interface CanvasProps {
 export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [elements, setElements] = useState<CanvasElement[]>([]);
+  const elementsRef = useRef<CanvasElement[]>([]);
+  elementsRef.current = elements;
   const [selectedTool, setSelectedTool] = useState<string>('select');
   const [pendingElement, setPendingElement] = useState<CanvasElement['type'] | null>(null);
   
@@ -285,6 +287,30 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       addToHistory(newElements);
       return newElements;
     });
+  }, [addToHistory]);
+
+  // Silent update — no history entry (used during drag/resize)
+  const handleElementUpdateSilent = useCallback((id: string, updates: Partial<CanvasElement>) => {
+    setElements(prev => prev.map(el => el.id === id ? { ...el, ...updates } : el));
+  }, []);
+
+  // Move all selected elements by canvas-space delta (called every mousemove during drag)
+  const handleMoveSelected = useCallback((dx: number, dy: number) => {
+    setElements(prev => prev.map(el =>
+      selection.selectedIds.includes(el.id) && !el.locked
+        ? { ...el, x: el.x + dx, y: el.y + dy }
+        : el
+    ));
+  }, [selection.selectedIds]);
+
+  // Commit drag to history once mouse released
+  const handleDragEnd = useCallback(() => {
+    addToHistory(elementsRef.current);
+  }, [addToHistory]);
+
+  // Commit resize to history once mouse released
+  const handleResizeEnd = useCallback(() => {
+    addToHistory(elementsRef.current);
   }, [addToHistory]);
 
   const handleElementDelete = useCallback((id: string) => {
@@ -527,32 +553,53 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
       if (e.key === 'Delete' || e.key === 'Backspace') {
         selection.selectedIds.forEach(id => handleElementDelete(id));
         clearSelection();
       } else if (e.key === 'Escape') {
         clearSelection();
+        setPendingElement(null);
       } else if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
         e.preventDefault();
         selection.selectedIds.forEach(id => handleElementDuplicate(id));
       } else if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
         e.preventDefault();
         const prevElements = undo();
-        if (prevElements) {
-          setElements(prevElements);
-        }
+        if (prevElements) setElements(prevElements);
       } else if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
         e.preventDefault();
         const nextElements = redo();
-        if (nextElements) {
-          setElements(nextElements);
+        if (nextElements) setElements(nextElements);
+      } else if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+        if (selection.selectedIds.length > 0) {
+          e.preventDefault();
+          const step = e.shiftKey ? 8 : 1;
+          const dx = e.key === 'ArrowLeft' ? -step : e.key === 'ArrowRight' ? step : 0;
+          const dy = e.key === 'ArrowUp' ? -step : e.key === 'ArrowDown' ? step : 0;
+          setElements(prev => {
+            const newElements = prev.map(el =>
+              selection.selectedIds.includes(el.id) && !el.locked
+                ? { ...el, x: el.x + dx, y: el.y + dy }
+                : el
+            );
+            addToHistory(newElements);
+            return newElements;
+          });
+        } else {
+          // Pan canvas when nothing selected
+          const step = e.shiftKey ? 50 : 10;
+          const dx = e.key === 'ArrowLeft' ? step : e.key === 'ArrowRight' ? -step : 0;
+          const dy = e.key === 'ArrowUp' ? step : e.key === 'ArrowDown' ? -step : 0;
+          setCanvasTransform(prev => ({ ...prev, x: prev.x + dx, y: prev.y + dy }));
         }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selection.selectedIds, handleElementDelete, handleElementDuplicate, clearSelection, undo, redo]);
+  }, [selection.selectedIds, handleElementDelete, handleElementDuplicate, clearSelection, undo, redo, addToHistory, setCanvasTransform]);
 
   const cursor = pendingElement 
     ? 'crosshair' 
@@ -739,21 +786,28 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
               key={element.id}
               element={element}
               onUpdate={handleElementUpdate}
+              onUpdateSilent={handleElementUpdateSilent}
               onDelete={handleElementDelete}
               onClick={handleElementClick}
               isSelected={isSelected(element.id)}
+              selectedIds={selection.selectedIds}
+              canvasScale={canvasTransform.scale}
+              onMoveSelected={handleMoveSelected}
+              onDragEnd={handleDragEnd}
               onOpenProperties={(id) => setPropertyPanelElementId(id)}
             />
           ))}
 
           {/* Resize Handles - Rendered separately to ensure proper positioning */}
-          {elements.map(element => 
+          {elements.map(element =>
             isSelected(element.id) && (
               <ResizeHandles
                 key={`handles-${element.id}`}
                 element={element}
-                onUpdate={handleElementUpdate}
+                onUpdateSilent={handleElementUpdateSilent}
+                onResizeEnd={handleResizeEnd}
                 isVisible={true}
+                canvasScale={canvasTransform.scale}
               />
             )
           )}

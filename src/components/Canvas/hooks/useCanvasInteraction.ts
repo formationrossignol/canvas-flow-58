@@ -6,38 +6,44 @@ interface CanvasTransform {
   scale: number;
 }
 
+const MIN_SCALE = 0.05;
+const MAX_SCALE = 5;
+
 export const useCanvasInteraction = (containerRef: React.RefObject<HTMLDivElement>) => {
   const [canvasTransform, setCanvasTransform] = useState<CanvasTransform>({
     x: 0,
     y: 0,
     scale: 1,
   });
-  
+
   const [isDragging, setIsDragging] = useState(false);
   const [isSpacePressed, setIsSpacePressed] = useState(false);
   const dragStart = useRef({ x: 0, y: 0 });
   const initialTransform = useRef({ x: 0, y: 0 });
+  // Stable ref so wheel/pan handlers never go stale
+  const transformRef = useRef(canvasTransform);
+  transformRef.current = canvasTransform;
 
-  // Handle space key for pan mode
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === 'Space' && !e.repeat) {
+      if (
+        e.code === 'Space' &&
+        !e.repeat &&
+        !(e.target instanceof HTMLInputElement) &&
+        !(e.target instanceof HTMLTextAreaElement)
+      ) {
         e.preventDefault();
         setIsSpacePressed(true);
       }
     };
-
     const handleKeyUp = (e: KeyboardEvent) => {
       if (e.code === 'Space') {
-        e.preventDefault();
         setIsSpacePressed(false);
         setIsDragging(false);
       }
     };
-
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
-
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
@@ -46,19 +52,16 @@ export const useCanvasInteraction = (containerRef: React.RefObject<HTMLDivElemen
 
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!isSpacePressed) return;
-    
     e.preventDefault();
     setIsDragging(true);
     dragStart.current = { x: e.clientX, y: e.clientY };
-    initialTransform.current = { x: canvasTransform.x, y: canvasTransform.y };
-  }, [isSpacePressed, canvasTransform.x, canvasTransform.y]);
+    initialTransform.current = { x: transformRef.current.x, y: transformRef.current.y };
+  }, [isSpacePressed]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!isDragging || !isSpacePressed) return;
-
     const deltaX = e.clientX - dragStart.current.x;
     const deltaY = e.clientY - dragStart.current.y;
-
     setCanvasTransform(prev => ({
       ...prev,
       x: initialTransform.current.x + deltaX,
@@ -66,64 +69,39 @@ export const useCanvasInteraction = (containerRef: React.RefObject<HTMLDivElemen
     }));
   }, [isDragging, isSpacePressed]);
 
-  // Navigation with arrow keys
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const step = 50;
-      switch (e.key) {
-        case 'ArrowUp':
-          e.preventDefault();
-          setCanvasTransform(prev => ({ ...prev, y: prev.y + step }));
-          break;
-        case 'ArrowDown':
-          e.preventDefault();
-          setCanvasTransform(prev => ({ ...prev, y: prev.y - step }));
-          break;
-        case 'ArrowLeft':
-          e.preventDefault();
-          setCanvasTransform(prev => ({ ...prev, x: prev.x + step }));
-          break;
-        case 'ArrowRight':
-          e.preventDefault();
-          setCanvasTransform(prev => ({ ...prev, x: prev.x - step }));
-          break;
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
   }, []);
 
   const handleWheel = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
-    if (!e.ctrlKey && !e.metaKey) return;
-    
     e.preventDefault();
-    
-    const scaleFactor = e.deltaY > 0 ? 0.9 : 1.1;
-    const newScale = Math.max(0.1, Math.min(3, canvasTransform.scale * scaleFactor));
-    
-    // Get mouse position relative to container
+
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
-    
+
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
-    
-    // Calculate zoom center - keep the point under the mouse fixed
-    const scaleChange = newScale / canvasTransform.scale;
-    const newX = mouseX - (mouseX - canvasTransform.x) * scaleChange;
-    const newY = mouseY - (mouseY - canvasTransform.y) * scaleChange;
-    
-    setCanvasTransform({
-      x: newX,
-      y: newY,
-      scale: newScale,
-    });
-  }, [canvasTransform, containerRef]);
+    const t = transformRef.current;
+
+    if (e.ctrlKey || e.metaKey) {
+      // Pinch-to-zoom or Ctrl+scroll — smooth exponential zoom centered on cursor
+      const zoomFactor = Math.exp(-e.deltaY * 0.003);
+      const newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, t.scale * zoomFactor));
+      const scaleChange = newScale / t.scale;
+      setCanvasTransform({
+        x: mouseX - (mouseX - t.x) * scaleChange,
+        y: mouseY - (mouseY - t.y) * scaleChange,
+        scale: newScale,
+      });
+    } else {
+      // Two-finger trackpad pan
+      setCanvasTransform(prev => ({
+        ...prev,
+        x: prev.x - e.deltaX,
+        y: prev.y - e.deltaY,
+      }));
+    }
+  }, [containerRef]);
 
   return {
     canvasTransform,
