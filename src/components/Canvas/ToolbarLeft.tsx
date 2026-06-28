@@ -38,6 +38,8 @@ export const ToolbarLeft = ({
   onToggleConnecting,
   onToggleShapeLibrary,
 }: ToolbarLeftProps) => {
+  const NO_ELEMENT_TOOLS = ['select', 'pen', 'eraser', 'connect', 'shapes'];
+
   const handleClick = (toolId: string) => {
     if (toolId === 'connect') {
       onToolSelect(toolId);
@@ -50,7 +52,7 @@ export const ToolbarLeft = ({
       return;
     }
     onToolSelect(toolId);
-    if (!['select', 'pen', 'eraser'].includes(toolId)) {
+    if (!NO_ELEMENT_TOOLS.includes(toolId)) {
       onAddElement(toolId as CanvasElement['type']);
     }
   };
