@@ -133,11 +133,14 @@ export const PropertyPanel = ({
     if (panelY + panelHeight > viewportHeight - padding) {
       panelY = screenY;
       panelX = screenX + screenWidth + padding;
-      
-      // If doesn't fit on right, try left
+
+      // If doesn't fit on right, try left (clamped so never off-screen)
       if (panelX + panelWidth > viewportWidth - padding) {
-        panelX = screenX - panelWidth - padding;
+        panelX = Math.max(padding, screenX - panelWidth - padding);
       }
+
+      // Clamp vertical so panel stays within viewport
+      panelY = Math.max(padding, Math.min(panelY, viewportHeight - panelHeight - padding));
     }
   }
 

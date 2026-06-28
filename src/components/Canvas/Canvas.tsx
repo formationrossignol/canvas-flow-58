@@ -89,8 +89,17 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   const [brushThickness, setBrushThickness] = useState(3);
   const [isTimerVisible, setIsTimerVisible] = useState(false);
   const [isTextEditorVisible, setIsTextEditorVisible] = useState(false);
-  const [textStyle, setTextStyle] = useState({});
+  const [textStyle, setTextStyle] = useState<{
+    fontFamily?: string;
+    fontWeight?: string;
+    fontStyle?: string;
+    textDecoration?: string;
+    textAlign?: 'left' | 'center' | 'right';
+    color?: string;
+  }>({});
   const [propertyPanelElementId, setPropertyPanelElementId] = useState<string | null>(null);
+  const pendingImageUrlRef = useRef<string | null>(null);
+  const lastCursorUpdateRef = useRef(0);
   
   const {
     canvasTransform,
@@ -213,7 +222,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
             const imageUrl = event.target?.result as string;
             setPendingElement(type);
             // Store imageUrl temporarily
-            (window as any).__pendingImageUrl = imageUrl;
+            pendingImageUrlRef.current = imageUrl;
           };
           reader.readAsDataURL(file);
         }
@@ -241,26 +250,34 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
               type === 'comment' ? 150 :
               ['triangle', 'hexagon', 'pentagon', 'star', 'diamond', 'heart'].includes(type) ? 120 : 100,
       color: selectedColor,
-      content: type === 'sticky' ? 'Nouvelle idée...' : 
-               type === 'text' ? 'Tapez votre texte' : 
+      content: type === 'sticky' ? 'Nouvelle idée...' :
+               type === 'text' ? 'Tapez votre texte' :
                type === 'comment' ? '' : '',
       fontSize: type === 'text' ? 16 : 14,
+      fontFamily: (type === 'text' || type === 'sticky') ? textStyle.fontFamily : undefined,
+      textAlign: (type === 'text' || type === 'sticky') ? textStyle.textAlign : undefined,
+      textStyle: type === 'text' ? {
+        fontWeight: textStyle.fontWeight,
+        fontStyle: textStyle.fontStyle,
+        textDecoration: textStyle.textDecoration,
+        color: textStyle.color,
+      } : undefined,
       borderRadius: type === 'rectangle' ? 8 : type === 'comment' ? 12 : 0,
-      imageUrl: type === 'image' ? (window as any).__pendingImageUrl : undefined,
+      imageUrl: type === 'image' ? (pendingImageUrlRef.current ?? undefined) : undefined,
       comments: type === 'comment' ? [] : undefined,
       author: type === 'sticky' ? localCollaborator.name : undefined,
     };
-    
+
     if (type === 'image') {
-      delete (window as any).__pendingImageUrl;
+      pendingImageUrlRef.current = null;
     }
-    
+
     setElements(prev => {
       const newElements = [...prev, newElement];
       addToHistory(newElements);
       return newElements;
     });
-  }, [selectedColor, addToHistory, localCollaborator]);
+  }, [selectedColor, textStyle, addToHistory, localCollaborator]);
 
   const handleElementUpdate = useCallback((id: string, updates: Partial<CanvasElement>) => {
     setElements(prev => {
@@ -276,10 +293,12 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       addToHistory(newElements);
       return newElements;
     });
-    
+
+    setPropertyPanelElementId(prev => prev === id ? null : prev);
+
     // Also remove connections related to this element
-    setConnections(prev => 
-      prev.filter(conn => 
+    setConnections(prev =>
+      prev.filter(conn =>
         conn.fromElementId !== id && conn.toElementId !== id
       )
     );
@@ -400,42 +419,8 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       const x = (e.clientX - rect.left - canvasTransform.x) / canvasTransform.scale;
       const y = (e.clientY - rect.top - canvasTransform.y) / canvasTransform.scale;
 
-      // Create the element but DON'T clear pendingElement
-      const newElement: CanvasElement = {
-        id: `${pendingElement}-${Date.now()}`,
-        type: pendingElement,
-        x,
-        y,
-        width: pendingElement === 'sticky' ? 200 : 
-               pendingElement === 'circle' ? 120 : 
-               pendingElement === 'comment' ? 300 :
-               ['triangle', 'hexagon', 'pentagon', 'star', 'diamond', 'heart'].includes(pendingElement) ? 120 : 160,
-        height: pendingElement === 'sticky' ? 200 : 
-                pendingElement === 'circle' ? 120 : 
-                pendingElement === 'comment' ? 150 :
-                ['triangle', 'hexagon', 'pentagon', 'star', 'diamond', 'heart'].includes(pendingElement) ? 120 : 100,
-        color: selectedColor,
-        content: pendingElement === 'sticky' ? 'Nouvelle idée...' : 
-                 pendingElement === 'text' ? 'Tapez votre texte' : 
-                 pendingElement === 'comment' ? '' : '',
-        fontSize: pendingElement === 'text' ? 16 : 14,
-        borderRadius: pendingElement === 'rectangle' ? 8 : pendingElement === 'comment' ? 12 : 0,
-        imageUrl: pendingElement === 'image' ? (window as any).__pendingImageUrl : undefined,
-        comments: pendingElement === 'comment' ? [] : undefined,
-        author: pendingElement === 'sticky' ? localCollaborator.name : undefined,
-      };
-      
-      if (pendingElement === 'image') {
-        delete (window as any).__pendingImageUrl;
-      }
-      
-      setElements(prev => {
-        const newElements = [...prev, newElement];
-        addToHistory(newElements);
-        return newElements;
-      });
-      
       // Keep pendingElement active so user can continue creating
+      createElementAtPosition(pendingElement, x, y);
       return;
     }
 
@@ -452,10 +437,14 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     } else {
       canvasMouseDown(e);
     }
-  }, [pendingElement, selectedTool, isSpacePressed, canvasTransform, selectedColor, addToHistory, startSelectionBox, clearSelection, canvasMouseDown, localCollaborator]);
+  }, [pendingElement, selectedTool, isSpacePressed, canvasTransform, createElementAtPosition, startSelectionBox, clearSelection, canvasMouseDown]);
 
   const handleCanvasMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    updatePresenceCursor(e.clientX, e.clientY);
+    const now = Date.now();
+    if (now - lastCursorUpdateRef.current > 32) {
+      updatePresenceCursor(e.clientX, e.clientY);
+      lastCursorUpdateRef.current = now;
+    }
 
     if (selection.selectionBox.isActive) {
       const rect = containerRef.current?.getBoundingClientRect();
@@ -565,7 +554,6 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selection.selectedIds, handleElementDelete, handleElementDuplicate, clearSelection, undo, redo]);
 
-  const selectedElements = elements.filter(el => isSelected(el.id));
   const cursor = pendingElement 
     ? 'crosshair' 
     : isSpacePressed 
