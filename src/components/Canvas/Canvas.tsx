@@ -28,7 +28,7 @@ import { useLocalCollaborator } from "@/hooks/useLocalCollaborator";
 import { useBoardPresence } from "@/hooks/useBoardPresence";
 import { CollaboratorCursors } from "./CollaboratorCursors";
 import { CollaboratorsList } from "./CollaboratorsList";
-import { PropertyPanel } from "./PropertyPanel";
+import { ContextualBar } from "./ContextualBar";
 
 export interface Comment {
   id: string;
@@ -100,7 +100,6 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     textAlign?: 'left' | 'center' | 'right';
     color?: string;
   }>({});
-  const [propertyPanelElementId, setPropertyPanelElementId] = useState<string | null>(null);
   const pendingImageUrlRef = useRef<string | null>(null);
   const lastCursorUpdateRef = useRef(0);
   
@@ -320,8 +319,6 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       addToHistory(newElements);
       return newElements;
     });
-
-    setPropertyPanelElementId(prev => prev === id ? null : prev);
 
     // Also remove connections related to this element
     setConnections(prev =>
@@ -821,7 +818,6 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
               canvasScale={canvasTransform.scale}
               onMoveSelected={handleMoveSelected}
               onDragEnd={handleDragEnd}
-              onOpenProperties={(id) => setPropertyPanelElementId(id)}
             />
           ))}
 
@@ -936,20 +932,13 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         />
       )}
 
-      {/* Property Panel */}
-      <PropertyPanel
-        selectedElements={propertyPanelElementId ? elements.filter(el => el.id === propertyPanelElementId) : []}
+      {/* Contextual Bar */}
+      <ContextualBar
+        selectedElements={elements.filter(el => selection.selectedIds.includes(el.id))}
+        canvasTransform={canvasTransform}
         onUpdate={handleElementUpdate}
         onDelete={handleElementDelete}
         onDuplicate={handleElementDuplicate}
-        isVisible={propertyPanelElementId !== null}
-        onClose={() => setPropertyPanelElementId(null)}
-        elementPosition={
-          propertyPanelElementId 
-            ? elements.find(el => el.id === propertyPanelElementId)
-            : undefined
-        }
-        canvasTransform={canvasTransform}
       />
 
     </div>

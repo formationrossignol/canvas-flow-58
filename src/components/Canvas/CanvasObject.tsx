@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { Trash2, Edit3, Lock, Unlock, Heart, MessageCircle, Tag, User, Settings } from "lucide-react";
+import { Trash2, Edit3, Lock, Unlock, Heart, MessageCircle, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { CanvasElement, Comment } from "./Canvas";
 import { CommentThread } from "./CommentThread";
@@ -15,7 +15,6 @@ interface CanvasObjectProps {
   canvasScale: number;
   onMoveSelected: (dx: number, dy: number) => void;
   onDragEnd: () => void;
-  onOpenProperties?: (id: string) => void;
 }
 
 const DRAG_THRESHOLD = 4;
@@ -31,7 +30,6 @@ export const CanvasObject = ({
   canvasScale,
   onMoveSelected,
   onDragEnd,
-  onOpenProperties,
 }: CanvasObjectProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -464,18 +462,6 @@ export const CanvasObject = ({
 
           {!element.locked && (
             <>
-              {element.type === 'sticky' && onOpenProperties && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onOpenProperties(element.id);
-                  }}
-                  className="w-6 h-6 bg-accent text-accent-foreground rounded-full flex items-center justify-center shadow-soft hover:scale-110 transition-transform"
-                  title="Propriétés"
-                >
-                  <Settings size={12} />
-                </button>
-              )}
               {element.type !== 'comment' && (
                 <button
                   onClick={(e) => {
