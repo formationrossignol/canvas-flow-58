@@ -37,8 +37,8 @@ export const BottomBar = ({
     onZoomChange(Math.max(MIN_SCALE, scale / 1.2));
 
   const handleZoomCommit = () => {
-    const val = parseInt(zoomInput, 10);
-    if (!isNaN(val) && val >= 10 && val <= 300) {
+    const val = Number(zoomInput.trim());
+    if (!isNaN(val) && Number.isInteger(val) && val >= 10 && val <= 300) {
       onZoomChange(val / 100);
     }
     setEditingZoom(false);
