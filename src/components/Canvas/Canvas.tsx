@@ -2,7 +2,8 @@ import { useRef, useState, useCallback, useEffect, useMemo } from "react";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { toast } from "sonner";
-import { CanvasToolbar } from "./CanvasToolbar";
+import { ToolbarLeft } from "./ToolbarLeft";
+import { BottomBar } from "./BottomBar";
 import { CanvasObject } from "./CanvasObject";
 import { CanvasHeader } from "./CanvasHeader";
 import { SelectionBox } from "./SelectionBox";
@@ -551,6 +552,29 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     toast.success(`Template "${template.name}" appliqué`);
   }, [templateId, hasSnapshot, elements.length, clearSelection, resetHistory]);
 
+  const handleFitToScreen = useCallback(() => {
+    if (!elements.length) {
+      setCanvasTransform({ x: 0, y: 0, scale: 1 });
+      return;
+    }
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const minX = Math.min(...elements.map(el => el.x));
+    const minY = Math.min(...elements.map(el => el.y));
+    const maxX = Math.max(...elements.map(el => el.x + el.width));
+    const maxY = Math.max(...elements.map(el => el.y + el.height));
+    const contentW = maxX - minX;
+    const contentH = maxY - minY;
+    const scale = Math.min(
+      (rect.width - 128) / contentW,
+      (rect.height - 128) / contentH,
+      1
+    );
+    const x = (rect.width - contentW * scale) / 2 - minX * scale;
+    const y = (rect.height - contentH * scale) / 2 - minY * scale;
+    setCanvasTransform({ x, y, scale });
+  }, [elements, setCanvasTransform]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
@@ -572,6 +596,9 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         e.preventDefault();
         const nextElements = redo();
         if (nextElements) setElements(nextElements);
+      } else if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'H') {
+        e.preventDefault();
+        handleFitToScreen();
       } else if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
         if (selection.selectedIds.length > 0) {
           e.preventDefault();
@@ -599,7 +626,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selection.selectedIds, handleElementDelete, handleElementDuplicate, clearSelection, undo, redo, addToHistory, setCanvasTransform]);
+  }, [selection.selectedIds, handleElementDelete, handleElementDuplicate, clearSelection, undo, redo, addToHistory, setCanvasTransform, handleFitToScreen]);
 
   const cursor = pendingElement 
     ? 'crosshair' 
@@ -814,35 +841,25 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         </div>
       </div>
 
-      {/* Floating Toolbar */}
-      <CanvasToolbar
+      {/* Left Toolbar */}
+      <ToolbarLeft
         selectedTool={selectedTool}
-        selectedColor={selectedColor}
-        brushThickness={brushThickness}
-        onToolSelect={setSelectedTool}
-        onColorSelect={setSelectedColor}
-        onBrushThicknessChange={setBrushThickness}
-        onAddElement={handleAddElement}
         isConnecting={isConnecting}
+        onToolSelect={setSelectedTool}
+        onAddElement={handleAddElement}
         onToggleConnecting={() => setIsConnecting(!isConnecting)}
-        isTimerVisible={isTimerVisible}
-        onToggleTimer={() => setIsTimerVisible(!isTimerVisible)}
-        onToggleTextEditor={() => setIsTextEditorVisible(!isTextEditorVisible)}
-        onToggleOptions={() => setIsOptionsMenuVisible(!isOptionsMenuVisible)}
         onToggleShapeLibrary={() => setIsShapeLibraryVisible(!isShapeLibraryVisible)}
-        onExportPDF={() => handleExportPDF(false)}
-        onExportSelectedArea={handleExportSelectedArea}
-        hasSelection={selection.selectedIds.length > 0}
+      />
+
+      {/* Bottom Bar */}
+      <BottomBar
         canUndo={canUndo}
         canRedo={canRedo}
-        onUndo={() => {
-          const prevElements = undo();
-          if (prevElements) setElements(prevElements);
-        }}
-        onRedo={() => {
-          const nextElements = redo();
-          if (nextElements) setElements(nextElements);
-        }}
+        scale={canvasTransform.scale}
+        onUndo={() => { const prev = undo(); if (prev) setElements(prev); }}
+        onRedo={() => { const next = redo(); if (next) setElements(next); }}
+        onZoomChange={(scale) => setCanvasTransform(prev => ({ ...prev, scale }))}
+        onFitToScreen={handleFitToScreen}
       />
 
       {/* Timer */}
