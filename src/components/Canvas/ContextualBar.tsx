@@ -52,6 +52,9 @@ export const ContextualBar = ({
   const first = selectedElements[0];
   const isText = first.type === 'text';
   const isLocked = selectedElements.every(el => el.locked);
+  const sharedColor = isMulti
+    ? (selectedElements.every(el => el.color === first.color) ? first.color : null)
+    : first.color;
 
   const updateAll = (updates: Partial<CanvasElement>) =>
     selectedElements.forEach(el => onUpdate(el.id, updates));
@@ -99,7 +102,7 @@ export const ContextualBar = ({
             <button
               key={color}
               className={`w-5 h-5 rounded transition-transform hover:scale-110 ${
-                first.color === color ? 'ring-2 ring-primary ring-offset-1' : ''
+                sharedColor === color ? 'ring-2 ring-primary ring-offset-1' : ''
               }`}
               style={{ backgroundColor: color }}
               onClick={() => handleColorClick(color)}
@@ -121,7 +124,7 @@ export const ContextualBar = ({
                   <button
                     key={color}
                     className={`w-6 h-6 rounded transition-transform hover:scale-110 border ${
-                      first.color === color ? 'border-primary scale-110' : 'border-border'
+                      sharedColor === color ? 'border-primary scale-110' : 'border-border'
                     }`}
                     style={{ backgroundColor: color }}
                     onClick={() => handleColorClick(color)}
