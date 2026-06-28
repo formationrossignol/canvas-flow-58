@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
+    body { font-family: 'DM Sans', system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+    textarea, input, button, select { font-family: inherit; }
+    textarea:focus, input:focus, button:focus { outline: none; }
+
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.93) translateY(5px); }
+      to   { opacity: 1; transform: scale(1)    translateY(0);   }
+    }
+    @keyframes floatIn {
+      from { opacity: 0; transform: translateX(-50%) translateY(16px) scale(0.95); }
+      to   { opacity: 1; transform: translateX(-50%) translateY(0)    scale(1);    }
+    }
+    @keyframes actionIn {
+      from { opacity: 0; transform: translateY(5px) scale(0.9); }
+      to   { opacity: 1; transform: translateY(0)   scale(1);   }
+    }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.35; }
+    }
+    @keyframes slideRight {
+      from { opacity: 0; transform: translateX(-6px); }
+      to   { opacity: 1; transform: translateX(0);    }
+    }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(15,23,42,0.12); border-radius: 2px; }
+  </style>
+</helmet>
+
+<div style="display:flex; width:100vw; height:100vh; overflow:hidden; font-family:'DM Sans',system-ui,sans-serif;">
+
+  <!-- ════════════ SIDEBAR ════════════ -->
+  <aside style="{{ sidebarStyle }}">
+
+    <!-- Logo row -->
+    <div style="height:52px; display:flex; align-items:center; gap:10px; padding:0 14px; border-bottom:1px solid rgba(255,255,255,0.07); flex-shrink:0; overflow:hidden;">
+      <div style="width:28px; height:28px; background:linear-gradient(135deg,#6366F1 0%,#8B5CF6 100%); border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 2px 8px rgba(99,102,241,0.35);">{{ logoMark }}</div>
+      <sc-if value="{{ sidebarOpen }}" hint-placeholder-val="{{ true }}">
+        <span style="font-size:15px; font-weight:700; color:#F1F3F5; letter-spacing:-0.4px; white-space:nowrap; overflow:hidden; animation:slideRight 0.2s ease-out;">FlowBoard</span>
+      </sc-if>
+    </div>
+
+    <!-- Search (open only) -->
+    <sc-if value="{{ sidebarOpen }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.06); flex-shrink:0;">
+        <div style="display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:7px 10px; cursor:text;">
+          {{ searchIcon }}
+          <span style="font-size:13px; color:rgba(255,255,255,0.27); flex:1; line-height:1;">Rechercher...</span>
+          <span style="font-size:11px; color:rgba(255,255,255,0.18); background:rgba(255,255,255,0.07); padding:2px 6px; border-radius:4px; letter-spacing:0.02em;">⌘K</span>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- Nav -->
+    <nav style="flex:1; padding:8px; overflow-y:auto; overflow-x:hidden; display:flex; flex-direction:column; gap:2px;">
+
+      <sc-if value="{{ sidebarOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:8px 8px 4px; font-size:10.5px; font-weight:600; color:rgba(255,255,255,0.22); letter-spacing:0.08em; text-transform:uppercase;">Navigation</div>
+      </sc-if>
+
+      <sc-for list="{{ navItems }}" as="navItem" hint-placeholder-count="4">
+        <button style="{{ navItem.style }}" onClick="{{ navItem.onClick }}">
+          {{ navItem.icon }}
+          <sc-if value="{{ sidebarOpen }}" hint-placeholder-val="{{ true }}">
+            <span style="font-size:13.5px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ navItem.label }}</span>
+          </sc-if>
+        </button>
+      </sc-for>
+
+      <div style="margin:8px 0; border-top:1px solid rgba(255,255,255,0.06);"></div>
+
+      <sc-if value="{{ sidebarOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:4px 8px 4px;">
+          <span style="font-size:10.5px; font-weight:600; color:rgba(255,255,255,0.22); letter-spacing:0.08em; text-transform:uppercase;">Tableaux</span>
+          <button style="width:18px; height:18px; background:rgba(255,255,255,0.08); border:none; border-radius:4px; cursor:pointer; color:rgba(255,255,255,0.5); font-size:14px; display:flex; align-items:center; justify-content:center; line-height:1;">+</button>
+        </div>
+      </sc-if>
+
+      <sc-for list="{{ projectItems }}" as="proj" hint-placeholder-count="4">
+        <button style="{{ proj.style }}" onClick="{{ proj.onClick }}">
+          <div style="width:6px; height:6px; border-radius:2px; background:{{ proj.color }}; flex-shrink:0;"></div>
+          <sc-if value="{{ sidebarOpen }}" hint-placeholder-val="{{ true }}">
+            <span style="font-size:13.5px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1; text-align:left;">{{ proj.name }}</span>
+            <sc-if value="{{ proj.isFav }}" hint-placeholder-val="{{ false }}">
+              <span style="color:#F59E0B; font-size:10px; flex-shrink:0;">★</span>
+            </sc-if>
+          </sc-if>
+        </button>
+      </sc-for>
+
+    </nav>
+
+    <!-- User row -->
+    <div style="padding:10px 8px; border-top:1px solid rgba(255,255,255,0.06); flex-shrink:0;">
+      <div style="display:flex; align-items:center; gap:10px; padding:6px; border-radius:9px;">
+        <div style="width:28px; height:28px; border-radius:8px; background:linear-gradient(135deg,#6366F1,#8B5CF6); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:white; flex-shrink:0;">M</div>
+        <sc-if value="{{ sidebarOpen }}" hint-placeholder-val="{{ true }}">
+          <div style="flex:1; min-width:0; overflow:hidden;">
+            <div style="font-size:13px; font-weight:500; color:#E2E4EA; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.3;">Marie Dupont</div>
+            <div style="font-size:11px; color:rgba(255,255,255,0.27); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Pro · Équipe Design</div>
+          </div>
+          <button style="width:22px; height:22px; background:none; border:none; cursor:pointer; color:rgba(255,255,255,0.3); display:flex; align-items:center; justify-content:center; border-radius:4px; flex-shrink:0;">{{ dotsIcon }}</button>
+        </sc-if>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ════════════ MAIN AREA ════════════ -->
+  <div style="flex:1; display:flex; flex-direction:column; overflow:hidden; position:relative; min-width:0;">
+
+    <!-- ════════════ HEADER ════════════ -->
+    <header style="height:52px; display:flex; align-items:center; justify-content:space-between; padding:0 16px 0 12px; background:white; border-bottom:1px solid rgba(15,23,42,0.07); flex-shrink:0; z-index:30; position:relative;">
+
+      <!-- Left: toggle + breadcrumb + title -->
+      <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:0;">
+        <button onClick="{{ toggleSidebar }}" style="width:30px; height:30px; border-radius:7px; background:none; border:1px solid rgba(15,23,42,0.09); cursor:pointer; display:flex; align-items:center; justify-content:center; color:#6B7280; flex-shrink:0; transition:background 0.12s;">{{ menuIcon }}</button>
+        <div style="display:flex; align-items:center; gap:5px; color:#9CA3AF; font-size:13px; flex-shrink:0;">
+          <span>Design</span><span style="color:#D1D5DB;">/</span>
+        </div>
+        <input type="text" value="{{ boardTitle }}" onChange="{{ handleTitleChange }}" style="font-size:14px; font-weight:600; color:#111827; background:none; border:none; outline:none; cursor:text; letter-spacing:-0.3px; min-width:60px; max-width:220px; padding:2px 4px; border-radius:5px;" placeholder="Titre du tableau" />
+        <div style="display:flex; align-items:center; gap:5px; font-size:12px; color:#9CA3AF; flex-shrink:0;">
+          <div style="width:5px; height:5px; border-radius:50%; background:#10B981; animation:pulseDot 2.5s ease-in-out infinite;"></div>
+          <span>Sauvegardé</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:4px; padding:3px 8px; background:rgba(15,23,42,0.04); border:1px solid rgba(15,23,42,0.07); border-radius:20px; font-size:11.5px; color:#6B7280; flex-shrink:0;">
+          {{ layersIcon }}
+          <span>{{ elementCount }}</span>
+        </div>
+      </div>
+
+      <!-- Center: collaborators -->
+      <div style="display:flex; align-items:center; gap:10px; position:absolute; left:50%; transform:translateX(-50%); pointer-events:none;">
+        <div style="display:flex; align-items:center;">
+          <sc-for list="{{ collaborators }}" as="collab" hint-placeholder-count="3">
+            <div style="{{ collab.avatarStyle }}" title="{{ collab.name }}">{{ collab.initial }}</div>
+          </sc-for>
+        </div>
+        <div style="display:flex; align-items:center; gap:5px; background:#F0FDF4; border:1px solid #BBF7D0; border-radius:20px; padding:4px 9px;">
+          <div style="width:5px; height:5px; border-radius:50%; background:#10B981; animation:pulseDot 2s ease-in-out infinite;"></div>
+          <span style="font-size:11.5px; font-weight:500; color:#059669;">3 en ligne</span>
+        </div>
+      </div>
+
+      <!-- Right: actions -->
+      <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+        <button style="height:30px; padding:0 10px; border-radius:7px; background:none; border:1px solid rgba(15,23,42,0.09); cursor:pointer; font-size:12.5px; color:#374151; font-family:inherit; display:flex; align-items:center; gap:5px; font-weight:500; transition:background 0.12s;">{{ layoutIcon }}<span>Templates</span></button>
+        <button style="height:30px; width:30px; border-radius:7px; background:none; border:1px solid rgba(15,23,42,0.09); cursor:pointer; color:#6B7280; display:flex; align-items:center; justify-content:center; position:relative;">
+          {{ commentIcon }}
+          <sc-if value="{{ showCommentBadge }}" hint-placeholder-val="{{ true }}">
+            <div style="position:absolute; top:-4px; right:-4px; min-width:16px; height:16px; background:#EF4444; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:white; padding:0 3px; border:1.5px solid white;">{{ commentCount }}</div>
+          </sc-if>
+        </button>
+        <div style="width:1px; height:18px; background:rgba(15,23,42,0.08);"></div>
+        <button style="height:30px; padding:0 14px; border-radius:7px; background:#6366F1; border:none; cursor:pointer; font-size:13px; font-weight:600; color:white; font-family:inherit; display:flex; align-items:center; gap:5px; box-shadow:0 1px 4px rgba(99,102,241,0.35); transition:background 0.12s;">{{ shareIcon }}<span>Partager</span></button>
+        <button style="height:30px; width:30px; border-radius:7px; background:none; border:1px solid rgba(15,23,42,0.09); cursor:pointer; color:#6B7280; display:flex; align-items:center; justify-content:center;">{{ moreVertIcon }}</button>
+      </div>
+    </header>
+
+    <!-- ════════════ CANVAS AREA ════════════ -->
+    <div style="flex:1; position:relative; overflow:hidden; background:#F1F3F6;"
+         onMouseDown="{{ handleCanvasMouseDown }}"
+         onWheel="{{ handleWheel }}"
+         ref="{{ setCanvasRef }}">
+
+      <!-- Dot grid -->
+      <div style="{{ dotGridStyle }}"></div>
+
+      <!-- Pending-tool hint bar -->
+      <sc-if value="{{ pendingTool }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute; top:16px; left:50%; transform:translateX(-50%); background:rgba(15,23,42,0.72); color:white; font-size:12px; font-weight:500; padding:6px 14px; border-radius:20px; pointer-events:none; z-index:20; backdrop-filter:blur(8px); letter-spacing:-0.1px; white-space:nowrap;">
+          Cliquez pour placer · Échap pour annuler
+        </div>
+      </sc-if>
+
+      <!-- Transform container -->
+      <div style="{{ transformStyle }}">
+        <sc-for list="{{ renderedElements }}" as="el" hint-placeholder-count="0">
+          <div data-elid="{{ el.id }}" style="{{ el.style }}" onMouseDown="{{ el.onMouseDown }}" onDoubleClick="{{ el.onDoubleClick }}">
+            {{ el.content }}
+
+            <!-- Selected state: action buttons + handles -->
+            <sc-if value="{{ el.isSelected }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute; top:-36px; right:0; display:flex; align-items:center; gap:3px; animation:actionIn 0.15s ease-out;">
+                <sc-if value="{{ el.canEdit }}" hint-placeholder-val="{{ true }}">
+                  <button onMouseDown="{{ el.onEditBtn }}" style="{{ actionBtnStyle }}" title="Éditer">{{ editIcon }}</button>
+                </sc-if>
+                <button onMouseDown="{{ el.onDupBtn }}" style="{{ actionBtnStyle }}" title="Dupliquer">{{ dupIcon }}</button>
+                <button onMouseDown="{{ el.onDelBtn }}" style="{{ actionBtnDanger }}" title="Supprimer">{{ trashIcon }}</button>
+              </div>
+              <div style="position:absolute; top:-3px;    left:-3px;  width:7px; height:7px; border-radius:2px; background:white; border:1.5px solid #6366F1; pointer-events:none;"></div>
+              <div style="position:absolute; top:-3px;    right:-3px; width:7px; height:7px; border-radius:2px; background:white; border:1.5px solid #6366F1; pointer-events:none;"></div>
+              <div style="position:absolute; bottom:-3px; left:-3px;  width:7px; height:7px; border-radius:2px; background:white; border:1.5px solid #6366F1; pointer-events:none;"></div>
+              <div style="position:absolute; bottom:-3px; right:-3px; width:7px; height:7px; border-radius:2px; background:white; border:1.5px solid #6366F1; pointer-events:none;"></div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+
+      <!-- Selection box -->
+      <sc-if value="{{ showSelBox }}" hint-placeholder-val="{{ false }}">
+        <div style="{{ selBoxStyle }}"></div>
+      </sc-if>
+    </div>
+
+    <!-- ════════════ FLOATING TOOLBAR ════════════ -->
+    <div style="position:fixed; bottom:24px; left:50%; transform:translateX(-50%); z-index:50; animation:floatIn 0.45s cubic-bezier(0.175,0.885,0.32,1.275) both;">
+      <div style="display:flex; align-items:center; gap:1px; background:rgba(255,255,255,0.97); border:1px solid rgba(15,23,42,0.07); border-radius:14px; padding:6px; box-shadow:0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.04), inset 0 1px 0 white;">
+
+        <button onClick="{{ selectTool_select }}"  title="Sélection (V)" style="{{ tbStyle_select }}">{{  tbIcon_select  }}</button>
+        <button onClick="{{ selectTool_hand }}"    title="Main (H)"      style="{{ tbStyle_hand   }}">{{  tbIcon_hand    }}</button>
+
+        <div style="width:1px; height:18px; background:rgba(15,23,42,0.08); margin:0 3px;"></div>
+
+        <button onClick="{{ selectTool_sticky }}"  title="Post-it (S)"   style="{{ tbStyle_sticky }}">{{  tbIcon_sticky  }}</button>
+        <button onClick="{{ selectTool_text }}"    title="Texte (T)"     style="{{ tbStyle_text   }}">{{  tbIcon_text    }}</button>
+        <button onClick="{{ selectTool_rect }}"    title="Rectangle (R)" style="{{ tbStyle_rect   }}">{{  tbIcon_rect    }}</button>
+        <button onClick="{{ selectTool_circle }}"  title="Cercle (C)"    style="{{ tbStyle_circle }}">{{  tbIcon_circle  }}</button>
+
+        <div style="width:1px; height:18px; background:rgba(15,23,42,0.08); margin:0 3px;"></div>
+
+        <button onClick="{{ selectTool_pen }}"     title="Crayon (P)"    style="{{ tbStyle_pen     }}">{{ tbIcon_pen     }}</button>
+        <button onClick="{{ selectTool_comment }}" title="Commentaire"   style="{{ tbStyle_comment }}">{{ tbIcon_comment }}</button>
+        <button onClick="{{ selectTool_connect }}" title="Connecter"     style="{{ tbStyle_connect }}">{{ tbIcon_connect }}</button>
+
+        <div style="width:1px; height:18px; background:rgba(15,23,42,0.08); margin:0 3px;"></div>
+
+        <!-- Color swatch + picker -->
+        <div style="position:relative;">
+          <button onClick="{{ toggleColors }}" title="Couleur" style="width:36px; height:36px; border-radius:9px; background:none; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+            <div style="width:22px; height:22px; border-radius:6px; background:{{ color }}; border:1.5px solid rgba(15,23,42,0.15); box-shadow:0 1px 4px rgba(0,0,0,0.1);"></div>
+          </button>
+          <sc-if value="{{ showColors }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute; bottom:calc(100% + 10px); left:50%; transform:translateX(-50%); background:white; border:1px solid rgba(15,23,42,0.08); border-radius:12px; padding:12px; box-shadow:0 8px 28px rgba(0,0,0,0.12); z-index:60; animation:scaleIn 0.15s ease-out; min-width:148px;">
+              <div style="font-size:10.5px; font-weight:600; color:#9CA3AF; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:8px;">Couleur</div>
+              <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:5px;">
+                <sc-for list="{{ colorBtns }}" as="cb" hint-placeholder-count="8">
+                  <button onClick="{{ cb.onClick }}" style="{{ cb.style }}" title="{{ cb.label }}"></button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+
+        <div style="width:1px; height:18px; background:rgba(15,23,42,0.08); margin:0 3px;"></div>
+
+        <button onClick="{{ undoAction }}" title="Annuler (⌘Z)" style="{{ undoBtnStyle }}">{{ undoIcon }}</button>
+        <button onClick="{{ redoAction }}" title="Refaire (⌘Y)" style="{{ redoBtnStyle }}">{{ redoIcon }}</button>
+
+        <div style="width:1px; height:18px; background:rgba(15,23,42,0.08); margin:0 3px;"></div>
+
+        <button title="Timer"      style="{{ toolBtnBase }}">{{ timerIcon    }}</button>
+        <button title="Exporter"   style="{{ toolBtnBase }}">{{ exportIcon   }}</button>
+        <button title="Paramètres" style="{{ toolBtnBase }}">{{ settingsIcon }}</button>
+      </div>
+    </div>
+
+    <!-- ════════════ MINIMAP + ZOOM ════════════ -->
+    <div style="position:absolute; bottom:24px; right:24px; z-index:40; display:flex; flex-direction:column; gap:8px; animation:scaleIn 0.3s ease-out;">
+
+      <!-- Zoom controls -->
+      <div style="display:flex; align-items:center; gap:5px; background:rgba(255,255,255,0.97); border:1px solid rgba(15,23,42,0.07); border-radius:10px; padding:5px 8px; box-shadow:0 2px 12px rgba(0,0,0,0.07);">
+        <button onClick="{{ zoomOut }}"   style="width:24px; height:24px; border-radius:6px; background:rgba(15,23,42,0.05); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#374151; font-size:18px; font-weight:300; line-height:1; font-family:inherit;">−</button>
+        <button onClick="{{ zoomReset }}" style="min-width:54px; height:24px; border-radius:6px; background:rgba(99,102,241,0.08); border:none; cursor:pointer; font-size:12px; font-weight:600; color:#6366F1; font-family:inherit; letter-spacing:-0.2px; transition:background 0.12s;">{{ scaleLabel }}%</button>
+        <button onClick="{{ zoomIn }}"    style="width:24px; height:24px; border-radius:6px; background:rgba(15,23,42,0.05); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#374151; font-size:18px; font-weight:300; line-height:1; font-family:inherit;">+</button>
+      </div>
+
+      <!-- Minimap canvas -->
+      <div style="background:rgba(255,255,255,0.97); border:1px solid rgba(15,23,42,0.07); border-radius:10px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,0.07);">
+        <div style="padding:7px 10px 5px; display:flex; align-items:center; justify-content:space-between;">
+          <span style="font-size:10.5px; font-weight:600; color:#9CA3AF; letter-spacing:0.05em; text-transform:uppercase;">Carte</span>
+          <span style="font-size:11px; color:#D1D5DB;">{{ elementCount }}×</span>
+        </div>
+        <canvas width="160" height="100" style="display:block; cursor:crosshair;" onClick="{{ handleMiniMapClick }}" ref="{{ setMiniMapRef }}"></canvas>
+      </div>
+    </div>
+
+    <!-- ════════════ PROPERTY PANEL ════════════ -->
+    <sc-if value="{{ showPropPanel }}" hint-placeholder-val="{{ false }}">
+      <div style="{{ propPanelStyle }}">
+
+        <!-- Panel header -->
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-bottom:1px solid rgba(15,23,42,0.06); flex-shrink:0;">
+          <span style="font-size:13px; font-weight:600; color:#111827; letter-spacing:-0.2px;">{{ propTitle }}</span>
+          <button onClick="{{ closePropPanel }}" style="width:22px; height:22px; border-radius:5px; background:rgba(15,23,42,0.05); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#9CA3AF;">{{ closeIcon }}</button>
+        </div>
+
+        <!-- Panel body -->
+        <div style="padding:14px; display:flex; flex-direction:column; gap:14px; overflow-y:auto; flex:1;">
+
+          <!-- Color -->
+          <div>
+            <div style="font-size:10.5px; font-weight:600; color:#9CA3AF; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:8px;">Couleur</div>
+            <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:5px;">
+              <sc-for list="{{ propColorBtns }}" as="pcb" hint-placeholder-count="8">
+                <button onClick="{{ pcb.onClick }}" style="{{ pcb.style }}"></button>
+              </sc-for>
+            </div>
+          </div>
+
+          <!-- Opacity -->
+          <div>
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+              <span style="font-size:10.5px; font-weight:600; color:#9CA3AF; letter-spacing:0.06em; text-transform:uppercase;">Opacité</span>
+              <span style="font-size:12px; font-weight:600; color:#374151;">{{ propOpacity }}%</span>
+            </div>
+            <input type="range" min="10" max="100" value="{{ propOpacity }}" onChange="{{ handlePropOpacityChange }}" style="width:100%; accent-color:#6366F1; cursor:pointer;" />
+          </div>
+
+          <!-- Font size (text / sticky only) -->
+          <sc-if value="{{ propIsText }}" hint-placeholder-val="{{ true }}">
+            <div>
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                <span style="font-size:10.5px; font-weight:600; color:#9CA3AF; letter-spacing:0.06em; text-transform:uppercase;">Taille police</span>
+                <span style="font-size:12px; font-weight:600; color:#374151;">{{ propFontSize }}px</span>
+              </div>
+              <input type="range" min="8" max="48" value="{{ propFontSize }}" onChange="{{ handlePropFontSizeChange }}" style="width:100%; accent-color:#6366F1; cursor:pointer;" />
+            </div>
+          </sc-if>
+
+          <!-- Geometry -->
+          <div>
+            <div style="font-size:10.5px; font-weight:600; color:#9CA3AF; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:8px;">Géométrie</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+              <sc-for list="{{ propGeometry }}" as="g" hint-placeholder-count="4">
+                <div style="background:rgba(15,23,42,0.03); border:1px solid rgba(15,23,42,0.07); border-radius:7px; padding:7px 9px;">
+                  <div style="font-size:10px; font-weight:600; color:#9CA3AF; letter-spacing:0.04em; margin-bottom:2px;">{{ g.label }}</div>
+                  <div style="font-size:13px; font-weight:500; color:#374151; letter-spacing:-0.2px;">{{ g.value }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div style="display:flex; gap:6px; padding-top:2px; border-top:1px solid rgba(15,23,42,0.06);">
+            <button onClick="{{ propDuplicate }}" style="flex:1; height:30px; border-radius:8px; background:rgba(15,23,42,0.04); border:1px solid rgba(15,23,42,0.08); cursor:pointer; font-size:12px; font-weight:500; color:#374151; font-family:inherit; display:flex; align-items:center; justify-content:center; gap:5px;">{{ dupIcon }} Dupliquer</button>
+            <button onClick="{{ propDelete }}"    style="height:30px; padding:0 12px; border-radius:8px; background:rgba(239,68,68,0.05); border:1px solid rgba(239,68,68,0.12); cursor:pointer; font-size:12px; font-weight:500; color:#EF4444; font-family:inherit; display:flex; align-items:center; justify-content:center; gap:5px;">{{ trashIcon }} Suppr.</button>
+          </div>
+
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+
+  /* ──────────────── INITIAL DEMO DATA ──────────────── */
+  static INIT = [
+    { id:'frame1', type:'rect',   x:90,  y:50,  width:900, height:440, color:'rgba(99,102,241,0.03)', borderColor:'rgba(99,102,241,0.14)', borderRadius:16, content:'Brainstorming — Sprint Q2', label:true, zIndex:0 },
+    { id:'s1', type:'sticky', x:130, y:115, width:196, height:200, color:'#FFFBEB', borderColor:'#FDE68A', content:'Améliorer l\'onboarding\n\nRéduire le temps de première connexion de 5 min à moins de 2 min.', author:'Marie D.', authorColor:'#6366F1', tag:'UX', tagColor:'#F59E0B', likes:4, zIndex:1 },
+    { id:'s2', type:'sticky', x:350, y:95,  width:196, height:200, color:'#F0FDF4', borderColor:'#86EFAC', content:'Templates métier\n\nAjouter 20 templates validés avec les équipes client.', author:'Jean-Paul R.', authorColor:'#10B981', tag:'Feature', tagColor:'#10B981', likes:6, zIndex:1 },
+    { id:'s3', type:'sticky', x:570, y:115, width:196, height:200, color:'#FFF1F2', borderColor:'#FECACA', content:'API publique\n\nDévelopper une API REST pour les intégrations tierces.', author:'Sophie M.', authorColor:'#EF4444', tag:'Tech', tagColor:'#EF4444', likes:2, zIndex:1 },
+    { id:'s4', type:'sticky', x:790, y:95,  width:196, height:200, color:'#EFF6FF', borderColor:'#BFDBFE', content:'Mode hors-ligne\n\nSynchronisation différée pour les utilisateurs sans connexion stable.', author:'Thomas B.', authorColor:'#3B82F6', tag:'Infra', tagColor:'#3B82F6', likes:7, zIndex:1 },
+    { id:'t1', type:'text',   x:130, y:345, width:500,  height:44, color:'transparent', textColor:'#6B7280', content:'📍 Prochaine étape : voter sur les priorités', fontSize:15, fontWeight:500, zIndex:2 },
+    { id:'c1', type:'circle', x:720, y:340, width:96,  height:96,  color:'#EFF6FF', borderColor:'#BFDBFE', zIndex:1 },
+    { id:'c2', type:'circle', x:836, y:362, width:66,  height:66,  color:'#F0FDF4', borderColor:'#86EFAC', zIndex:1 },
+  ];
+
+  state = {
+    sidebarOpen: true,
+    tool: 'select',
+    color: '#FFFBEB',
+    elements: Component.INIT.map(e => ({ ...e })),
+    selectedIds: [],
+    transform: { x: 0, y: 0, scale: 1 },
+    showColors: false,
+    editingId: null,
+    editContent: '',
+    boardTitle: 'Sprint Q2 — Design',
+    propElId: null,
+    selectionBox: null,
+    history: [Component.INIT.map(e => ({ ...e }))],
+    historyIndex: 0,
+    nextId: 200,
+  };
+
+  _canvasRef   = null;
+  _miniMapRef  = null;
+  _drag        = null;
+  _spaceDown   = false;
+
+  /* ──────────────── LIFECYCLE ──────────────── */
+  componentDidMount() {
+    this._onMove = e => this._winMove(e);
+    this._onUp   = e => this._winUp(e);
+    this._onKD   = e => this._keyDown(e);
+    this._onKU   = e => { if (e.code === 'Space') this._spaceDown = false; };
+    window.addEventListener('mousemove', this._onMove);
+    window.addEventListener('mouseup',   this._onUp);
+    window.addEventListener('keydown',   this._onKD);
+    window.addEventListener('keyup',     this._onKU);
+    setTimeout(() => this._drawMiniMap(), 120);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('mousemove', this._onMove);
+    window.removeEventListener('mouseup',   this._onUp);
+    window.removeEventListener('keydown',   this._onKD);
+    window.removeEventListener('keyup',     this._onKU);
+  }
+
+  componentDidUpdate() { this._drawMiniMap(); }
+
+  /* ──────────────── HISTORY ──────────────── */
+  _push(elements) {
+    const { history, historyIndex } = this.state;
+    const h = history.slice(0, historyIndex + 1);
+    h.push(elements.map(e => ({ ...e })));
+    this.setState({ history: h, historyIndex: h.length - 1 });
+  }
+
+  _undo() {
+    const { history, historyIndex } = this.state;
+    if (historyIndex <= 0) return;
+    const i = historyIndex - 1;
+    this.setState({ elements: history[i].map(e => ({ ...e })), historyIndex: i, selectedIds: [], propElId: null });
+  }
+
+  _redo() {
+    const { history, historyIndex } = this.state;
+    if (historyIndex >= history.length - 1) return;
+    const i = historyIndex + 1;
+    this.setState({ elements: history[i].map(e => ({ ...e })), historyIndex: i, selectedIds: [], propElId: null });
+  }
+
+  /* ──────────────── KEYBOARD ──────────────── */
+  _keyDown(e) {
+    if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+    if (e.code === 'Space') { this._spaceDown = true; e.preventDefault(); return; }
+
+    if (e.key === 'Escape') {
+      this.setState({ selectedIds: [], tool: 'select', editingId: null, showColors: false, propElId: null });
+      return;
+    }
+    if ((e.key === 'Delete' || e.key === 'Backspace') && !this.state.editingId) {
+      const { selectedIds, elements } = this.state;
+      if (!selectedIds.length) return;
+      const els = elements.filter(el => !selectedIds.includes(el.id));
+      this.setState({ elements: els, selectedIds: [], propElId: null });
+      this._push(els);
+      return;
+    }
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'z') { e.preventDefault(); this._undo(); return; }
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'z'))) { e.preventDefault(); this._redo(); return; }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'd') { e.preventDefault(); this._dupSelected(); return; }
+
+    const sc = { v:'select', h:'hand', s:'sticky', t:'text', r:'rect', c:'circle', p:'pen' };
+    if (!e.ctrlKey && !e.metaKey && sc[e.key.toLowerCase()]) {
+      this.setState({ tool: sc[e.key.toLowerCase()] });
+    }
+  }
+
+  /* ──────────────── CANVAS MOUSE ──────────────── */
+  _s2c(cx, cy) {
+    const rect = this._canvasRef && this._canvasRef.getBoundingClientRect();
+    if (!rect) return { x: 0, y: 0 };
+    const t = this.state.transform;
+    return { x: (cx - rect.left - t.x) / t.scale, y: (cy - rect.top - t.y) / t.scale };
+  }
+
+  handleCanvasMouseDown(e) {
+    if (e.button !== 0) return;
+    if (e.target.closest('[data-elid]')) return;
+    const { tool, transform } = this.state;
+
+    if (this._spaceDown || tool === 'hand') {
+      this._drag = { type: 'pan', sx: e.clientX, sy: e.clientY, tx: transform.x, ty: transform.y };
+      return;
+    }
+    if (tool === 'select') {
+      const p = this._s2c(e.clientX, e.clientY);
+      this.setState({ selectedIds: [], propElId: null, selectionBox: { sx: p.x, sy: p.y, ex: p.x, ey: p.y } });
+      this._drag = { type: 'sel', scx: p.x, scy: p.y };
+      return;
+    }
+    if (['sticky','text','rect','circle'].includes(tool)) {
+      const p = this._s2c(e.clientX, e.clientY);
+      this._createElement(tool, p.x, p.y);
+    }
+  }
+
+  _winMove(e) {
+    if (!this._drag) return;
+    const t = this.state.transform;
+
+    if (this._drag.type === 'pan') {
+      this.setState({ transform: { ...t, x: this._drag.tx + (e.clientX - this._drag.sx), y: this._drag.ty + (e.clientY - this._drag.sy) } });
+      return;
+    }
+    if (this._drag.type === 'element') {
+      const dx = (e.clientX - this._drag.lx) / t.scale;
+      const dy = (e.clientY - this._drag.ly) / t.scale;
+      this._drag.lx = e.clientX; this._drag.ly = e.clientY; this._drag.moved = true;
+      this.setState(s => ({ elements: s.elements.map(el => s.selectedIds.includes(el.id) ? { ...el, x: el.x + dx, y: el.y + dy } : el) }));
+      return;
+    }
+    if (this._drag.type === 'sel') {
+      const p = this._s2c(e.clientX, e.clientY);
+      this.setState(s => s.selectionBox ? { selectionBox: { ...s.selectionBox, ex: p.x, ey: p.y } } : {});
+    }
+  }
+
+  _winUp() {
+    if (!this._drag) return;
+    if (this._drag.type === 'element' && this._drag.moved) this._push(this.state.elements);
+    if (this._drag.type === 'sel') {
+      const { selectionBox, elements } = this.state;
+      if (selectionBox) {
+        const minX = Math.min(selectionBox.sx, selectionBox.ex), maxX = Math.max(selectionBox.sx, selectionBox.ex);
+        const minY = Math.min(selectionBox.sy, selectionBox.ey), maxY = Math.max(selectionBox.sy, selectionBox.ey);
+        const sel = elements.filter(el => el.x < maxX && el.x + el.width > minX && el.y < maxY && el.y + el.height > minY).map(el => el.id);
+        this.setState({ selectedIds: sel, propElId: sel.length === 1 ? sel[0] : null, selectionBox: null });
+      }
+    }
+    this._drag = null;
+    if (this.state.selectionBox) this.setState({ selectionBox: null });
+  }
+
+  /* ──────────────── ELEMENT MOUSE ──────────────── */
+  handleElementMouseDown(id, e) {
+    e.stopPropagation();
+    if (this.state.tool !== 'select' && this.state.tool !== 'hand') return;
+    const { selectedIds } = this.state;
+    const multi = e.ctrlKey || e.metaKey || e.shiftKey;
+    const newSel = multi
+      ? (selectedIds.includes(id) ? selectedIds.filter(s => s !== id) : [...selectedIds, id])
+      : (selectedIds.includes(id) ? selectedIds : [id]);
+    this.setState({ selectedIds: newSel, propElId: newSel.length === 1 ? newSel[0] : null });
+    this._drag = { type: 'element', lx: e.clientX, ly: e.clientY, moved: false };
+  }
+
+  handleElementDoubleClick(id, e) {
+    e.stopPropagation();
+    const el = this.state.elements.find(el => el.id === id);
+    if (el && (el.type === 'sticky' || el.type === 'text')) {
+      this.setState({ editingId: id, editContent: el.content || '' });
+    }
+  }
+
+  _saveEdit() {
+    const { editingId, editContent, elements } = this.state;
+    if (!editingId) return;
+    const els = elements.map(el => el.id === editingId ? { ...el, content: editContent } : el);
+    this.setState({ elements: els, editingId: null });
+    this._push(els);
+  }
+
+  /* ──────────────── WHEEL / ZOOM ──────────────── */
+  handleWheel(e) {
+    e.preventDefault();
+    const t = this.state.transform;
+    const rect = this._canvasRef && this._canvasRef.getBoundingClientRect();
+    if (!rect) return;
+    const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+    const f = e.deltaY < 0 ? 1.12 : 0.89;
+    const ns = Math.max(0.07, Math.min(5, t.scale * f));
+    this.setState({ transform: { x: mx - (mx - t.x) * (ns / t.scale), y: my - (my - t.y) * (ns / t.scale), scale: ns } });
+  }
+
+  _zoom(f) {
+    const t = this.state.transform;
+    this.setState({ transform: { ...t, scale: Math.max(0.07, Math.min(5, t.scale * f)) } });
+  }
+
+  /* ──────────────── ELEMENT CRUD ──────────────── */
+  _createElement(type, x, y) {
+    const { color, nextId, elements } = this.state;
+    const szMap = { sticky:[200,200], text:[220,48], rect:[200,120], circle:[120,120] };
+    const [w, h] = szMap[type] || [160, 100];
+    const bMap = { '#FFFBEB':'#FDE68A','#F0FDF4':'#86EFAC','#FFF1F2':'#FECACA','#EFF6FF':'#BFDBFE','#FAF5FF':'#E9D5FF','#FFF7ED':'#FED7AA','#ECFDF5':'#A7F3D0','#F8FAFC':'#CBD5E1' };
+    const id = `el-${nextId}`;
+    const el = { id, type, x: x - w/2, y: y - h/2, width: w, height: h,
+      color: type === 'sticky' ? color : (type === 'text' ? 'transparent' : color),
+      borderColor: bMap[color] || 'rgba(15,23,42,0.1)',
+      content: type === 'sticky' ? 'Nouvelle idée...' : type === 'text' ? 'Texte' : '',
+      fontSize: type === 'text' ? 18 : 13, fontWeight: type === 'text' ? 600 : 400,
+      borderRadius: type === 'rect' ? 10 : 0, zIndex: 1,
+    };
+    const els = [...elements, el];
+    this.setState({ elements: els, nextId: nextId + 1, selectedIds: [id], propElId: id, tool: 'select' });
+    this._push(els);
+    if (type === 'sticky' || type === 'text') setTimeout(() => this.setState({ editingId: id, editContent: el.content }), 80);
+  }
+
+  _deleteEl(id) {
+    const { elements, selectedIds, propElId } = this.state;
+    const els = elements.filter(el => el.id !== id);
+    this.setState({ elements: els, selectedIds: selectedIds.filter(s => s !== id), propElId: propElId === id ? null : propElId });
+    this._push(els);
+  }
+
+  _dupEl(id) {
+    const { elements, nextId } = this.state;
+    const el = elements.find(e => e.id === id);
+    if (!el) return;
+    const ne = { ...el, id: `el-${nextId}`, x: el.x + 24, y: el.y + 24 };
+    const els = [...elements, ne];
+    this.setState({ elements: els, nextId: nextId + 1, selectedIds: [ne.id], propElId: ne.id });
+    this._push(els);
+  }
+
+  _dupSelected() {
+    const { selectedIds, elements, nextId } = this.state;
+    if (!selectedIds.length) return;
+    let id = nextId;
+    const newEls = selectedIds.map(sid => {
+      const el = elements.find(e => e.id === sid);
+      return el ? { ...el, id: `el-${id++}`, x: el.x + 24, y: el.y + 24 } : null;
+    }).filter(Boolean);
+    if (!newEls.length) return;
+    const all = [...elements, ...newEls];
+    this.setState({ elements: all, nextId: id, selectedIds: newEls.map(e => e.id), propElId: newEls.length === 1 ? newEls[0].id : null });
+    this._push(all);
+  }
+
+  _updateEl(id, updates) {
+    const els = this.state.elements.map(el => el.id === id ? { ...el, ...updates } : el);
+    this.setState({ elements: els });
+  }
+
+  /* ──────────────── MINIMAP ──────────────── */
+  _drawMiniMap() {
+    const canvas = this._miniMapRef;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const W = 160, H = 100, WW = 8000, WH = 6000;
+    const sx = W / WW, sy = H / WH;
+    ctx.fillStyle = '#F8FAFC'; ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = 'rgba(15,23,42,0.05)'; ctx.lineWidth = 0.5;
+    for (let i = 0; i < W; i += 16) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,H); ctx.stroke(); }
+    for (let i = 0; i < H; i += 16) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(W,i); ctx.stroke(); }
+    this.state.elements.forEach(el => {
+      const x = el.x*sx, y = el.y*sy, w = Math.max(2,el.width*sx), h = Math.max(2,el.height*sy);
+      ctx.fillStyle = (el.color && el.color !== 'transparent') ? el.color : '#E0E7FF';
+      ctx.beginPath();
+      if (el.type === 'circle') { ctx.ellipse(x+w/2,y+h/2,w/2,h/2,0,0,Math.PI*2); }
+      else { ctx.roundRect(x,y,w,h,1); }
+      ctx.fill();
+    });
+    const t = this.state.transform;
+    const vw = (window.innerWidth/t.scale)*sx, vh = (window.innerHeight/t.scale)*sy;
+    const vx = (-t.x/t.scale)*sx,             vy = (-t.y/t.scale)*sy;
+    ctx.strokeStyle = '#6366F1'; ctx.lineWidth = 1.5;
+    ctx.fillStyle = 'rgba(99,102,241,0.08)';
+    ctx.beginPath(); ctx.roundRect(vx,vy,vw,vh,2); ctx.fill(); ctx.stroke();
+  }
+
+  handleMiniMapClick(e) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const cx = e.clientX - rect.left, cy = e.clientY - rect.top;
+    const WW = 8000, WH = 6000;
+    const wx = (cx / (160/WW)), wy = (cy / (100/WH));
+    const t = this.state.transform;
+    this.setState({ transform: { ...t, x: -(wx*t.scale - window.innerWidth/2), y: -(wy*t.scale - window.innerHeight/2) } });
+  }
+
+  /* ──────────────── RENDER VALS ──────────────── */
+  renderVals() {
+    const { sidebarOpen, tool, color, elements, selectedIds, transform, showColors, editingId, editContent, boardTitle, propElId, selectionBox, history, historyIndex } = this.state;
+    const R = React;
+    const mk = (t, p, ...k) => R.createElement(t, p, ...k);
+
+    /* ── icon factory ── */
+    const svgI = (children, w=15, h=15, extra={}) =>
+      mk('svg',{ width:w, height:h, viewBox:'0 0 24 24', fill:'none', stroke:'currentColor', strokeWidth:2, strokeLinecap:'round', strokeLinejoin:'round', ...extra }, ...children);
+
+    const p  = (d, i=0)  => mk('path',   { key:i, d });
+    const ci = (cx,cy,r,i=0) => mk('circle', { key:i, cx, cy, r });
+    const li = (x1,y1,x2,y2,i=0) => mk('line', { key:i, x1, y1, x2, y2 });
+    const re = (x,y,w,h,rx=0,i=0) => mk('rect', { key:i, x, y, width:w, height:h, rx });
+    const pl = (points,i=0) => mk('polyline', { key:i, points });
+    const pg = (points,i=0) => mk('polygon',  { key:i, points });
+
+    const I = {
+      logo:    mk('svg',{width:14,height:14,viewBox:'0 0 14 14',fill:'none'}, mk('rect',{x:2,y:2,width:4,height:4,rx:1,fill:'white',opacity:0.9,key:0}), mk('rect',{x:8,y:2,width:4,height:4,rx:1,fill:'white',opacity:0.55,key:1}), mk('rect',{x:2,y:8,width:4,height:4,rx:1,fill:'white',opacity:0.55,key:2}), mk('rect',{x:8,y:8,width:4,height:4,rx:1,fill:'white',opacity:0.9,key:3})),
+      search:  svgI([ci(11,11,8,0),p('m21 21-4.35-4.35',1)],13,13,{stroke:'rgba(255,255,255,0.28)'}),
+      menu:    svgI([li(3,6,21,6,0),li(3,12,21,12,1),li(3,18,21,18,2)],14,14),
+      layers:  svgI([pg('12 2 2 7 12 12 22 7 12 2',0),pl('2 17 12 22 22 17',1),pl('2 12 12 17 22 12',2)],12,12),
+      share:   svgI([ci(18,5,3,0),ci(6,12,3,1),ci(18,19,3,2),li(8.59,13.51,15.42,17.49,3),li(15.41,6.51,8.59,10.49,4)],13,13),
+      layout:  svgI([re(3,3,7,7,0,0),re(14,3,7,7,0,1),re(14,14,7,7,0,2),re(3,14,7,7,0,3)],13,13),
+      comment: svgI([p('M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z')]),
+      moreV:   svgI([ci(12,5,1,0),ci(12,12,1,1),ci(12,19,1,2)]),
+      dots:    svgI([ci(12,12,1,0),ci(19,12,1,1),ci(5,12,1,2)],13,13),
+      edit:    svgI([p('M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7',0),p('M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z',1)],11,11,{strokeWidth:2.5}),
+      dup:     svgI([re(9,9,13,13,2,0),p('M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1',1)],11,11,{strokeWidth:2.5}),
+      trash:   svgI([pl('3 6 5 6 21 6',0),p('M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2',1)],11,11,{strokeWidth:2.5}),
+      close:   svgI([li(18,6,6,18,0),li(6,6,18,18,1)],11,11,{strokeWidth:2.5}),
+      undo:    svgI([p('M3 7v6h6',0),p('M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13',1)],14,14),
+      redo:    svgI([p('M21 7v6h-6',0),p('M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7',1)],14,14),
+      timer:   svgI([ci(12,12,9,0),pl('12 6 12 12 16 14',1)],14,14),
+      export:  svgI([p('M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4',0),pl('7 10 12 15 17 10',1),li(12,15,12,3,2)],14,14),
+      settings:svgI([ci(12,12,3,0),p('M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z',1)],14,14),
+      home:    svgI([p('M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',0),pl('9 22 9 12 15 12 15 22',1)],14,14),
+      clock:   svgI([ci(12,12,10,0),pl('12 6 12 12 16 14',1)],14,14),
+      layout2: svgI([re(3,3,7,7,0,0),re(14,3,7,7,0,1),re(14,14,7,7,0,2),re(3,14,7,7,0,3)],14,14),
+      users:   svgI([p('M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2',0),ci(9,7,4,1),p('M23 21v-2a4 4 0 0 0-3-3.87',2),p('M16 3.13a4 4 0 0 1 0 7.75',3)],14,14),
+    };
+
+    /* ── toolbar icon helper ── */
+    const tIcon = (id, kids) => {
+      const c = tool === id ? 'white' : '#374151';
+      return mk('svg',{width:15,height:15,viewBox:'0 0 24 24',fill:'none',stroke:c,strokeWidth:2,strokeLinecap:'round',strokeLinejoin:'round'}, ...kids);
+    };
+
+    /* ── toolbar button style ── */
+    const tBtn = id => ({ width:36, height:36, borderRadius:9, background: tool===id ? '#6366F1' : 'transparent', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', transition:'background 0.12s, color 0.12s' });
+    const toolBtnBase = { width:36, height:36, borderRadius:9, background:'transparent', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:'#6B7280', transition:'background 0.12s' };
+
+    /* ── sidebar ── */
+    const sidebarStyle = { width: sidebarOpen?220:56, minHeight:'100vh', background:'#0F1117', display:'flex', flexDirection:'column', borderRight:'1px solid rgba(255,255,255,0.06)', transition:'width 0.22s cubic-bezier(0.4,0,0.2,1)', overflow:'hidden', flexShrink:0, zIndex:40 };
+
+    const navBtnSt = (active) => ({ display:'flex', alignItems:'center', gap:sidebarOpen?10:0, padding:'8px 10px', borderRadius:8, cursor:'pointer', border:'none', background: active?'rgba(99,102,241,0.12)':'transparent', color: active?'#A5B4FC':'rgba(255,255,255,0.5)', width:'100%', transition:'background 0.12s, color 0.12s', fontFamily:'inherit', justifyContent: sidebarOpen?'flex-start':'center', minHeight:36 });
+
+    const navItems = [
+      { id:'home',      label:'Mes tableaux', icon:I.home,    isActive:false },
+      { id:'recent',    label:'Récents',       icon:I.clock,   isActive:false },
+      { id:'templates', label:'Templates',     icon:I.layout2, isActive:false },
+      { id:'teams',     label:'Équipes',       icon:I.users,   isActive:false },
+    ].map(n => ({ ...n, style:navBtnSt(n.isActive), onClick:(e)=>e.preventDefault() }));
+
+    const pColors = ['#6366F1','#10B981','#F59E0B','#8B5CF6'];
+    const projectItems = [
+      { id:'p1', name:'Sprint Q2 — Design',  color:pColors[0], isFav:true,  isActive:true  },
+      { id:'p2', name:'Workshop Produit',     color:pColors[1], isFav:false, isActive:false },
+      { id:'p3', name:'Roadmap 2025',         color:pColors[2], isFav:true,  isActive:false },
+      { id:'p4', name:'Rétro Sprint 12',      color:pColors[3], isFav:false, isActive:false },
+    ].map(proj => ({
+      ...proj,
+      style:{ display:'flex', alignItems:'center', gap:sidebarOpen?8:0, padding:'7px 10px', borderRadius:8, cursor:'pointer', border:'none', background: proj.isActive?'rgba(99,102,241,0.1)':'transparent', color: proj.isActive?'#A5B4FC':'rgba(255,255,255,0.44)', width:'100%', transition:'background 0.12s', fontFamily:'inherit', justifyContent:sidebarOpen?'flex-start':'center', minHeight:34 },
+      onClick:(e)=>e.preventDefault(),
+    }));
+
+    /* ── collaborators ── */
+    const collabColors = ['#6366F1','#10B981','#F59E0B'];
+    const collaborators = [
+      { id:'c1', name:'Marie D.',       initial:'M', color:collabColors[0] },
+      { id:'c2', name:'Jean-Paul R.',   initial:'J', color:collabColors[1] },
+      { id:'c3', name:'Sophie M.',      initial:'S', color:collabColors[2] },
+    ].map((c,i) => ({
+      ...c,
+      avatarStyle:{ width:26, height:26, borderRadius:8, background:c.color, display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:700, color:'white', border:'2px solid white', marginLeft:i>0?-8:0, position:'relative', zIndex:3-i, boxShadow:'0 1px 3px rgba(0,0,0,0.12)', flexShrink:0, userSelect:'none' },
+    }));
+
+    /* ── canvas ── */
+    const dotGridStyle = {
+      position:'absolute', inset:0, pointerEvents:'none',
+      backgroundImage:'radial-gradient(circle, rgba(99,102,241,0.18) 1px, transparent 1px)',
+      backgroundSize:'24px 24px',
+      backgroundPosition:`${((transform.x%24)+24)%24}px ${((transform.y%24)+24)%24}px`,
+    };
+    const transformStyle = {
+      position:'absolute', left:0, top:0, transformOrigin:'0 0',
+      transform:`translate(${transform.x}px,${transform.y}px) scale(${transform.scale})`,
+      width:'100%', height:'100%', minWidth:'400vw', minHeight:'400vh',
+    };
+
+    /* ── element content builder ── */
+    const buildContent = (el) => {
+      const isEditing = editingId === el.id;
+      if (isEditing) {
+        return mk('textarea',{
+          value: editContent,
+          onChange: e => this.setState({ editContent:e.target.value }),
+          onKeyDown: e => { if(e.key==='Escape'){e.stopPropagation();this.setState({editingId:null});} if(e.key==='Enter'&&!e.shiftKey&&el.type==='text'){e.preventDefault();this._saveEdit();} },
+          onBlur: ()=>this._saveEdit(),
+          autoFocus:true,
+          style:{ position:'absolute',inset:0,width:'100%',height:'100%',background:'transparent',border:'none',resize:'none',padding:el.type==='sticky'?'14px 14px 10px':'4px 4px',fontFamily:"'DM Sans',system-ui,sans-serif",fontSize:el.fontSize||13,lineHeight:1.65,color:'#1F2937',letterSpacing:'-0.1px',outline:'none' },
+        });
+      }
+      if (el.type === 'sticky') {
+        const ac = el.authorColor || '#6366F1';
+        return mk('div',{style:{display:'flex',flexDirection:'column',height:'100%',padding:'14px 14px 10px',gap:8}},
+          el.author && mk('div',{key:'a',style:{display:'flex',alignItems:'center',gap:6,flexShrink:0}},
+            mk('div',{style:{width:18,height:18,borderRadius:5,background:ac,display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,fontWeight:700,color:'white'}},(el.author[0]||'?').toUpperCase()),
+            mk('span',{style:{fontSize:11,fontWeight:500,color:'#6B7280'}},el.author),
+          ),
+          mk('div',{key:'c',style:{flex:1,fontSize:el.fontSize||13,lineHeight:1.65,color:'#1F2937',letterSpacing:'-0.1px',wordBreak:'break-word',overflow:'hidden',whiteSpace:'pre-wrap'}},el.content||'Double-clic pour éditer'),
+          mk('div',{key:'f',style:{display:'flex',alignItems:'center',justifyContent:'space-between',flexShrink:0}},
+            el.tag && mk('span',{style:{fontSize:11,fontWeight:600,color:el.tagColor||'#6366F1',background:`${el.tagColor||'#6366F1'}1A`,padding:'2px 7px',borderRadius:20}},el.tag),
+            (el.likes||0)>0 && mk('div',{style:{display:'flex',alignItems:'center',gap:3,fontSize:11.5,fontWeight:500,color:'#9CA3AF',marginLeft:'auto'}},mk('span',{style:{color:'#F87171'}},'♥'),String(el.likes)),
+          ),
+        );
+      }
+      if (el.type === 'text') {
+        return mk('div',{style:{width:'100%',height:'100%',display:'flex',alignItems:'center',padding:'4px 2px',fontSize:el.fontSize||18,fontWeight:el.fontWeight||600,color:el.textColor||'#111827',letterSpacing:'-0.4px',lineHeight:1.3,wordBreak:'break-word'}},el.content||'Texte');
+      }
+      if (el.type === 'rect' && el.label) {
+        return mk('div',{style:{position:'absolute',top:-26,left:0,fontSize:11,fontWeight:700,color:'#6366F1',letterSpacing:'0.06em',textTransform:'uppercase',whiteSpace:'nowrap',userSelect:'none'}},el.content);
+      }
+      return null;
+    };
+
+    const renderedElements = elements.map(el => {
+      const isSel = selectedIds.includes(el.id);
+      const canEdit = el.type==='sticky'||el.type==='text';
+      let style = { position:'absolute', left:el.x, top:el.y, width:el.width, height:el.height, cursor:'grab', zIndex:isSel?100:(el.zIndex||1), userSelect:'none', transition:'box-shadow 0.15s ease' };
+      if (el.type==='sticky') Object.assign(style,{ backgroundColor:el.color||'#FFFBEB', border:`1px solid ${el.borderColor||'#FDE68A'}`, borderRadius:10, boxShadow:isSel?'0 0 0 2px #6366F1, 0 8px 24px rgba(0,0,0,0.10)':'0 2px 8px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)' });
+      else if (el.type==='text') Object.assign(style,{ backgroundColor:'transparent', border:isSel?'1.5px dashed rgba(99,102,241,0.3)':'1.5px solid transparent', borderRadius:4 });
+      else if (el.type==='rect') Object.assign(style,{ backgroundColor:el.color||'rgba(99,102,241,0.03)', border:`1.5px solid ${el.borderColor||'rgba(15,23,42,0.1)'}`, borderRadius:el.borderRadius||10, boxShadow:isSel?'0 0 0 2px #6366F1':'none' });
+      else if (el.type==='circle') Object.assign(style,{ backgroundColor:el.color||'#E0E7FF', border:`1.5px solid ${el.borderColor||'#A5B4FC'}`, borderRadius:'50%', boxShadow:isSel?'0 0 0 2px #6366F1':'none' });
+      return {
+        id:el.id, type:el.type,
+        isSelected:isSel, canEdit, style,
+        content:buildContent(el),
+        onMouseDown: (e)=>this.handleElementMouseDown(el.id,e),
+        onDoubleClick:(e)=>this.handleElementDoubleClick(el.id,e),
+        onEditBtn:(e)=>{e.stopPropagation();this.setState({editingId:el.id,editContent:el.content||''}); },
+        onDupBtn: (e)=>{e.stopPropagation();this._dupEl(el.id);},
+        onDelBtn: (e)=>{e.stopPropagation();this._deleteEl(el.id);},
+      };
+    });
+
+    /* ── selection box ── */
+    const sb = selectionBox;
+    let showSelBox=false, selBoxStyle=null;
+    if (sb && (Math.abs(sb.ex-sb.sx)>4||Math.abs(sb.ey-sb.sy)>4)) {
+      showSelBox=true;
+      const minX=Math.min(sb.sx,sb.ex)*transform.scale+transform.x, minY=Math.min(sb.sy,sb.ey)*transform.scale+transform.y;
+      const w=Math.abs(sb.ex-sb.sx)*transform.scale, h=Math.abs(sb.ey-sb.sy)*transform.scale;
+      selBoxStyle={ position:'absolute',left:minX,top:minY,width:w,height:h,border:'1.5px solid #6366F1',backgroundColor:'rgba(99,102,241,0.06)',borderRadius:4,pointerEvents:'none',zIndex:999 };
+    }
+
+    /* ── color palette ── */
+    const colorDefs = [
+      {v:'#FFFBEB',b:'#FDE68A',label:'Jaune'},   {v:'#F0FDF4',b:'#86EFAC',label:'Vert'},
+      {v:'#FFF1F2',b:'#FECACA',label:'Corail'},   {v:'#EFF6FF',b:'#BFDBFE',label:'Bleu'},
+      {v:'#FAF5FF',b:'#E9D5FF',label:'Violet'},   {v:'#FFF7ED',b:'#FED7AA',label:'Orange'},
+      {v:'#ECFDF5',b:'#A7F3D0',label:'Émeraude'}, {v:'#F8FAFC',b:'#CBD5E1',label:'Gris'},
+    ];
+    const colorBtns = colorDefs.map(cd => ({
+      label:cd.label,
+      onClick:()=>this.setState({color:cd.v,showColors:false}),
+      style:{ width:30,height:30,borderRadius:7,background:cd.v,border:color===cd.v?'2px solid #6366F1':`1.5px solid ${cd.b}`,cursor:'pointer',transform:color===cd.v?'scale(1.1)':'scale(1)',transition:'transform 0.1s,border 0.1s',boxShadow:color===cd.v?'0 0 0 2px rgba(99,102,241,0.2)':'none' },
+    }));
+
+    /* ── toolbar icons per tool ── */
+    const toolIconMap = {
+      select:  () => tIcon('select', [mk('path',{key:0,d:'m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z'}),mk('path',{key:1,d:'m13 13 6 6'})]),
+      hand:    () => tIcon('hand',   [mk('path',{key:0,d:'M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0'}),mk('path',{key:1,d:'M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2'}),mk('path',{key:2,d:'M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8'}),mk('path',{key:3,d:'M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15'})]),
+      sticky:  () => tIcon('sticky', [mk('path',{key:0,d:'M15.5 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3z'}),mk('path',{key:1,d:'M15 3v6h6'})]),
+      text:    () => mk('span',{style:{fontSize:15,fontWeight:700,color:tool==='text'?'white':'#374151',lineHeight:1}},'T'),
+      rect:    () => tIcon('rect',   [mk('rect',{key:0,x:3,y:3,width:18,height:18,rx:2})]),
+      circle:  () => tIcon('circle', [mk('circle',{key:0,cx:12,cy:12,r:10})]),
+      pen:     () => tIcon('pen',    [mk('path',{key:0,d:'M12 20h9'}),mk('path',{key:1,d:'M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z'})]),
+      comment: () => tIcon('comment',[mk('path',{key:0,d:'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'})]),
+      connect: () => tIcon('connect',[mk('circle',{key:0,cx:6,cy:12,r:3}),mk('circle',{key:1,cx:18,cy:6,r:3}),mk('circle',{key:2,cx:18,cy:18,r:3}),mk('path',{key:3,d:'M8.7 10.7l6.6-3.4'}),mk('path',{key:4,d:'M8.7 13.3l6.6 3.4'})]),
+    };
+
+    const toolOut = {};
+    Object.keys(toolIconMap).forEach(id => {
+      toolOut[`selectTool_${id}`] = () => this.setState({tool:id,showColors:false});
+      toolOut[`tbStyle_${id}`]    = tBtn(id);
+      toolOut[`tbIcon_${id}`]     = toolIconMap[id]();
+    });
+
+    /* ── undo/redo ── */
+    const canUndo = historyIndex>0, canRedo = historyIndex<history.length-1;
+    const hStyle = (en) => ({ ...toolBtnBase, opacity:en?1:0.28, cursor:en?'pointer':'default' });
+
+    /* ── property panel ── */
+    const propEl = propElId ? elements.find(e=>e.id===propElId) : null;
+    const showPropPanel = !!propEl;
+    const propPanelStyle = { position:'fixed', right:220, bottom:24, width:256, maxHeight:'66vh', background:'white', border:'1px solid rgba(15,23,42,0.07)', borderRadius:14, boxShadow:'0 16px 40px rgba(0,0,0,0.10), 0 4px 12px rgba(0,0,0,0.05)', zIndex:45, display:'flex', flexDirection:'column', animation:'scaleIn 0.18s ease-out', overflow:'hidden' };
+    const propColorBtns = colorDefs.map(cd => ({
+      onClick:()=>propEl&&this._updateEl(propEl.id,{color:cd.v,borderColor:cd.b}),
+      style:{ width:30,height:30,borderRadius:7,background:cd.v,border:(propEl&&propEl.color===cd.v)?'2px solid #6366F1':`1.5px solid ${cd.b}`,cursor:'pointer',transform:(propEl&&propEl.color===cd.v)?'scale(1.1)':'scale(1)',transition:'transform 0.1s' },
+    }));
+    const propOpacity  = Math.round((propEl?.opacity??1)*100);
+    const propFontSize = propEl?.fontSize??14;
+    const propIsText   = !!(propEl&&(propEl.type==='text'||propEl.type==='sticky'));
+    const typeLabel    = {sticky:'Post-it',text:'Texte',rect:'Rectangle',circle:'Cercle'};
+    const propTitle    = propEl ? (typeLabel[propEl.type]||propEl.type) : '';
+    const propGeometry = propEl ? [
+      {label:'X', value:`${Math.round(propEl.x)}`},
+      {label:'Y', value:`${Math.round(propEl.y)}`},
+      {label:'L', value:`${Math.round(propEl.width)}`},
+      {label:'H', value:`${Math.round(propEl.height)}`},
+    ] : [];
+
+    /* ── pending tool hint ── */
+    const pendingTool = ['sticky','text','rect','circle','pen','comment','connect'].includes(tool);
+
+    return {
+      /* sidebar */
+      sidebarStyle, sidebarOpen, navItems, projectItems,
+      logoMark:I.logo, searchIcon:I.search, dotsIcon:I.dots,
+
+      /* header */
+      menuIcon:I.menu, shareIcon:I.share, commentIcon:I.comment, layoutIcon:I.layout,
+      layersIcon:I.layers, moreVertIcon:I.moreV,
+      boardTitle, elementCount:elements.length,
+      collaborators, commentCount:3, showCommentBadge:true,
+      handleTitleChange:(e)=>this.setState({boardTitle:e.target.value}),
+      toggleSidebar:()=>this.setState(s=>({sidebarOpen:!s.sidebarOpen})),
+
+      /* canvas */
+      dotGridStyle, transformStyle, pendingTool,
+      renderedElements, showSelBox, selBoxStyle,
+      handleCanvasMouseDown:(e)=>this.handleCanvasMouseDown(e),
+      handleWheel:(e)=>this.handleWheel(e),
+      setCanvasRef:(ref)=>{this._canvasRef=ref;},
+
+      /* action icons */
+      editIcon:I.edit, dupIcon:I.dup, trashIcon:I.trash,
+      actionBtnStyle:{ width:27,height:27,borderRadius:7,background:'white',border:'1px solid rgba(15,23,42,0.1)',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',color:'#6B7280',boxShadow:'0 1px 4px rgba(0,0,0,0.08)' },
+      actionBtnDanger:{ width:27,height:27,borderRadius:7,background:'white',border:'1px solid rgba(239,68,68,0.2)',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',color:'#EF4444',boxShadow:'0 1px 4px rgba(0,0,0,0.06)' },
+
+      /* toolbar */
+      ...toolOut,
+      color, showColors, colorBtns,
+      toggleColors:()=>this.setState(s=>({showColors:!s.showColors})),
+      canUndo, canRedo,
+      undoBtnStyle:hStyle(canUndo), redoBtnStyle:hStyle(canRedo),
+      undoIcon:I.undo, redoIcon:I.redo,
+      undoAction:()=>this._undo(), redoAction:()=>this._redo(),
+      toolBtnBase, timerIcon:I.timer, exportIcon:I.export, settingsIcon:I.settings,
+
+      /* minimap */
+      scaleLabel:Math.round(transform.scale*100),
+      zoomIn:()=>this._zoom(1.2), zoomOut:()=>this._zoom(1/1.2),
+      zoomReset:()=>this.setState({transform:{x:0,y:0,scale:1}}),
+      setMiniMapRef:(ref)=>{this._miniMapRef=ref;if(ref)this._drawMiniMap();},
+      handleMiniMapClick:(e)=>this.handleMiniMapClick(e),
+
+      /* property panel */
+      showPropPanel, propPanelStyle, propTitle, propColorBtns,
+      propOpacity, propFontSize, propIsText, propGeometry,
+      closeIcon:I.close,
+      closePropPanel:()=>this.setState({propElId:null}),
+      handlePropOpacityChange:(e)=>propEl&&this._updateEl(propEl.id,{opacity:parseInt(e.target.value)/100}),
+      handlePropFontSizeChange:(e)=>propEl&&this._updateEl(propEl.id,{fontSize:parseInt(e.target.value)}),
+      propDuplicate:()=>propEl&&this._dupEl(propEl.id),
+      propDelete:()=>propEl&&this._deleteEl(propEl.id),
+    };
+  }
+}
+</script>
+</body>
+</html>

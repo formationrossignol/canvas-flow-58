@@ -1,0 +1,126 @@
+<h2>Layout global — canvas redesigné</h2>
+<p class="subtitle">Disposition de tous les éléments UI autour du canvas</p>
+
+<div class="mockup">
+  <div class="mockup-header">Vue d'ensemble — canvas au repos (aucune sélection)</div>
+  <div class="mockup-body" style="padding:0">
+    <div style="position:relative;width:100%;height:480px;background:#f0ece6;border-radius:0 0 8px 8px;overflow:hidden">
+
+      <!-- Canvas background grid -->
+      <div style="position:absolute;inset:0;background-image:radial-gradient(circle,#ccc8c0 1px,transparent 1px);background-size:24px 24px;opacity:.5"></div>
+
+      <!-- HEADER -->
+      <div style="position:absolute;top:0;left:0;right:0;height:48px;background:rgba(255,248,238,.97);border-bottom:1px solid #efe6d3;display:flex;align-items:center;padding:0 16px;gap:10px;z-index:10;backdrop-filter:blur(8px)">
+        <div style="width:28px;height:28px;background:#7048ff;border-radius:7px;flex-shrink:0"></div>
+        <div style="width:1px;height:20px;background:#efe6d3"></div>
+        <span style="font-size:13px;font-weight:700;color:#241b3a">Mon tableau</span>
+        <div style="width:6px;height:6px;background:#15c08a;border-radius:50%"></div>
+        <div style="flex:1"></div>
+        <!-- dynamic center: empty at rest -->
+        <span style="font-size:10px;color:#b0a89a;font-style:italic">← contexte dynamique ici →</span>
+        <div style="flex:1"></div>
+        <div style="display:flex;gap:-4px;margin-right:8px">
+          <div style="width:26px;height:26px;background:#7048ff;border-radius:50%;border:2px solid #fff8ee;margin-left:-6px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;font-weight:700">L</div>
+          <div style="width:26px;height:26px;background:#15c08a;border-radius:50%;border:2px solid #fff8ee;margin-left:-6px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;font-weight:700">M</div>
+        </div>
+        <div style="height:30px;padding:0 12px;background:#7048ff;border-radius:8px;display:flex;align-items:center;font-size:11px;color:#fff;font-weight:700;gap:6px">
+          <span>⇪</span> Partager
+        </div>
+        <div style="width:30px;height:30px;background:#f3ecdd;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#8a7fa6">⋯</div>
+      </div>
+
+      <!-- LEFT TOOLBAR -->
+      <div style="position:absolute;left:12px;top:50%;transform:translateY(-50%);width:44px;background:rgba(255,248,238,.97);border-radius:14px;border:1px solid #efe6d3;box-shadow:0 8px 24px rgba(36,27,58,.12);display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 6px;z-index:10">
+        <!-- select - active -->
+        <div style="width:32px;height:32px;background:#7048ff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px" title="Sélection (V)">↖</div>
+        <!-- pen -->
+        <div style="width:32px;height:32px;background:#f3ecdd;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#8a7fa6" title="Crayon (P)">✏️</div>
+        <!-- eraser -->
+        <div style="width:32px;height:32px;background:#f3ecdd;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#8a7fa6" title="Gomme (E)">⌫</div>
+        <!-- separator -->
+        <div style="width:24px;height:1px;background:#efe6d3;margin:2px 0"></div>
+        <!-- sticky -->
+        <div style="width:32px;height:32px;background:#f3ecdd;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px" title="Post-it (S)">📝</div>
+        <!-- text -->
+        <div style="width:32px;height:32px;background:#f3ecdd;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#8a7fa6;font-weight:700;font-family:serif" title="Texte (T)">T</div>
+        <!-- shapes -->
+        <div style="width:32px;height:32px;background:#f3ecdd;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#8a7fa6" title="Formes (F)">◻</div>
+        <!-- image -->
+        <div style="width:32px;height:32px;background:#f3ecdd;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px" title="Image (I)">🖼</div>
+        <!-- separator -->
+        <div style="width:24px;height:1px;background:#efe6d3;margin:2px 0"></div>
+        <!-- comment -->
+        <div style="width:32px;height:32px;background:#f3ecdd;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px" title="Commentaire (C)">💬</div>
+        <!-- connect -->
+        <div style="width:32px;height:32px;background:#f3ecdd;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#8a7fa6" title="Connecter (L)">↔</div>
+      </div>
+
+      <!-- CANVAS CONTENT (some sample elements) -->
+      <div style="position:absolute;top:120px;left:160px;width:130px;height:80px;background:#FFE066;border-radius:10px;box-shadow:0 3px 8px rgba(0,0,0,.12);display:flex;align-items:center;justify-content:center;font-size:12px;color:#555;font-weight:600">Post-it A</div>
+      <div style="position:absolute;top:150px;left:340px;width:130px;height:80px;background:#81C784;border-radius:10px;box-shadow:0 3px 8px rgba(0,0,0,.12);display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;font-weight:600">Post-it B</div>
+      <div style="position:absolute;top:260px;left:240px;width:100px;height:50px;background:#64B5F6;border-radius:8px;box-shadow:0 3px 8px rgba(0,0,0,.12);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:600">Texte</div>
+
+      <!-- BOTTOM BAR -->
+      <div style="position:absolute;bottom:12px;left:50%;transform:translateX(-50%);height:40px;background:rgba(255,248,238,.97);border-radius:12px;border:1px solid #efe6d3;box-shadow:0 4px 16px rgba(36,27,58,.1);display:flex;align-items:center;gap:4px;padding:0 12px;z-index:10;white-space:nowrap">
+        <!-- undo -->
+        <div style="width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#8a7fa6;font-size:14px;cursor:pointer" title="Annuler">↩</div>
+        <!-- redo -->
+        <div style="width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#8a7fa6;font-size:14px" title="Refaire">↪</div>
+        <div style="width:1px;height:20px;background:#efe6d3;margin:0 4px"></div>
+        <!-- zoom out -->
+        <div style="width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#8a7fa6;font-size:16px;font-weight:700">−</div>
+        <!-- zoom % -->
+        <div style="min-width:48px;height:28px;padding:0 8px;background:#f3ecdd;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#241b3a">100%</div>
+        <!-- zoom in -->
+        <div style="width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#8a7fa6;font-size:16px;font-weight:700">+</div>
+        <div style="width:1px;height:20px;background:#efe6d3;margin:0 4px"></div>
+        <!-- fit to screen -->
+        <div style="width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#8a7fa6;font-size:12px" title="Ajuster à l'écran">⊡</div>
+      </div>
+
+      <!-- MINIMAP -->
+      <div style="position:absolute;bottom:12px;right:12px;width:110px;height:72px;background:rgba(255,248,238,.95);border-radius:10px;border:1px solid #efe6d3;box-shadow:0 2px 8px rgba(36,27,58,.08);overflow:hidden">
+        <div style="position:absolute;inset:0;background-image:radial-gradient(circle,#d0ccc8 1px,transparent 1px);background-size:8px 8px;opacity:.4"></div>
+        <div style="position:absolute;top:20px;left:30px;width:22px;height:14px;background:#FFE06688;border-radius:2px"></div>
+        <div style="position:absolute;top:24px;left:58px;width:22px;height:14px;background:#81C78488;border-radius:2px"></div>
+        <div style="position:absolute;top:38px;left:42px;width:18px;height:9px;background:#64B5F688;border-radius:2px"></div>
+        <!-- viewport rect -->
+        <div style="position:absolute;top:10px;left:20px;width:70px;height:48px;border:1.5px solid #7048ff;border-radius:3px;background:rgba(112,72,255,.06)"></div>
+        <div style="position:absolute;bottom:4px;right:6px;font-size:8px;color:#8a7fa6;font-weight:600">mini-map</div>
+      </div>
+
+      <!-- LABELS -->
+      <div style="position:absolute;left:64px;top:50%;transform:translateY(-50%);font-size:9px;color:#7048ff;font-weight:700;background:#efe9ff;padding:2px 6px;border-radius:4px;white-space:nowrap">← Toolbar outils</div>
+      <div style="position:absolute;bottom:58px;left:50%;transform:translateX(-50%);font-size:9px;color:#7048ff;font-weight:700;background:#efe9ff;padding:2px 6px;border-radius:4px;white-space:nowrap">Zoom + Undo/Redo</div>
+      <div style="position:absolute;top:56px;left:50%;transform:translateX(-50%);font-size:9px;color:#7048ff;font-weight:700;background:#efe9ff;padding:2px 6px;border-radius:4px;white-space:nowrap">Header minimal</div>
+
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:24px" class="section">
+  <h3>Groupes outils (toolbar gauche)</h3>
+  <table style="width:100%;border-collapse:collapse;font-size:13px">
+    <tr style="background:#f3ecdd">
+      <th style="padding:8px 12px;text-align:left;border-radius:6px 0 0 6px">Groupe</th>
+      <th style="padding:8px 12px;text-align:left">Outils</th>
+      <th style="padding:8px 12px;text-align:left;border-radius:0 6px 6px 0">Shortcut</th>
+    </tr>
+    <tr>
+      <td style="padding:8px 12px;color:#8a7fa6;font-weight:600">Mode</td>
+      <td style="padding:8px 12px">Sélection, Crayon, Gomme</td>
+      <td style="padding:8px 12px;font-family:monospace;color:#7048ff">V P E</td>
+    </tr>
+    <tr style="background:#faf7f2">
+      <td style="padding:8px 12px;color:#8a7fa6;font-weight:600">Création</td>
+      <td style="padding:8px 12px">Post-it, Texte, Formes, Image</td>
+      <td style="padding:8px 12px;font-family:monospace;color:#7048ff">S T F I</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 12px;color:#8a7fa6;font-weight:600">Collaboration</td>
+      <td style="padding:8px 12px">Commentaire, Connecter</td>
+      <td style="padding:8px 12px;font-family:monospace;color:#7048ff">C L</td>
+    </tr>
+  </table>
+  <p style="font-size:12px;color:#8a7fa6;margin-top:8px">Timer → déplacé dans le menu <strong>···</strong> du header (usage ponctuel, pas un mode de dessin)</p>
+</div>

@@ -1,0 +1,99 @@
+<h2>Header — états dynamiques</h2>
+<p class="subtitle">Le centre s'adapte au contexte. Gauche et droite restent fixes.</p>
+
+<div class="section">
+
+  <!-- State 1: Repos -->
+  <div style="margin-bottom:16px">
+    <div class="label">État 1 — Repos (aucune sélection)</div>
+    <div style="height:48px;background:#fff8ee;border:1px solid #efe6d3;border-radius:10px;display:flex;align-items:center;padding:0 16px;gap:10px;margin-top:6px;box-shadow:0 2px 8px rgba(36,27,58,.06)">
+      <div style="width:26px;height:26px;background:#7048ff;border-radius:7px;flex-shrink:0"></div>
+      <div style="width:1px;height:20px;background:#efe6d3"></div>
+      <span style="font-size:13px;font-weight:700;color:#241b3a">Mon tableau</span>
+      <div style="width:6px;height:6px;background:#15c08a;border-radius:50%" title="Sauvegardé"></div>
+      <div style="flex:1"></div>
+      <span style="font-size:11px;color:#d8ccb5;font-style:italic">— vide —</span>
+      <div style="flex:1"></div>
+      <div style="display:flex;margin-right:8px">
+        <div style="width:26px;height:26px;background:#7048ff;border-radius:50%;border:2px solid #fff8ee;margin-left:-6px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;font-weight:700">L</div>
+        <div style="width:26px;height:26px;background:#15c08a;border-radius:50%;border:2px solid #fff8ee;margin-left:-6px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;font-weight:700">M</div>
+      </div>
+      <div style="height:30px;padding:0 12px;background:#7048ff;border-radius:8px;display:flex;align-items:center;font-size:11px;color:#fff;font-weight:700">Partager</div>
+      <div style="width:30px;height:30px;background:#f3ecdd;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#8a7fa6">⋯</div>
+    </div>
+  </div>
+
+  <!-- State 2: Sélection active -->
+  <div style="margin-bottom:16px">
+    <div class="label">État 2 — Sélection active (1+ éléments)</div>
+    <div style="height:48px;background:#fff8ee;border:1px solid #efe6d3;border-radius:10px;display:flex;align-items:center;padding:0 16px;gap:10px;margin-top:6px;box-shadow:0 2px 8px rgba(36,27,58,.06)">
+      <div style="width:26px;height:26px;background:#7048ff;border-radius:7px;flex-shrink:0"></div>
+      <div style="width:1px;height:20px;background:#efe6d3"></div>
+      <span style="font-size:13px;font-weight:700;color:#241b3a">Mon tableau</span>
+      <div style="width:6px;height:6px;background:#15c08a;border-radius:50%"></div>
+      <div style="flex:1"></div>
+      <!-- Dynamic center: selection -->
+      <div style="display:flex;align-items:center;gap:8px;background:#efe9ff;padding:5px 12px;border-radius:8px;border:1px solid #c8b8ff">
+        <div style="width:8px;height:8px;background:#7048ff;border-radius:2px"></div>
+        <span style="font-size:12px;font-weight:700;color:#7048ff">3 éléments sélectionnés</span>
+        <div style="width:1px;height:16px;background:#c8b8ff"></div>
+        <span style="font-size:11px;color:#8a7fa6;cursor:pointer" title="Dupliquer">⊞ Dupliquer</span>
+        <span style="font-size:11px;color:#8a7fa6;cursor:pointer" title="Grouper">⊠ Grouper</span>
+      </div>
+      <div style="flex:1"></div>
+      <div style="display:flex;margin-right:8px">
+        <div style="width:26px;height:26px;background:#7048ff;border-radius:50%;border:2px solid #fff8ee;margin-left:-6px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;font-weight:700">L</div>
+        <div style="width:26px;height:26px;background:#15c08a;border-radius:50%;border:2px solid #fff8ee;margin-left:-6px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;font-weight:700">M</div>
+      </div>
+      <div style="height:30px;padding:0 12px;background:#7048ff;border-radius:8px;display:flex;align-items:center;font-size:11px;color:#fff;font-weight:700">Partager</div>
+      <div style="width:30px;height:30px;background:#f3ecdd;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#8a7fa6">⋯</div>
+    </div>
+  </div>
+
+  <!-- State 3: Saving -->
+  <div style="margin-bottom:16px">
+    <div class="label">État 3 — Sauvegarde en cours</div>
+    <div style="height:48px;background:#fff8ee;border:1px solid #efe6d3;border-radius:10px;display:flex;align-items:center;padding:0 16px;gap:10px;margin-top:6px;box-shadow:0 2px 8px rgba(36,27,58,.06)">
+      <div style="width:26px;height:26px;background:#7048ff;border-radius:7px;flex-shrink:0"></div>
+      <div style="width:1px;height:20px;background:#efe6d3"></div>
+      <span style="font-size:13px;font-weight:700;color:#241b3a">Mon tableau</span>
+      <!-- saving dot animated -->
+      <div style="width:6px;height:6px;background:#ffb020;border-radius:50%;animation:pulse 1s infinite" title="Sauvegarde en cours…"></div>
+      <div style="flex:1"></div>
+      <span style="font-size:11px;color:#d8ccb5;font-style:italic">— vide —</span>
+      <div style="flex:1"></div>
+      <div style="display:flex;margin-right:8px">
+        <div style="width:26px;height:26px;background:#7048ff;border-radius:50%;border:2px solid #fff8ee;margin-left:-6px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;font-weight:700">L</div>
+        <div style="width:26px;height:26px;background:#15c08a;border-radius:50%;border:2px solid #fff8ee;margin-left:-6px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;font-weight:700">M</div>
+      </div>
+      <div style="height:30px;padding:0 12px;background:#7048ff;border-radius:8px;display:flex;align-items:center;font-size:11px;color:#fff;font-weight:700">Partager</div>
+      <div style="width:30px;height:30px;background:#f3ecdd;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#8a7fa6">⋯</div>
+    </div>
+    <p style="font-size:11px;color:#8a7fa6;margin-top:4px">Dot vert = sauvegardé · Dot orange animé = en cours · Dot rouge = erreur — tooltip au survol</p>
+  </div>
+
+  <!-- Menu ··· content -->
+  <div style="margin-top:20px">
+    <div class="label">Contenu du menu ···</div>
+    <div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap">
+      <div style="background:#fff;border:1px solid #efe6d3;border-radius:10px;overflow:hidden;min-width:180px;box-shadow:0 4px 12px rgba(36,27,58,.08)">
+        <div style="padding:8px 12px;font-size:11px;color:#241b3a;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f3ecdd">💾 Enregistrer maintenant</div>
+        <div style="padding:8px 12px;font-size:11px;color:#241b3a;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f3ecdd">📐 Templates</div>
+        <div style="padding:8px 12px;font-size:11px;color:#241b3a;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f3ecdd">📤 Exporter (PDF…)</div>
+        <div style="padding:8px 12px;font-size:11px;color:#241b3a;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f3ecdd">⏱ Timer</div>
+        <div style="padding:8px 12px;font-size:11px;color:#241b3a;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f3ecdd">🔗 Copier l'ID du tableau</div>
+        <div style="height:1px;background:#efe6d3;margin:2px 0"></div>
+        <div style="padding:8px 12px;font-size:11px;color:#241b3a;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f3ecdd">⚙️ Paramètres</div>
+        <div style="padding:8px 12px;font-size:11px;color:#c0392b;display:flex;align-items:center;gap:8px">🔄 Réinitialiser le tableau</div>
+      </div>
+      <div style="font-size:12px;color:#8a7fa6;max-width:200px;padding-top:8px">
+        Timer, Templates et Export sortis du header principal → moins de bruit visuel. Accessibles en 2 clics max.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<style>
+@keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:.3 } }
+</style>

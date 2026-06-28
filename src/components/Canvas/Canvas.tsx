@@ -2,8 +2,8 @@ import { useRef, useState, useCallback, useEffect, useMemo } from "react";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { toast } from "sonner";
-import { ToolbarLeft } from "./ToolbarLeft";
-import { BottomBar } from "./BottomBar";
+import { CanvasToolbar } from "./CanvasToolbar";
+import { PropertyPanel } from "./PropertyPanel";
 import { CanvasObject } from "./CanvasObject";
 import { CanvasHeader } from "./CanvasHeader";
 import { SelectionBox } from "./SelectionBox";
@@ -26,7 +26,6 @@ import { useLocalCollaborator } from "@/hooks/useLocalCollaborator";
 import { useBoardPresence } from "@/hooks/useBoardPresence";
 import { CollaboratorCursors } from "./CollaboratorCursors";
 import { CollaboratorsList } from "./CollaboratorsList";
-import { ContextualBar } from "./ContextualBar";
 import { ContextMenu } from "./ContextMenu";
 
 export interface Comment {
@@ -915,25 +914,29 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         </div>
       </div>
 
-      {/* Left Toolbar */}
-      <ToolbarLeft
+      {/* Bottom Toolbar */}
+      <CanvasToolbar
         selectedTool={selectedTool}
-        isConnecting={isConnecting}
+        selectedColor={selectedColor}
+        brushThickness={brushThickness}
         onToolSelect={setSelectedTool}
+        onColorSelect={setSelectedColor}
+        onBrushThicknessChange={setBrushThickness}
         onAddElement={handleAddElement}
+        isConnecting={isConnecting}
         onToggleConnecting={() => setIsConnecting(!isConnecting)}
+        isTimerVisible={isTimerVisible}
+        onToggleTimer={() => setIsTimerVisible(!isTimerVisible)}
+        onToggleTextEditor={() => {}}
+        onToggleOptions={() => setIsExportModalVisible(true)}
         onToggleShapeLibrary={() => setIsShapeLibraryVisible(!isShapeLibraryVisible)}
-      />
-
-      {/* Bottom Bar */}
-      <BottomBar
+        onExportPDF={() => handleExportPDF(false)}
+        onExportSelectedArea={handleExportSelectedArea}
+        hasSelection={selection.selectedIds.length > 0}
         canUndo={canUndo}
         canRedo={canRedo}
-        scale={canvasTransform.scale}
         onUndo={() => { const prev = undo(); if (prev) setElements(prev); }}
         onRedo={() => { const next = redo(); if (next) setElements(next); }}
-        onZoomChange={(scale) => setCanvasTransform(prev => ({ ...prev, scale }))}
-        onFitToScreen={handleFitToScreen}
       />
 
       {/* Timer */}
@@ -991,10 +994,20 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         hasSelection={selection.selectedIds.length > 0}
       />
 
-      {/* Contextual Bar */}
-      <ContextualBar
+      {/* Property Panel */}
+      <PropertyPanel
         selectedElements={elements.filter(el => selection.selectedIds.includes(el.id))}
+        isVisible={selection.selectedIds.length > 0}
+        onClose={clearSelection}
         canvasTransform={canvasTransform}
+        elementPosition={
+          selection.selectedIds.length === 1
+            ? (() => {
+                const el = elements.find(e => e.id === selection.selectedIds[0]);
+                return el ? { x: el.x, y: el.y, width: el.width, height: el.height } : undefined;
+              })()
+            : undefined
+        }
         onUpdate={handleElementUpdate}
         onDelete={handleElementDelete}
         onDuplicate={handleElementDuplicate}

@@ -1,0 +1,142 @@
+<h2>Barre contextuelle + Menu clic-droit</h2>
+<p class="subtitle">Détail des interactions sur sélection et clic-droit</p>
+
+<!-- SECTION 1: Contextual bar -->
+<div class="section">
+  <h3>Barre contextuelle flottante (au-dessus de la sélection)</h3>
+  <p class="subtitle" style="font-size:12px">Contenu adaptatif selon le type d'élément sélectionné</p>
+
+  <div class="split">
+
+    <!-- Post-it / Shape -->
+    <div class="mockup">
+      <div class="mockup-header">Post-it / Forme sélectionnée</div>
+      <div class="mockup-body" style="background:#f0ece6;min-height:140px;position:relative;display:flex;align-items:center;justify-content:center">
+        <!-- Element -->
+        <div style="width:110px;height:70px;background:#FFE066;border-radius:10px;border:2px solid #7048ff;position:relative;margin-top:36px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#666">Post-it
+          <!-- Resize handle indicator -->
+          <div style="position:absolute;bottom:-5px;right:-5px;width:10px;height:10px;background:#7048ff;border-radius:50%;border:2px solid #fff"></div>
+        </div>
+        <!-- Contextual bar above -->
+        <div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);background:#241b3a;border-radius:10px;padding:5px 8px;display:flex;gap:4px;align-items:center;box-shadow:0 6px 20px rgba(36,27,58,.25);white-space:nowrap">
+          <!-- color swatches -->
+          <div style="width:20px;height:20px;background:#FFE066;border-radius:4px;border:2px solid #fff"></div>
+          <div style="width:20px;height:20px;background:#FF8A80;border-radius:4px"></div>
+          <div style="width:20px;height:20px;background:#81C784;border-radius:4px"></div>
+          <div style="width:20px;height:20px;background:#64B5F6;border-radius:4px"></div>
+          <div style="width:20px;height:20px;background:#FFB74D;border-radius:4px"></div>
+          <div style="width:18px;height:18px;border-radius:4px;border:1.5px dashed #666;display:flex;align-items:center;justify-content:center;font-size:10px;color:#888">+</div>
+          <div style="width:1px;height:16px;background:#3a3a4a;margin:0 2px"></div>
+          <!-- opacity -->
+          <span style="font-size:10px;color:#aaa">100%</span>
+          <div style="width:1px;height:16px;background:#3a3a4a;margin:0 2px"></div>
+          <!-- actions -->
+          <div style="width:24px;height:24px;background:#2f2a3a;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px" title="Dupliquer">⊞</div>
+          <div style="width:24px;height:24px;background:#2f2a3a;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px" title="Verrouiller">🔓</div>
+          <div style="width:24px;height:24px;background:#c0392b22;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px" title="Supprimer">🗑</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Text element -->
+    <div class="mockup">
+      <div class="mockup-header">Texte / Titre sélectionné</div>
+      <div class="mockup-body" style="background:#f0ece6;min-height:140px;position:relative;display:flex;align-items:center;justify-content:center">
+        <div style="padding:8px 16px;background:#fff;border-radius:8px;border:2px solid #7048ff;margin-top:36px;font-size:14px;font-weight:600;color:#241b3a">Mon texte ici</div>
+        <div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);background:#241b3a;border-radius:10px;padding:5px 8px;display:flex;gap:4px;align-items:center;box-shadow:0 6px 20px rgba(36,27,58,.25);white-space:nowrap">
+          <!-- font size -->
+          <div style="display:flex;align-items:center;gap:3px;background:#2f2a3a;padding:3px 6px;border-radius:6px">
+            <span style="font-size:10px;color:#888">A</span>
+            <span style="font-size:10px;color:#eee;font-weight:700">14</span>
+            <span style="font-size:12px;color:#aaa">A</span>
+          </div>
+          <div style="width:1px;height:16px;background:#3a3a4a;margin:0 2px"></div>
+          <!-- bold / italic -->
+          <div style="width:24px;height:24px;background:#2f2a3a;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#eee">B</div>
+          <div style="width:24px;height:24px;background:#2f2a3a;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;font-style:italic;color:#eee">I</div>
+          <div style="width:1px;height:16px;background:#3a3a4a;margin:0 2px"></div>
+          <!-- color -->
+          <div style="width:20px;height:20px;background:#241b3a;border-radius:4px;border:2px solid #fff"></div>
+          <div style="width:20px;height:20px;background:#7048ff;border-radius:4px"></div>
+          <div style="width:20px;height:20px;background:#ff5a4d;border-radius:4px"></div>
+          <div style="width:1px;height:16px;background:#3a3a4a;margin:0 2px"></div>
+          <div style="width:24px;height:24px;background:#2f2a3a;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px">⊞</div>
+          <div style="width:24px;height:24px;background:#c0392b22;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px">🗑</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="margin-top:12px;padding:10px 14px;background:#f3ecdd;border-radius:8px;font-size:12px;color:#8a7fa6">
+    <strong style="color:#241b3a">Règle :</strong> barre toujours centrée au-dessus de la sélection, jamais en dehors de l'écran (flip si trop proche du bord haut). Multi-sélection = version réduite (couleur + supprimer + dupliquer uniquement).
+  </div>
+</div>
+
+<!-- SECTION 2: Context Menu -->
+<div class="section">
+  <h3>Menu clic-droit</h3>
+  <div class="split">
+
+    <!-- Sur canvas vide -->
+    <div class="mockup">
+      <div class="mockup-header">Clic-droit sur canvas vide</div>
+      <div class="mockup-body" style="background:#f0ece6;padding:0;position:relative;min-height:220px">
+        <div style="position:absolute;top:20px;left:40px;background:#fff;border-radius:10px;box-shadow:0 8px 24px rgba(36,27,58,.18);border:1px solid #efe6d3;overflow:hidden;min-width:190px">
+          <div style="padding:8px 12px;font-size:11px;color:#241b3a;cursor:pointer;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f3ecdd">
+            <span>📝</span> Ajouter un post-it <span style="margin-left:auto;color:#b0a89a;font-size:10px">S</span>
+          </div>
+          <div style="padding:8px 12px;font-size:11px;color:#241b3a;cursor:pointer;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f3ecdd">
+            <span>T</span> Ajouter du texte <span style="margin-left:auto;color:#b0a89a;font-size:10px">T</span>
+          </div>
+          <div style="padding:8px 12px;font-size:11px;color:#241b3a;cursor:pointer;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f3ecdd">
+            <span>◻</span> Ajouter une forme
+          </div>
+          <div style="height:1px;background:#efe6d3;margin:2px 0"></div>
+          <div style="padding:8px 12px;font-size:11px;color:#241b3a;cursor:pointer;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f3ecdd">
+            <span>📋</span> Coller <span style="margin-left:auto;color:#b0a89a;font-size:10px">⌘V</span>
+          </div>
+          <div style="padding:8px 12px;font-size:11px;color:#241b3a;cursor:pointer;display:flex;align-items:center;gap:8px">
+            <span>⊡</span> Ajuster à l'écran <span style="margin-left:auto;color:#b0a89a;font-size:10px">⌘⇧H</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sur élément -->
+    <div class="mockup">
+      <div class="mockup-header">Clic-droit sur un élément</div>
+      <div class="mockup-body" style="background:#f0ece6;padding:0;position:relative;min-height:220px">
+        <!-- Element behind -->
+        <div style="position:absolute;top:30px;left:20px;width:90px;height:60px;background:#FFE066;border-radius:8px;opacity:.6"></div>
+        <!-- Context menu -->
+        <div style="position:absolute;top:50px;left:80px;background:#fff;border-radius:10px;box-shadow:0 8px 24px rgba(36,27,58,.18);border:1px solid #efe6d3;overflow:hidden;min-width:200px">
+          <div style="padding:8px 12px;font-size:11px;color:#241b3a;cursor:pointer;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f3ecdd">
+            <span>⊞</span> Dupliquer <span style="margin-left:auto;color:#b0a89a;font-size:10px">⌘D</span>
+          </div>
+          <div style="padding:8px 12px;font-size:11px;color:#241b3a;cursor:pointer;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f3ecdd">
+            <span>📋</span> Copier <span style="margin-left:auto;color:#b0a89a;font-size:10px">⌘C</span>
+          </div>
+          <div style="padding:8px 12px;font-size:11px;color:#241b3a;cursor:pointer;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f3ecdd">
+            <span>✂️</span> Couper <span style="margin-left:auto;color:#b0a89a;font-size:10px">⌘X</span>
+          </div>
+          <div style="height:1px;background:#efe6d3;margin:2px 0"></div>
+          <div style="padding:8px 12px;font-size:11px;color:#241b3a;cursor:pointer;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f3ecdd">
+            <span>🔒</span> Verrouiller / Déverrouiller
+          </div>
+          <div style="padding:8px 12px;font-size:11px;color:#241b3a;cursor:pointer;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f3ecdd">
+            <span>⬆</span> Mettre au premier plan
+          </div>
+          <div style="padding:8px 12px;font-size:11px;color:#241b3a;cursor:pointer;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f3ecdd">
+            <span>⬇</span> Envoyer en arrière-plan
+          </div>
+          <div style="height:1px;background:#efe6d3;margin:2px 0"></div>
+          <div style="padding:8px 12px;font-size:11px;color:#c0392b;cursor:pointer;display:flex;align-items:center;gap:8px">
+            <span>🗑</span> Supprimer <span style="margin-left:auto;color:#b0a89a;font-size:10px">⌫</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
