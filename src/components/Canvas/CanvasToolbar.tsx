@@ -1,7 +1,7 @@
 import {
   MousePointer2, Hand, StickyNote, Type, Square, Circle, Smile,
   Pen, Eraser, MessageCircle, Share2, Undo2, Redo2,
-  Clock, Download, FileJson2, Upload, Settings,
+  Clock, Download, FileJson2, Upload, Keyboard,
 } from "lucide-react";
 import { CanvasElement } from "./Canvas";
 import { useState } from "react";
@@ -320,7 +320,7 @@ export const CanvasToolbar = ({
 
         {/* Settings / Shortcuts */}
         <button style={TB_BTN_BASE} onClick={onOpenShortcuts} title="Raccourcis clavier">
-          <Settings size={17} />
+          <Keyboard size={17} />
         </button>
       </div>
     </div>

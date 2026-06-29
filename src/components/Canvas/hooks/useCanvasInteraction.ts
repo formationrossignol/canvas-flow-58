@@ -85,8 +85,15 @@ export const useCanvasInteraction = (containerRef: React.RefObject<HTMLDivElemen
     const mouseY = e.clientY - rect.top;
     const t = transformRef.current;
 
-    if (e.ctrlKey || e.metaKey) {
-      // Pinch-to-zoom or Ctrl+scroll — smooth exponential zoom centered on cursor
+    if (e.deltaX !== 0 && !e.ctrlKey && !e.metaKey) {
+      // Trackpad horizontal swipe — pan
+      setCanvasTransform(prev => ({
+        ...prev,
+        x: prev.x - e.deltaX,
+        y: prev.y - e.deltaY,
+      }));
+    } else {
+      // Scroll wheel, pinch, or Ctrl+scroll — zoom centered on cursor
       const zoomFactor = Math.exp(-e.deltaY * 0.003);
       const newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, t.scale * zoomFactor));
       const scaleChange = newScale / t.scale;
@@ -95,13 +102,6 @@ export const useCanvasInteraction = (containerRef: React.RefObject<HTMLDivElemen
         y: mouseY - (mouseY - t.y) * scaleChange,
         scale: newScale,
       });
-    } else {
-      // Two-finger trackpad pan
-      setCanvasTransform(prev => ({
-        ...prev,
-        x: prev.x - e.deltaX,
-        y: prev.y - e.deltaY,
-      }));
     }
   }, [containerRef]);
 
