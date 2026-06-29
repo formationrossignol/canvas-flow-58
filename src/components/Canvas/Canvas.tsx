@@ -89,7 +89,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   const [drawingStrokes, setDrawingStrokes] = useState<DrawingStroke[]>([]);
   const [brushThickness, setBrushThickness] = useState(3);
   const [isTimerVisible, setIsTimerVisible] = useState(false);
-  const [bgStyle, setBgStyle] = useState<'dots' | 'grid' | 'cross' | 'blank'>('grid');
+  const [bgStyle, setBgStyle] = useState<'dots' | 'grid' | 'cross' | 'blank'>('dots');
   const [activeTagFilter, setActiveTagFilter] = useState<string | null>(null);
   const isTextEditorVisible = selectedTool === 'text';
   const [textStyle, setTextStyle] = useState<{
@@ -116,12 +116,13 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   const {
     canvasTransform,
     isSpacePressed,
+    isDragging,
     handleMouseDown: canvasMouseDown,
     handleMouseMove: canvasMouseMove,
     handleMouseUp: canvasMouseUp,
     handleWheel,
     setCanvasTransform,
-  } = useCanvasInteraction(containerRef);
+  } = useCanvasInteraction(containerRef, selectedTool === 'hand');
 
   const {
     selection,
@@ -652,6 +653,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         switch (e.key.toLowerCase()) {
           case 'v': setSelectedTool('select'); return;
           case 'p': setSelectedTool('pen'); return;
+          case 'h': setSelectedTool('hand'); return;
           case 'e': setSelectedTool('eraser'); return;
           case 's': setSelectedTool('sticky'); handleAddElement('sticky'); return;
           case 't': setSelectedTool('text'); handleAddElement('text'); return;
@@ -711,15 +713,15 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selection.selectedIds, handleElementDelete, handleElementDuplicate, clearSelection, undo, redo, addToHistory, setCanvasTransform, handleFitToScreen, handleAddElement]);
 
-  const cursor = pendingElement 
-    ? 'crosshair' 
-    : isSpacePressed 
-    ? 'canvas-cursor-grabbing' 
-    : selectedTool === 'select' 
-    ? 'canvas-cursor-grab' 
-    : selectedTool === 'pen' 
-    ? 'crosshair' 
-    : 'crosshair';
+  const cursor = pendingElement
+    ? 'crosshair'
+    : isSpacePressed && isDragging
+    ? 'canvas-cursor-grabbing'
+    : isSpacePressed
+    ? 'canvas-cursor-grab'
+    : selectedTool === 'pen' || selectedTool === 'eraser'
+    ? 'crosshair'
+    : 'default';
 
   const handleAddStroke = useCallback((stroke: DrawingStroke) => {
     setDrawingStrokes(prev => [...prev, stroke]);
@@ -856,6 +858,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         onSaveNow={handleForceSave}
         onResetBoard={handleResetBoard}
         onToggleTimer={() => setIsTimerVisible(!isTimerVisible)}
+        elementCount={elements.length}
       />
 
       {/* Tag Filter Bar */}

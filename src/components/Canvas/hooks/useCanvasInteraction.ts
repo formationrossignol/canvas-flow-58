@@ -9,7 +9,7 @@ interface CanvasTransform {
 const MIN_SCALE = 0.05;
 const MAX_SCALE = 5;
 
-export const useCanvasInteraction = (containerRef: React.RefObject<HTMLDivElement>) => {
+export const useCanvasInteraction = (containerRef: React.RefObject<HTMLDivElement>, externalPanMode = false) => {
   const [canvasTransform, setCanvasTransform] = useState<CanvasTransform>({
     x: 0,
     y: 0,
@@ -50,16 +50,18 @@ export const useCanvasInteraction = (containerRef: React.RefObject<HTMLDivElemen
     };
   }, []);
 
+  const isPanActive = isSpacePressed || externalPanMode;
+
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isSpacePressed) return;
+    if (!isPanActive) return;
     e.preventDefault();
     setIsDragging(true);
     dragStart.current = { x: e.clientX, y: e.clientY };
     initialTransform.current = { x: transformRef.current.x, y: transformRef.current.y };
-  }, [isSpacePressed]);
+  }, [isPanActive]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isDragging || !isSpacePressed) return;
+    if (!isDragging || !isPanActive) return;
     const deltaX = e.clientX - dragStart.current.x;
     const deltaY = e.clientY - dragStart.current.y;
     setCanvasTransform(prev => ({
@@ -67,7 +69,7 @@ export const useCanvasInteraction = (containerRef: React.RefObject<HTMLDivElemen
       x: initialTransform.current.x + deltaX,
       y: initialTransform.current.y + deltaY,
     }));
-  }, [isDragging, isSpacePressed]);
+  }, [isDragging, isPanActive]);
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
@@ -105,7 +107,7 @@ export const useCanvasInteraction = (containerRef: React.RefObject<HTMLDivElemen
 
   return {
     canvasTransform,
-    isSpacePressed,
+    isSpacePressed: isPanActive,
     isDragging,
     handleMouseDown,
     handleMouseMove,
