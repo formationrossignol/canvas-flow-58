@@ -1247,21 +1247,22 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
             />
           ))}
 
-          {/* Resize Handles - Rendered separately to ensure proper positioning */}
-          {elements.map(element =>
-            isSelected(element.id) && (
-              <ResizeHandles
-                key={`handles-${element.id}`}
-                element={element}
-                onUpdateSilent={handleElementUpdateSilent}
-                onResizeEnd={handleResizeEnd}
-                isVisible={true}
-                canvasScale={canvasTransform.scale}
-              />
-            )
-          )}
         </div>
       </div>
+
+      {/* Resize Handles — rendered in screen space (outside CSS transform) */}
+      {elements.map(element =>
+        isSelected(element.id) && (
+          <ResizeHandles
+            key={`handles-${element.id}`}
+            element={element}
+            onUpdateSilent={handleElementUpdateSilent}
+            onResizeEnd={handleResizeEnd}
+            canvasTransform={canvasTransform}
+            containerRef={containerRef}
+          />
+        )
+      )}
 
       {/* Background Style Toggle */}
       <button

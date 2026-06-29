@@ -1,28 +1,37 @@
 import React, { useState, useCallback, useRef } from "react";
 import { CanvasElement } from "./Canvas";
 
-interface ResizeHandle {
-  position: 'nw' | 'ne' | 'sw' | 'se' | 'n' | 's' | 'e' | 'w';
-  x: number;
-  y: number;
-}
+type HandlePosition = 'nw' | 'ne' | 'sw' | 'se' | 'n' | 's' | 'e' | 'w';
 
 interface ResizeHandlesProps {
   element: CanvasElement;
   onUpdateSilent: (id: string, updates: Partial<CanvasElement>) => void;
   onResizeEnd: () => void;
-  isVisible: boolean;
-  canvasScale: number;
+  canvasTransform: { x: number; y: number; scale: number };
+  containerRef: React.RefObject<HTMLDivElement>;
 }
 
-export const ResizeHandles = ({ element, onUpdateSilent, onResizeEnd, isVisible, canvasScale }: ResizeHandlesProps) => {
-  const [isResizing, setIsResizing] = useState(false);
-  const [resizeHandle, setResizeHandle] = useState<string | null>(null);
-  const startPos = useRef({ mouseX: 0, mouseY: 0, width: 0, height: 0, elemX: 0, elemY: 0 });
+// Handle is rendered in screen space (position: fixed), always 10×10px.
+const HANDLE_SIZE = 10;
+const HALF = HANDLE_SIZE / 2;
+const OFFSET = 8; // screen pixels outside element edge
 
-  // Stable refs so handler never goes stale
-  const canvasScaleRef = useRef(canvasScale);
-  canvasScaleRef.current = canvasScale;
+export const ResizeHandles = ({
+  element,
+  onUpdateSilent,
+  onResizeEnd,
+  canvasTransform,
+  containerRef,
+}: ResizeHandlesProps) => {
+  const [isResizing, setIsResizing] = useState(false);
+  const [resizeHandle, setResizeHandle] = useState<HandlePosition | null>(null);
+
+  const startPos = useRef({
+    mouseX: 0, mouseY: 0,
+    width: 0, height: 0, elemX: 0, elemY: 0,
+    scale: 1,
+  });
+
   const onUpdateSilentRef = useRef(onUpdateSilent);
   onUpdateSilentRef.current = onUpdateSilent;
   const onResizeEndRef = useRef(onResizeEnd);
@@ -30,23 +39,11 @@ export const ResizeHandles = ({ element, onUpdateSilent, onResizeEnd, isVisible,
   const elementIdRef = useRef(element.id);
   elementIdRef.current = element.id;
 
-  // All handles placed OUTSIDE the element bounds (center at ±8px from edge)
-  // to avoid z-conflict with connection points which sit ON the edges.
-  const handles: ResizeHandle[] = [
-    { position: 'nw', x: -14, y: -14 },
-    { position: 'ne', x: element.width + 2, y: -14 },
-    { position: 'sw', x: -14, y: element.height + 2 },
-    { position: 'se', x: element.width + 2, y: element.height + 2 },
-    { position: 'n',  x: element.width / 2 - 6, y: -14 },
-    { position: 's',  x: element.width / 2 - 6, y: element.height + 2 },
-    { position: 'e',  x: element.width + 2, y: element.height / 2 - 6 },
-    { position: 'w',  x: -14, y: element.height / 2 - 6 },
-  ];
-
-  const handleMouseDown = useCallback((e: React.MouseEvent, handlePos: string) => {
+  const handleMouseDown = useCallback((e: React.MouseEvent, pos: HandlePosition) => {
     e.stopPropagation();
+    e.preventDefault();
     setIsResizing(true);
-    setResizeHandle(handlePos);
+    setResizeHandle(pos);
     startPos.current = {
       mouseX: e.clientX,
       mouseY: e.clientY,
@@ -54,17 +51,16 @@ export const ResizeHandles = ({ element, onUpdateSilent, onResizeEnd, isVisible,
       height: element.height,
       elemX: element.x,
       elemY: element.y,
+      scale: canvasTransform.scale,
     };
-  }, [element.width, element.height, element.x, element.y]);
+  }, [element.width, element.height, element.x, element.y, canvasTransform.scale]);
 
-  // Stable handler — reads everything from refs
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!resizeHandle) return;
 
-    const scale = canvasScaleRef.current;
+    const scale = startPos.current.scale;
     const deltaX = (e.clientX - startPos.current.mouseX) / scale;
     const deltaY = (e.clientY - startPos.current.mouseY) / scale;
-
     const minSize = 20;
     let newWidth = startPos.current.width;
     let newHeight = startPos.current.height;
@@ -73,23 +69,23 @@ export const ResizeHandles = ({ element, onUpdateSilent, onResizeEnd, isVisible,
 
     switch (resizeHandle) {
       case 'se':
-        newWidth = Math.max(minSize, startPos.current.width + deltaX);
+        newWidth  = Math.max(minSize, startPos.current.width  + deltaX);
         newHeight = Math.max(minSize, startPos.current.height + deltaY);
         break;
       case 'sw':
-        newWidth = Math.max(minSize, startPos.current.width - deltaX);
+        newWidth  = Math.max(minSize, startPos.current.width  - deltaX);
         newHeight = Math.max(minSize, startPos.current.height + deltaY);
-        if (newWidth > minSize) newX = startPos.current.elemX + deltaX;
+        if (newWidth  > minSize) newX = startPos.current.elemX + deltaX;
         break;
       case 'ne':
-        newWidth = Math.max(minSize, startPos.current.width + deltaX);
+        newWidth  = Math.max(minSize, startPos.current.width  + deltaX);
         newHeight = Math.max(minSize, startPos.current.height - deltaY);
         if (newHeight > minSize) newY = startPos.current.elemY + deltaY;
         break;
       case 'nw':
-        newWidth = Math.max(minSize, startPos.current.width - deltaX);
+        newWidth  = Math.max(minSize, startPos.current.width  - deltaX);
         newHeight = Math.max(minSize, startPos.current.height - deltaY);
-        if (newWidth > minSize) newX = startPos.current.elemX + deltaX;
+        if (newWidth  > minSize) newX = startPos.current.elemX + deltaX;
         if (newHeight > minSize) newY = startPos.current.elemY + deltaY;
         break;
       case 'n':
@@ -100,27 +96,22 @@ export const ResizeHandles = ({ element, onUpdateSilent, onResizeEnd, isVisible,
         newHeight = Math.max(minSize, startPos.current.height + deltaY);
         break;
       case 'e':
-        newWidth = Math.max(minSize, startPos.current.width + deltaX);
+        newWidth  = Math.max(minSize, startPos.current.width  + deltaX);
         break;
       case 'w':
-        newWidth = Math.max(minSize, startPos.current.width - deltaX);
-        if (newWidth > minSize) newX = startPos.current.elemX + deltaX;
+        newWidth  = Math.max(minSize, startPos.current.width  - deltaX);
+        if (newWidth  > minSize) newX = startPos.current.elemX + deltaX;
         break;
     }
 
-    onUpdateSilentRef.current(elementIdRef.current, {
-      x: newX,
-      y: newY,
-      width: newWidth,
-      height: newHeight,
-    });
-  }, [resizeHandle]); // stable — deps via refs
+    onUpdateSilentRef.current(elementIdRef.current, { x: newX, y: newY, width: newWidth, height: newHeight });
+  }, [resizeHandle]);
 
   const handleMouseUp = useCallback(() => {
     setIsResizing(false);
     setResizeHandle(null);
     onResizeEndRef.current();
-  }, []); // stable
+  }, []);
 
   React.useEffect(() => {
     if (isResizing) {
@@ -133,41 +124,52 @@ export const ResizeHandles = ({ element, onUpdateSilent, onResizeEnd, isVisible,
     }
   }, [isResizing, handleMouseMove, handleMouseUp]);
 
-  if (!isVisible) return null;
+  const containerRect = containerRef.current?.getBoundingClientRect();
+  if (!containerRect) return null;
 
-  const getCursor = (position: string): string => {
-    switch (position) {
-      case 'nw': case 'se': return 'nw-resize';
-      case 'ne': case 'sw': return 'ne-resize';
-      case 'n': case 's': return 'n-resize';
-      case 'e': case 'w': return 'e-resize';
-      default: return 'default';
-    }
-  };
+  const { x: tx, y: ty, scale } = canvasTransform;
+
+  // Element corners in screen coordinates
+  const sx = containerRect.left + tx + element.x * scale;
+  const sy = containerRect.top  + ty + element.y * scale;
+  const sw = element.width  * scale;
+  const sh = element.height * scale;
+
+  const handles: { position: HandlePosition; left: number; top: number; cursor: string }[] = [
+    { position: 'nw', left: sx - OFFSET - HALF,       top: sy - OFFSET - HALF,      cursor: 'nw-resize' },
+    { position: 'ne', left: sx + sw + OFFSET - HALF,  top: sy - OFFSET - HALF,      cursor: 'ne-resize' },
+    { position: 'sw', left: sx - OFFSET - HALF,       top: sy + sh + OFFSET - HALF, cursor: 'ne-resize' },
+    { position: 'se', left: sx + sw + OFFSET - HALF,  top: sy + sh + OFFSET - HALF, cursor: 'nw-resize' },
+    { position: 'n',  left: sx + sw / 2 - HALF,       top: sy - OFFSET - HALF,      cursor: 'n-resize'  },
+    { position: 's',  left: sx + sw / 2 - HALF,       top: sy + sh + OFFSET - HALF, cursor: 'n-resize'  },
+    { position: 'e',  left: sx + sw + OFFSET - HALF,  top: sy + sh / 2 - HALF,      cursor: 'e-resize'  },
+    { position: 'w',  left: sx - OFFSET - HALF,       top: sy + sh / 2 - HALF,      cursor: 'e-resize'  },
+  ];
 
   return (
-    <div
-      className="absolute pointer-events-none"
-      style={{
-        left: element.x,
-        top: element.y,
-        width: element.width,
-        height: element.height,
-      }}
-    >
-      {handles.map((handle) => (
+    <>
+      {handles.map(h => (
         <div
-          key={handle.position}
-          className="absolute w-2.5 h-2.5 bg-card border-2 border-primary rounded-sm shadow-md hover:bg-primary hover:scale-125 transition-all pointer-events-auto"
+          key={h.position}
+          onMouseDown={e => handleMouseDown(e, h.position)}
           style={{
-            left: handle.x,
-            top: handle.y,
-            cursor: getCursor(handle.position),
+            position: 'fixed',
+            left: h.left,
+            top: h.top,
+            width: HANDLE_SIZE,
+            height: HANDLE_SIZE,
+            cursor: h.cursor,
             zIndex: 1000,
+            background: 'white',
+            border: '2px solid hsl(var(--primary))',
+            borderRadius: 2,
+            boxShadow: '0 1px 4px rgba(0,0,0,0.18)',
+            transition: 'background 0.1s',
           }}
-          onMouseDown={(e) => handleMouseDown(e, handle.position)}
+          onMouseEnter={e => (e.currentTarget.style.background = 'hsl(var(--primary))')}
+          onMouseLeave={e => (e.currentTarget.style.background = 'white')}
         />
       ))}
-    </div>
+    </>
   );
 };
