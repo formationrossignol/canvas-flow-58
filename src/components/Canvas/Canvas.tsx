@@ -79,6 +79,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   const [elements, setElements] = useState<CanvasElement[]>([]);
   const elementsRef = useRef<CanvasElement[]>([]);
   elementsRef.current = elements;
+  const keyboardMovingRef = useRef(false);
   const [selectedTool, setSelectedTool] = useState<string>('select');
   const [pendingElement, setPendingElement] = useState<CanvasElement['type'] | null>(null);
   
@@ -99,6 +100,8 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   const [activeTagFilter, setActiveTagFilter] = useState<string | null>(null);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isPresentMode, setIsPresentMode] = useState(false);
+  const [showShortcuts, setShowShortcuts] = useState(false);
   const isTextEditorVisible = selectedTool === 'text';
   const [textStyle, setTextStyle] = useState<{
     fontFamily?: string;
@@ -286,19 +289,21 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   }, [selectedColor]);
 
   const createElementAtPosition = useCallback((type: CanvasElement['type'], x: number, y: number) => {
+    const w = type === 'sticky' ? 200 :
+              type === 'circle' ? 120 :
+              type === 'comment' ? 300 :
+              ['triangle', 'hexagon', 'pentagon', 'star', 'diamond', 'heart'].includes(type) ? 120 : 160;
+    const h = type === 'sticky' ? 200 :
+              type === 'circle' ? 120 :
+              type === 'comment' ? 150 :
+              ['triangle', 'hexagon', 'pentagon', 'star', 'diamond', 'heart'].includes(type) ? 120 : 100;
     const newElement: CanvasElement = {
       id: generateId(type),
       type,
-      x,
-      y,
-      width: type === 'sticky' ? 200 : 
-             type === 'circle' ? 120 : 
-             type === 'comment' ? 300 :
-             ['triangle', 'hexagon', 'pentagon', 'star', 'diamond', 'heart'].includes(type) ? 120 : 160,
-      height: type === 'sticky' ? 200 : 
-              type === 'circle' ? 120 : 
-              type === 'comment' ? 150 :
-              ['triangle', 'hexagon', 'pentagon', 'star', 'diamond', 'heart'].includes(type) ? 120 : 100,
+      x: x - w / 2,
+      y: y - h / 2,
+      width: w,
+      height: h,
       color: selectedColor,
       content: type === 'sticky' ? 'Nouvelle idée...' :
                type === 'text' ? 'Tapez votre texte' :
@@ -482,6 +487,54 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     toast.success("Données importées avec succès");
   }, [clearSelection, addToHistory]);
 
+  const handleExportPNG = useCallback(async () => {
+    if (!containerRef.current) return;
+    try {
+      const canvas = await html2canvas(containerRef.current, { useCORS: true, allowTaint: true, scale: 2 });
+      const link = document.createElement('a');
+      link.download = `${boardTitle || 'tableau'}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      toast.success('Export PNG réussi');
+    } catch {
+      toast.error("Erreur lors de l'export PNG");
+    }
+  }, [boardTitle]);
+
+  const handleExportJSON = useCallback(() => {
+    const data = JSON.stringify({ elements, connections, boardTitle }, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.download = `${boardTitle || 'tableau'}.json`;
+    link.href = url;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success('Export JSON réussi');
+  }, [elements, connections, boardTitle]);
+
+  const handleImportJSON = useCallback(() => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const data = JSON.parse(ev.target?.result as string);
+          if (data.elements) handleImportElements(data.elements);
+          if (data.boardTitle) setBoardTitle(data.boardTitle);
+        } catch {
+          toast.error('Fichier JSON invalide');
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  }, [handleImportElements]);
+
   // Enhanced selection and interaction handlers
   const handleCanvasMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     // If we have a pending element, create it at click position and keep it pending
@@ -561,7 +614,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
     const { x, y } = screenToCanvas(e.clientX, e.clientY, rect, canvasTransform);
-    createElementAtPosition('sticky', x - 100, y - 100);
+    createElementAtPosition('sticky', x, y);
   }, [pendingElement, isConnecting, selectedTool, canvasTransform, createElementAtPosition]);
 
   const handleElementClick = useCallback((id: string, e: React.MouseEvent) => {
@@ -724,15 +777,12 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
           const step = e.shiftKey ? 8 : 1;
           const dx = e.key === 'ArrowLeft' ? -step : e.key === 'ArrowRight' ? step : 0;
           const dy = e.key === 'ArrowUp' ? -step : e.key === 'ArrowDown' ? step : 0;
-          setElements(prev => {
-            const newElements = prev.map(el =>
-              selection.selectedIds.includes(el.id) && !el.locked
-                ? { ...el, x: el.x + dx, y: el.y + dy }
-                : el
-            );
-            addToHistory(newElements);
-            return newElements;
-          });
+          keyboardMovingRef.current = true;
+          setElements(prev => prev.map(el =>
+            selection.selectedIds.includes(el.id) && !el.locked
+              ? { ...el, x: el.x + dx, y: el.y + dy }
+              : el
+          ));
         } else {
           // Pan canvas when nothing selected
           const step = e.shiftKey ? 50 : 10;
@@ -743,8 +793,19 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       }
     };
 
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key) && keyboardMovingRef.current) {
+        keyboardMovingRef.current = false;
+        addToHistory(elementsRef.current);
+      }
+    };
+
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
   }, [selection.selectedIds, handleElementDelete, handleElementDuplicate, clearSelection, undo, redo, addToHistory, setCanvasTransform, handleFitToScreen, handleAddElement]);
 
   const cursor = pendingElement
@@ -759,6 +820,10 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
 
   const handleAddStroke = useCallback((stroke: DrawingStroke) => {
     setDrawingStrokes(prev => [...prev, stroke]);
+  }, []);
+
+  const handleRemoveStroke = useCallback((id: string) => {
+    setDrawingStrokes(prev => prev.filter(s => s.id !== id));
   }, []);
 
   const handleExportPDF = useCallback(async (exportOnlySelected = false) => {
@@ -955,6 +1020,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         onResetBoard={handleResetBoard}
         onToggleTimer={() => setIsTimerVisible(!isTimerVisible)}
         elementCount={elements.length}
+        onPresent={() => setIsPresentMode(true)}
       />
 
       {/* Tag Filter Bar — inline 36px strip below header */}
@@ -969,7 +1035,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         ];
         return (
           <div style={{
-            position: 'fixed', top: 52, left: 0, right: 0, height: 36, zIndex: 10,
+            position: 'absolute', top: 52, left: 0, right: 0, height: 36, zIndex: 30,
             background: 'white', borderBottom: '1px solid rgba(15,23,42,0.06)',
             display: 'flex', alignItems: 'center', gap: 6, padding: '0 14px', overflowX: 'auto',
           }}>
@@ -1137,9 +1203,12 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
             </span>
           </div>
         )}
+        {/* Background pattern — screen-space, outside transform so dots don't scale */}
+        <div className="absolute inset-0" style={bgPatterns[bgStyle]} />
+
         {/* Canvas Content */}
         <div
-          className="absolute bg-canvas"
+          className="absolute"
           style={{
             transform: `translate(${canvasTransform.x}px, ${canvasTransform.y}px) scale(${canvasTransform.scale})`,
             transformOrigin: '0 0',
@@ -1149,20 +1218,14 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
             minHeight: '200vh',
           }}
         >
-          {/* Background pattern */}
-          <div
-            className="absolute"
-            style={{
-              left: '-20000px', top: '-20000px', width: '60000px', height: '60000px',
-              ...bgPatterns[bgStyle],
-            }}
-          />
 
           {/* Drawing Tool */}
           <DrawingTool
             strokes={drawingStrokes}
             onAddStroke={handleAddStroke}
+            onRemoveStroke={handleRemoveStroke}
             isActive={selectedTool === 'pen'}
+            isErasing={selectedTool === 'eraser'}
             color={selectedColor}
             thickness={brushThickness}
             canvasTransform={canvasTransform}
@@ -1195,6 +1258,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
               onUpdate={handleElementUpdate}
               onUpdateSilent={handleElementUpdateSilent}
               onDelete={handleElementDelete}
+              onDuplicate={handleElementDuplicate}
               onClick={handleElementClick}
               isSelected={isSelected(element.id)}
               selectedIds={selection.selectedIds}
@@ -1245,15 +1309,15 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         onToggleTimer={() => setIsTimerVisible(!isTimerVisible)}
         onToggleTextEditor={() => {}}
         onToggleOptions={() => setIsExportModalVisible(true)}
-        onToggleShapeLibrary={() => setIsShapeLibraryVisible(!isShapeLibraryVisible)}
-        onExportPDF={() => handleExportPDF(false)}
-        onExportSelectedArea={handleExportSelectedArea}
-        hasSelection={selection.selectedIds.length > 0}
         canUndo={canUndo}
         canRedo={canRedo}
         onUndo={() => { const prev = undo(); if (prev) setElements(prev); }}
         onRedo={() => { const next = redo(); if (next) setElements(next); }}
         onInsertEmoji={handleInsertEmoji}
+        onExportPNG={handleExportPNG}
+        onExportJSON={handleExportJSON}
+        onImportJSON={handleImportJSON}
+        onOpenShortcuts={() => setShowShortcuts(true)}
       />
 
       {/* Timer */}
@@ -1345,6 +1409,102 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
           onBringToFront={handleBringToFront}
           onSendToBack={handleSendToBack}
         />
+      )}
+
+      {/* Presentation Mode */}
+      {isPresentMode && (
+        <div style={{ position: 'fixed', inset: 0, background: '#0F1117', zIndex: 800, display: 'flex', flexDirection: 'column' }}>
+          {/* Nav bar */}
+          <div style={{ height: 44, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.7)', letterSpacing: '-0.2px' }}>{boardTitle}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <button style={{ width: 28, height: 28, borderRadius: 7, background: 'rgba(255,255,255,0.08)', border: 'none', cursor: 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.3)', opacity: 0.4 }}>‹</button>
+              <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.4)', fontVariantNumeric: 'tabular-nums' }}>1 / 1</span>
+              <button style={{ width: 28, height: 28, borderRadius: 7, background: 'rgba(255,255,255,0.08)', border: 'none', cursor: 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.3)', opacity: 0.4 }}>›</button>
+            </div>
+            <button
+              onClick={() => setIsPresentMode(false)}
+              style={{ height: 28, padding: '0 12px', borderRadius: 7, background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.6)', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 5 }}
+            >
+              ✕ Quitter
+            </button>
+          </div>
+          {/* Frame viewport */}
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
+            {elements.length === 0 ? (
+              <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.3)' }}>Aucun élément à afficher</div>
+            ) : (() => {
+              const minX = Math.min(...elements.map(el => el.x));
+              const minY = Math.min(...elements.map(el => el.y));
+              const maxX = Math.max(...elements.map(el => el.x + el.width));
+              const maxY = Math.max(...elements.map(el => el.y + el.height));
+              const contentW = maxX - minX;
+              const contentH = maxY - minY;
+              const areaW = window.innerWidth - 80;
+              const areaH = window.innerHeight - 44 - 60;
+              const scale = Math.min(areaW / contentW, areaH / contentH, 1);
+              return (
+                <div style={{ transform: `scale(${scale})`, transformOrigin: 'center center', position: 'relative', width: contentW, height: contentH, flexShrink: 0 }}>
+                  {elements.map(el => {
+                    const style: React.CSSProperties = {
+                      position: 'absolute',
+                      left: el.x - minX, top: el.y - minY,
+                      width: el.width, height: el.height,
+                      background: el.type === 'sticky' || el.type === 'rectangle' ? el.color : 'transparent',
+                      borderRadius: el.type === 'sticky' ? 10 : el.type === 'circle' ? '50%' : 6,
+                      border: el.type === 'rectangle' || el.type === 'circle' ? `2px solid ${el.color}` : 'none',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: el.fontSize || 14, color: '#111827', padding: 8,
+                      wordBreak: 'break-word', overflow: 'hidden',
+                      opacity: el.opacity ?? 1,
+                    };
+                    return (
+                      <div key={el.id} style={style}>
+                        {el.content}
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
+            {/* Frame chip */}
+            <div style={{ position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, padding: '4px 14px', fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)' }}>
+              Vue d'ensemble
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Shortcuts Modal */}
+      {showShortcuts && (
+        <div onClick={() => setShowShortcuts(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.3)', zIndex: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(2px)' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: 'white', borderRadius: 18, padding: '28px 32px', width: 540, maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 24px 64px rgba(0,0,0,0.18)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+              <div>
+                <div style={{ fontSize: 17, fontWeight: 700, color: '#111827', letterSpacing: '-0.4px' }}>Raccourcis clavier</div>
+                <div style={{ fontSize: 13, color: '#9CA3AF', marginTop: 2 }}>FlowBoard · Tableau collaboratif</div>
+              </div>
+              <button onClick={() => setShowShortcuts(false)} style={{ width: 30, height: 30, borderRadius: 8, background: 'rgba(15,23,42,0.05)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9CA3AF', fontSize: 16 }}>✕</button>
+            </div>
+            {[
+              { title: 'Outils', items: [['V', 'Sélection'], ['H', 'Main (déplacer)'], ['S', 'Post-it'], ['T', 'Texte'], ['R', 'Rectangle'], ['C', 'Cercle'], ['P', 'Crayon'], ['E', 'Gomme'], ['L', 'Connecteur']] },
+              { title: 'Actions', items: [['⌘Z', 'Annuler'], ['⌘Y / ⌘⇧Z', 'Refaire'], ['⌘C', 'Copier'], ['⌘V', 'Coller'], ['⌘X', 'Couper'], ['⌘D', 'Dupliquer'], ['⌫ / Suppr', 'Supprimer'], ['Échap', 'Désélectionner']] },
+              { title: 'Vue', items: [['⌘0', 'Ajuster à l\'écran'], ['⌘+', 'Zoom avant'], ['⌘−', 'Zoom arrière'], ['⌘F', 'Rechercher'], ['Double-clic', 'Créer un post-it']] },
+            ].map(sec => (
+              <div key={sec.title} style={{ marginBottom: 20 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 10 }}>{sec.title}</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  {sec.items.map(([key, label]) => (
+                    <div key={key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', borderRadius: 8, background: 'rgba(15,23,42,0.02)' }}>
+                      <span style={{ fontSize: 13, color: '#374151' }}>{label}</span>
+                      <kbd style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', background: 'rgba(15,23,42,0.06)', border: '1px solid rgba(15,23,42,0.1)', borderRadius: 5, padding: '2px 7px', fontFamily: 'inherit' }}>{key}</kbd>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
 
     </div>

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { Trash2, Edit3, Lock, Unlock, Heart, MessageCircle, CheckSquare, Square } from "lucide-react";
+import { Trash2, Edit3, Heart, MessageCircle, CheckSquare, Square, Copy } from "lucide-react";
 import { TagBadge } from "@/components/UI/SharedComponents";
 import { CanvasElement, Comment } from "./Canvas";
 import { CommentThread } from "./CommentThread";
@@ -10,6 +10,7 @@ interface CanvasObjectProps {
   onUpdate: (id: string, updates: Partial<CanvasElement>) => void;
   onUpdateSilent: (id: string, updates: Partial<CanvasElement>) => void;
   onDelete: (id: string) => void;
+  onDuplicate?: (id: string) => void;
   onClick: (id: string, e: React.MouseEvent) => void;
   isSelected: boolean;
   selectedIds: string[];
@@ -26,6 +27,7 @@ export const CanvasObject = ({
   onUpdate,
   onUpdateSilent,
   onDelete,
+  onDuplicate,
   onClick,
   isSelected,
   selectedIds,
@@ -373,8 +375,9 @@ export const CanvasObject = ({
     if (element.type === 'sticky') {
       return (
         <div className="w-full h-full flex flex-col relative">
-          {/* Corner fold */}
-          <div className="absolute bottom-0 right-0 w-5 h-5 pointer-events-none" style={{ background: 'linear-gradient(225deg,rgba(0,0,0,0.13) 50%,transparent 50%)', borderRadius: '0 0 8px 0' }} />
+          {/* Corner fold — DC-style triangle */}
+          <div className="absolute bottom-0 right-0 pointer-events-none" style={{ width: 0, height: 0, borderStyle: 'solid', borderWidth: '0 0 20px 20px', borderColor: `transparent transparent rgba(0,0,0,0.18) transparent` }} />
+          <div className="absolute bottom-0 right-0 pointer-events-none" style={{ width: 0, height: 0, borderStyle: 'solid', borderWidth: '0 0 18px 18px', borderColor: `transparent transparent rgba(255,255,255,0.5) transparent` }} />
 
           {/* Header: avatar + author + time + done toggle */}
           {(element.author || element.createdAt) && (
@@ -471,61 +474,52 @@ export const CanvasObject = ({
           </div>
         )}
 
-        <div className="absolute -top-3 -right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
-          <button
-            onClick={handleLike}
-            className={`w-6 h-6 rounded-full flex items-center justify-center shadow-soft hover:scale-110 transition-all ${
-              hasUserLiked
-                ? 'bg-destructive text-destructive-foreground'
-                : 'bg-background text-destructive border border-destructive'
-            }`}
-            title={hasUserLiked ? "Retirer mon like" : "Aimer cette idée"}
-          >
-            <Heart size={12} fill={hasUserLiked ? "currentColor" : "none"} />
-          </button>
-
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onUpdate(element.id, { locked: !element.locked });
+        {/* DC-style inline action bar — single selection only */}
+        {isSelected && !isEditing && selectedIds.length === 1 && (
+          <div
+            style={{
+              position: 'absolute', top: -36, right: 0,
+              display: 'flex', alignItems: 'center', gap: 3,
+              animation: 'actionIn 0.15s ease-out',
             }}
-            className={`w-6 h-6 rounded-full flex items-center justify-center shadow-soft hover:scale-110 transition-transform ${
-              element.locked
-                ? 'bg-warning text-warning-foreground'
-                : 'bg-secondary text-secondary-foreground'
-            }`}
-            title={element.locked ? "Déverrouiller" : "Verrouiller"}
+            onMouseDown={e => e.stopPropagation()}
           >
-            {element.locked ? <Lock size={12} /> : <Unlock size={12} />}
-          </button>
-
-          {!element.locked && (
-            <>
-              {element.type !== 'comment' && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsEditing(true);
-                  }}
-                  className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-soft hover:scale-110 transition-transform"
-                  title="Éditer"
-                >
-                  <Edit3 size={12} />
-                </button>
-              )}
+            <button
+              onClick={handleLike}
+              style={{ width: 28, height: 28, borderRadius: 8, background: hasUserLiked ? 'rgba(239,68,68,0.1)' : 'white', border: hasUserLiked ? '1px solid rgba(239,68,68,0.3)' : '1px solid rgba(15,23,42,0.08)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: hasUserLiked ? '#EF4444' : '#374151', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+              title="J'aime"
+            >
+              <Heart size={13} fill={hasUserLiked ? 'currentColor' : 'none'} />
+            </button>
+            {!element.locked && element.type !== 'comment' && (
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(element.id);
-                }}
-                className="w-6 h-6 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center shadow-soft hover:scale-110 transition-transform"
+                onClick={e => { e.stopPropagation(); setIsEditing(true); }}
+                style={{ width: 28, height: 28, borderRadius: 8, background: 'white', border: '1px solid rgba(15,23,42,0.08)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#374151', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+                title="Éditer"
+              >
+                <Edit3 size={13} />
+              </button>
+            )}
+            {onDuplicate && !element.locked && (
+              <button
+                onClick={e => { e.stopPropagation(); onDuplicate(element.id); }}
+                style={{ width: 28, height: 28, borderRadius: 8, background: 'white', border: '1px solid rgba(15,23,42,0.08)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#374151', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+                title="Dupliquer"
+              >
+                <Copy size={13} />
+              </button>
+            )}
+            {!element.locked && (
+              <button
+                onClick={e => { e.stopPropagation(); onDelete(element.id); }}
+                style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#EF4444', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
                 title="Supprimer"
               >
-                <Trash2 size={12} />
+                <Trash2 size={13} />
               </button>
-            </>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
 
       {showComments && element.type === 'comment' && (

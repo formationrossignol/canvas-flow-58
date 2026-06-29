@@ -16,7 +16,7 @@ const PRESETS = [
 const R = 52;
 const CIRC = 2 * Math.PI * R;
 
-export const Timer = ({ isVisible }: TimerProps) => {
+export const Timer = ({ isVisible, onToggle }: TimerProps) => {
   const [totalSeconds, setTotalSeconds] = useState(300);
   const [elapsed, setElapsed] = useState(0);
   const [running, setRunning] = useState(false);
@@ -64,6 +64,12 @@ export const Timer = ({ isVisible }: TimerProps) => {
       boxShadow: '0 16px 48px rgba(0,0,0,0.13), 0 4px 12px rgba(0,0,0,0.06)',
       minWidth: 260,
     }}>
+      {/* Header with close */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+        <span style={{ fontSize: 12, fontWeight: 600, color: '#9CA3AF', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Timer</span>
+        <button onClick={onToggle} style={{ width: 24, height: 24, borderRadius: 6, background: 'rgba(15,23,42,0.05)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9CA3AF', fontSize: 14 }}>✕</button>
+      </div>
+
       {/* Ring + time */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, marginBottom: 16 }}>
         <svg width="130" height="130" viewBox="0 0 130 130">

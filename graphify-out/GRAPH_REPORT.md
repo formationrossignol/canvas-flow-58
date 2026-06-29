@@ -1,12 +1,12 @@
 # Graph Report - /Users/loicrossignol/Desktop/vibecoding/canvas-flow-58  (2026-06-29)
 
 ## Corpus Check
-- 102 files · ~98,769 words
+- 151 files · ~196,484 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 315 nodes · 266 edges · 105 communities detected
-- Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 7 edges (avg confidence: 0.87)
+- 420 nodes · 476 edges · 122 communities detected
+- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 10 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -115,29 +115,46 @@
 - [[_COMMUNITY_Community 102|Community 102]]
 - [[_COMMUNITY_Community 103|Community 103]]
 - [[_COMMUNITY_Community 104|Community 104]]
+- [[_COMMUNITY_Community 105|Community 105]]
+- [[_COMMUNITY_Community 106|Community 106]]
+- [[_COMMUNITY_Community 107|Community 107]]
+- [[_COMMUNITY_Community 108|Community 108]]
+- [[_COMMUNITY_Community 109|Community 109]]
+- [[_COMMUNITY_Community 110|Community 110]]
+- [[_COMMUNITY_Community 111|Community 111]]
+- [[_COMMUNITY_Community 112|Community 112]]
+- [[_COMMUNITY_Community 113|Community 113]]
+- [[_COMMUNITY_Community 114|Community 114]]
+- [[_COMMUNITY_Community 115|Community 115]]
+- [[_COMMUNITY_Community 116|Community 116]]
+- [[_COMMUNITY_Community 117|Community 117]]
+- [[_COMMUNITY_Community 118|Community 118]]
+- [[_COMMUNITY_Community 119|Community 119]]
+- [[_COMMUNITY_Community 120|Community 120]]
+- [[_COMMUNITY_Community 121|Community 121]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `walkChildren()` - 7 edges
-2. `walk()` - 7 edges
-3. `createRuntime()` - 7 edges
-4. `Canvas UX Redesign Implementation Plan (2026-06-28)` - 7 edges
-5. `compileAttr()` - 6 edges
-6. `collectProps()` - 6 edges
-7. `Canvas UX Redesign Spec — Miro-like Ergonomics (2026-06-28)` - 6 edges
-8. `boot()` - 5 edges
-9. `resolve()` - 5 edges
-10. `walkComponent()` - 5 edges
+1. `CanvasStateManager` - 20 edges
+2. `walkChildren()` - 8 edges
+3. `walk()` - 8 edges
+4. `createRuntime()` - 8 edges
+5. `compileAttr()` - 7 edges
+6. `collectProps()` - 7 edges
+7. `Canvas UX Redesign Implementation Plan (2026-06-28)` - 7 edges
+8. `boot()` - 6 edges
+9. `resolve()` - 6 edges
+10. `walkComponent()` - 6 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `Toaster()` --calls--> `useToast()`  [INFERRED]
-  src/components/ui/toaster.tsx → src/hooks/use-toast.ts
+- `useToast()` --calls--> `Toaster()`  [INFERRED]
+  /Users/loicrossignol/Desktop/vibecoding/canvas-flow-58/src/hooks/useCanvas.ts → src/components/ui/toaster.tsx
 - `handleColorChange()` --calls--> `setColor()`  [INFERRED]
   src/components/Canvas/InlineEditor.tsx → src/components/Canvas/TextEditor.tsx
+- `Toaster()` --calls--> `useToast()`  [INFERRED]
+  src/components/ui/toaster.tsx → src/hooks/use-toast.ts
 - `Canvas UX Redesign Implementation Plan (2026-06-28)` --rationale_for--> `Rationale: Phased Rebuild — Lower Risk, Canvas is Complex, Each Phase Independently Testable`  [EXTRACTED]
   docs/superpowers/plans/2026-06-28-canvas-ux-redesign.md → docs/superpowers/specs/2026-06-28-canvas-ux-redesign.md
 - `ToolbarLeft.tsx — Vertical Pill Toolbar (Phase 1 Task 1)` --implements--> `Phase 1 Toolbar Spec (ToolbarLeft + BottomBar)`  [INFERRED]
-  docs/superpowers/plans/2026-06-28-canvas-ux-redesign.md → docs/superpowers/specs/2026-06-28-canvas-ux-redesign.md
-- `BottomBar.tsx — Slim Zoom + Undo/Redo (Phase 1 Task 2)` --implements--> `Phase 1 Toolbar Spec (ToolbarLeft + BottomBar)`  [INFERRED]
   docs/superpowers/plans/2026-06-28-canvas-ux-redesign.md → docs/superpowers/specs/2026-06-28-canvas-ux-redesign.md
 
 ## Hyperedges (group relationships)
@@ -150,163 +167,163 @@
 ## Communities
 
 ### Community 0 - "Community 0"
-Cohesion: 0.08
-Nodes (28): boot(), createComponentFactory(), createExternalModules(), createHelmetManager(), createPseudoSheet(), createRegistry(), createRuntime(), cssToObj() (+20 more)
+Cohesion: 0.1
+Nodes (53): boot(), collectProps(), compileAttr(), compileTemplate(), componentDidMount(), componentDidUpdate(), componentWillUnmount(), constructor() (+45 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.12
-Nodes (0): 
+Nodes (2): handleKeyDown(), CanvasStateManager
 
 ### Community 2 - "Community 2"
+Cohesion: 0.33
+Nodes (13): canvasToScreen(), elementContainsPoint(), elementsIntersect(), exportToJSON(), generateId(), getArrowHeadPath(), getBoundingBox(), getSelectionBoxElements() (+5 more)
+
+### Community 3 - "Community 3"
+Cohesion: 0.12
+Nodes (0): 
+
+### Community 4 - "Community 4"
 Cohesion: 0.17
 Nodes (16): BottomBar.tsx — Slim Zoom + Undo/Redo (Phase 1 Task 2), CanvasHeader.tsx — Minimal Dynamic Header (Phase 2 Task 4), Canvas UX Redesign Implementation Plan (2026-06-28), ContextMenu.tsx — Right-Click Portal Menu (Phase 4 Task 7), ContextualBar.tsx — Floating Selection Toolbar (Phase 3 Task 5), ToolbarLeft.tsx — Vertical Pill Toolbar (Phase 1 Task 1), Canvas UX Redesign Spec — Miro-like Ergonomics (2026-06-28), Canvas Layout Structure (Header + ToolbarLeft + Canvas + BottomBar) (+8 more)
 
-### Community 3 - "Community 3"
-Cohesion: 0.32
-Nodes (12): collectProps(), compileAttr(), compileTemplate(), encodeCase(), walk(), walkChildren(), walkComponent(), walkElement() (+4 more)
-
-### Community 4 - "Community 4"
-Cohesion: 0.18
-Nodes (2): handleColorChange(), setColor()
-
 ### Community 5 - "Community 5"
+Cohesion: 0.18
+Nodes (3): handleColorChange(), handleSave(), setColor()
+
+### Community 6 - "Community 6"
+Cohesion: 0.44
+Nodes (8): useDebounce(), useDrag(), useElementResize(), useHistory(), useKeyboardShortcuts(), useLocalStorage(), useSelection(), useToast()
+
+### Community 7 - "Community 7"
 Cohesion: 0.2
 Nodes (0): 
 
-### Community 6 - "Community 6"
+### Community 8 - "Community 8"
+Cohesion: 0.39
+Nodes (7): formatTime(), playNotificationSound(), resetTimer(), setCustomTime(), toggleMode(), toggleMusic(), toggleTimer()
+
+### Community 9 - "Community 9"
 Cohesion: 0.33
 Nodes (7): Toaster(), addToRemoveQueue(), dispatch(), genId(), reducer(), toast(), useToast()
 
-### Community 7 - "Community 7"
-Cohesion: 0.25
-Nodes (0): 
-
-### Community 8 - "Community 8"
-Cohesion: 0.25
-Nodes (0): 
-
-### Community 9 - "Community 9"
-Cohesion: 0.29
-Nodes (0): 
-
 ### Community 10 - "Community 10"
-Cohesion: 0.29
+Cohesion: 0.25
 Nodes (0): 
 
 ### Community 11 - "Community 11"
-Cohesion: 0.33
+Cohesion: 0.25
 Nodes (0): 
 
 ### Community 12 - "Community 12"
-Cohesion: 0.33
-Nodes (6): Lovable Project README (CollabBoard), React, shadcn-ui Component Library, Tailwind CSS, TypeScript, Vite (Build Tool)
+Cohesion: 0.29
+Nodes (0): 
 
 ### Community 13 - "Community 13"
-Cohesion: 0.4
+Cohesion: 0.29
 Nodes (0): 
 
 ### Community 14 - "Community 14"
-Cohesion: 0.5
-Nodes (0): 
+Cohesion: 0.6
+Nodes (3): exportAsJSON(), exportAsPNG(), handleImport()
 
 ### Community 15 - "Community 15"
-Cohesion: 0.5
-Nodes (0): 
+Cohesion: 0.6
+Nodes (3): handleCopyBoardId(), handleEmailInvite(), handleShare()
 
 ### Community 16 - "Community 16"
-Cohesion: 0.5
+Cohesion: 0.33
 Nodes (0): 
 
 ### Community 17 - "Community 17"
-Cohesion: 0.5
-Nodes (0): 
+Cohesion: 0.33
+Nodes (6): Lovable Project README (CollabBoard), React, shadcn-ui Component Library, Tailwind CSS, TypeScript, Vite (Build Tool)
 
 ### Community 18 - "Community 18"
-Cohesion: 0.5
-Nodes (0): 
+Cohesion: 0.6
+Nodes (2): handleApplyTemplate(), handleCreateTemplate()
 
 ### Community 19 - "Community 19"
-Cohesion: 0.5
+Cohesion: 0.4
 Nodes (0): 
 
 ### Community 20 - "Community 20"
 Cohesion: 0.5
-Nodes (0): 
+Nodes (1): CommentThread()
 
 ### Community 21 - "Community 21"
 Cohesion: 0.5
-Nodes (0): 
+Nodes (1): getOpacityFromActivity()
 
 ### Community 22 - "Community 22"
-Cohesion: 0.67
-Nodes (0): 
+Cohesion: 0.5
+Nodes (1): getActivityStatus()
 
 ### Community 23 - "Community 23"
-Cohesion: 0.67
-Nodes (0): 
+Cohesion: 0.5
+Nodes (1): ShapeLibrary()
 
 ### Community 24 - "Community 24"
-Cohesion: 0.67
-Nodes (0): 
+Cohesion: 0.5
+Nodes (1): getElementStyle()
 
 ### Community 25 - "Community 25"
-Cohesion: 0.67
+Cohesion: 0.5
 Nodes (0): 
 
 ### Community 26 - "Community 26"
-Cohesion: 0.67
+Cohesion: 0.5
 Nodes (0): 
 
 ### Community 27 - "Community 27"
-Cohesion: 0.67
+Cohesion: 0.5
 Nodes (0): 
 
 ### Community 28 - "Community 28"
-Cohesion: 1.0
+Cohesion: 0.5
 Nodes (0): 
 
 ### Community 29 - "Community 29"
-Cohesion: 1.0
+Cohesion: 0.5
 Nodes (0): 
 
 ### Community 30 - "Community 30"
-Cohesion: 1.0
+Cohesion: 0.5
 Nodes (0): 
 
 ### Community 31 - "Community 31"
-Cohesion: 1.0
+Cohesion: 0.5
 Nodes (0): 
 
 ### Community 32 - "Community 32"
-Cohesion: 1.0
+Cohesion: 0.5
 Nodes (0): 
 
 ### Community 33 - "Community 33"
-Cohesion: 1.0
-Nodes (0): 
+Cohesion: 0.67
+Nodes (1): MiniMap()
 
 ### Community 34 - "Community 34"
-Cohesion: 1.0
-Nodes (0): 
+Cohesion: 0.67
+Nodes (1): handleToolClick()
 
 ### Community 35 - "Community 35"
-Cohesion: 1.0
+Cohesion: 0.67
 Nodes (0): 
 
 ### Community 36 - "Community 36"
-Cohesion: 1.0
+Cohesion: 0.67
 Nodes (0): 
 
 ### Community 37 - "Community 37"
-Cohesion: 1.0
+Cohesion: 0.67
 Nodes (0): 
 
 ### Community 38 - "Community 38"
-Cohesion: 1.0
+Cohesion: 0.67
 Nodes (0): 
 
 ### Community 39 - "Community 39"
-Cohesion: 1.0
+Cohesion: 0.67
 Nodes (0): 
 
 ### Community 40 - "Community 40"
@@ -559,180 +576,264 @@ Nodes (0):
 
 ### Community 102 - "Community 102"
 Cohesion: 1.0
-Nodes (1): Graphify Knowledge Graph Config (CLAUDE.md)
+Nodes (0): 
 
 ### Community 103 - "Community 103"
 Cohesion: 1.0
-Nodes (1): Robots.txt Crawl Policy (All Bots Allowed)
+Nodes (0): 
 
 ### Community 104 - "Community 104"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 105 - "Community 105"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 106 - "Community 106"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 107 - "Community 107"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 108 - "Community 108"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 109 - "Community 109"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 110 - "Community 110"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 111 - "Community 111"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 112 - "Community 112"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 113 - "Community 113"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 114 - "Community 114"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 115 - "Community 115"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 116 - "Community 116"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 117 - "Community 117"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 118 - "Community 118"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 119 - "Community 119"
+Cohesion: 1.0
+Nodes (1): Graphify Knowledge Graph Config (CLAUDE.md)
+
+### Community 120 - "Community 120"
+Cohesion: 1.0
+Nodes (1): Robots.txt Crawl Policy (All Bots Allowed)
+
+### Community 121 - "Community 121"
 Cohesion: 1.0
 Nodes (1): Placeholder SVG Image (1200x1200, Gray Background, Circle + Crosshair)
 
 ## Knowledge Gaps
 - **13 isolated node(s):** `Vite (Build Tool)`, `TypeScript`, `React`, `shadcn-ui Component Library`, `Tailwind CSS` (+8 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **Thin community `Community 28`** (2 nodes): `App.tsx`, `main.tsx`
+- **Thin community `Community 40`** (2 nodes): `App.tsx`, `main.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 29`** (2 nodes): `useChart()`, `chart.tsx`
+- **Thin community `Community 41`** (2 nodes): `useCanvasStateManager()`, `useCanvasStateManager.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 30`** (2 nodes): `ResizablePanelGroup()`, `resizable.tsx`
+- **Thin community `Community 42`** (2 nodes): `useChart()`, `chart.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 31`** (2 nodes): `Toaster()`, `sonner.tsx`
+- **Thin community `Community 43`** (2 nodes): `ResizablePanelGroup()`, `resizable.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 32`** (2 nodes): `Calendar()`, `calendar.tsx`
+- **Thin community `Community 44`** (2 nodes): `Toaster()`, `sonner.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 33`** (2 nodes): `useFormField()`, `form.tsx`
+- **Thin community `Community 45`** (2 nodes): `Calendar()`, `calendar.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 34`** (2 nodes): `useCarousel()`, `carousel.tsx`
+- **Thin community `Community 46`** (2 nodes): `useFormField()`, `form.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 35`** (2 nodes): `CommentThread()`, `CommentThread.tsx`
+- **Thin community `Community 47`** (2 nodes): `useCarousel()`, `carousel.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 36`** (2 nodes): `getOpacityFromActivity()`, `CollaboratorCursors.tsx`
+- **Thin community `Community 48`** (2 nodes): `strokeToPath()`, `DrawingTool.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 37`** (2 nodes): `DrawingTool()`, `DrawingTool.tsx`
+- **Thin community `Community 49`** (2 nodes): `handleClick()`, `MiniMap.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 38`** (2 nodes): `MiniMap()`, `MiniMap.tsx`
+- **Thin community `Community 50`** (2 nodes): `ResizeHandles()`, `ResizeHandles.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 39`** (2 nodes): `getActivityStatus()`, `CollaboratorsList.tsx`
+- **Thin community `Community 51`** (2 nodes): `SelectionBox()`, `SelectionBox.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 40`** (2 nodes): `ShapeLibrary()`, `ShapeLibrary.tsx`
+- **Thin community `Community 52`** (2 nodes): `useHistory.ts`, `useHistory()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 41`** (2 nodes): `ResizeHandles()`, `ResizeHandles.tsx`
+- **Thin community `Community 53`** (2 nodes): `useCanvasInteraction()`, `useCanvasInteraction.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 42`** (2 nodes): `SelectionBox()`, `SelectionBox.tsx`
+- **Thin community `Community 54`** (2 nodes): `useSelection.ts`, `useSelection()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 43`** (2 nodes): `handleKeyDown()`, `Canvas.tsx`
+- **Thin community `Community 55`** (2 nodes): `use-mobile.tsx`, `useIsMobile()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 44`** (2 nodes): `handleToolClick()`, `CanvasToolbar.tsx`
+- **Thin community `Community 56`** (2 nodes): `utils.ts`, `cn()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 45`** (2 nodes): `useHistory.ts`, `useHistory()`
+- **Thin community `Community 57`** (2 nodes): `Index()`, `Index.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 46`** (2 nodes): `useCanvasInteraction.ts`, `useCanvasInteraction()`
+- **Thin community `Community 58`** (2 nodes): `Canvas()`, `Canvas.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 47`** (2 nodes): `useSelection.ts`, `useSelection()`
+- **Thin community `Community 59`** (2 nodes): `NotFound()`, `NotFound.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 48`** (2 nodes): `use-mobile.tsx`, `useIsMobile()`
+- **Thin community `Community 60`** (1 nodes): `tailwind.config.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 49`** (2 nodes): `utils.ts`, `cn()`
+- **Thin community `Community 61`** (1 nodes): `eslint.config.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 50`** (2 nodes): `Index()`, `Index.tsx`
+- **Thin community `Community 62`** (1 nodes): `vite.config.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 51`** (2 nodes): `Canvas()`, `Canvas.tsx`
+- **Thin community `Community 63`** (1 nodes): `postcss.config.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 52`** (2 nodes): `NotFound()`, `NotFound.tsx`
+- **Thin community `Community 64`** (1 nodes): `tailwind.config.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 53`** (1 nodes): `tailwind.config.ts`
+- **Thin community `Community 65`** (1 nodes): `tailwind.config.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 54`** (1 nodes): `eslint.config.js`
+- **Thin community `Community 66`** (1 nodes): `App.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 55`** (1 nodes): `vite.config.ts`
+- **Thin community `Community 67`** (1 nodes): `AppSidebar.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 56`** (1 nodes): `postcss.config.js`
+- **Thin community `Community 68`** (1 nodes): `SharedComponents.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 57`** (1 nodes): `tailwind.config.ts`
+- **Thin community `Community 69`** (1 nodes): `PropertyPanel.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 58`** (1 nodes): `vite-env.d.ts`
+- **Thin community `Community 70`** (1 nodes): `OptionsMenu.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 59`** (1 nodes): `AppSidebar.tsx`
+- **Thin community `Community 71`** (1 nodes): `App.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 60`** (1 nodes): `aspect-ratio.tsx`
+- **Thin community `Community 72`** (1 nodes): `AppSidebar.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 61`** (1 nodes): `alert-dialog.tsx`
+- **Thin community `Community 73`** (1 nodes): `SharedComponents.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 62`** (1 nodes): `tabs.tsx`
+- **Thin community `Community 74`** (1 nodes): `PropertyPanel.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 63`** (1 nodes): `card.tsx`
+- **Thin community `Community 75`** (1 nodes): `OptionsMenu.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 64`** (1 nodes): `slider.tsx`
+- **Thin community `Community 76`** (1 nodes): `vite-env.d.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 65`** (1 nodes): `popover.tsx`
+- **Thin community `Community 77`** (1 nodes): `aspect-ratio.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 66`** (1 nodes): `progress.tsx`
+- **Thin community `Community 78`** (1 nodes): `alert-dialog.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 67`** (1 nodes): `input-otp.tsx`
+- **Thin community `Community 79`** (1 nodes): `tabs.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 68`** (1 nodes): `hover-card.tsx`
+- **Thin community `Community 80`** (1 nodes): `card.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 69`** (1 nodes): `sheet.tsx`
+- **Thin community `Community 81`** (1 nodes): `slider.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 70`** (1 nodes): `scroll-area.tsx`
+- **Thin community `Community 82`** (1 nodes): `popover.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 71`** (1 nodes): `label.tsx`
+- **Thin community `Community 83`** (1 nodes): `progress.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 72`** (1 nodes): `navigation-menu.tsx`
+- **Thin community `Community 84`** (1 nodes): `input-otp.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 73`** (1 nodes): `accordion.tsx`
+- **Thin community `Community 85`** (1 nodes): `hover-card.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 74`** (1 nodes): `tooltip.tsx`
+- **Thin community `Community 86`** (1 nodes): `sheet.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 75`** (1 nodes): `alert.tsx`
+- **Thin community `Community 87`** (1 nodes): `scroll-area.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 76`** (1 nodes): `use-toast.ts`
+- **Thin community `Community 88`** (1 nodes): `label.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 77`** (1 nodes): `switch.tsx`
+- **Thin community `Community 89`** (1 nodes): `navigation-menu.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 78`** (1 nodes): `radio-group.tsx`
+- **Thin community `Community 90`** (1 nodes): `accordion.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 79`** (1 nodes): `command.tsx`
+- **Thin community `Community 91`** (1 nodes): `tooltip.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 80`** (1 nodes): `toggle-group.tsx`
+- **Thin community `Community 92`** (1 nodes): `alert.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 81`** (1 nodes): `avatar.tsx`
+- **Thin community `Community 93`** (1 nodes): `use-toast.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 82`** (1 nodes): `menubar.tsx`
+- **Thin community `Community 94`** (1 nodes): `switch.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 83`** (1 nodes): `dialog.tsx`
+- **Thin community `Community 95`** (1 nodes): `radio-group.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 84`** (1 nodes): `badge.tsx`
+- **Thin community `Community 96`** (1 nodes): `command.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 85`** (1 nodes): `table.tsx`
+- **Thin community `Community 97`** (1 nodes): `toggle-group.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 86`** (1 nodes): `separator.tsx`
+- **Thin community `Community 98`** (1 nodes): `avatar.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 87`** (1 nodes): `button.tsx`
+- **Thin community `Community 99`** (1 nodes): `menubar.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 88`** (1 nodes): `toggle.tsx`
+- **Thin community `Community 100`** (1 nodes): `dialog.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 89`** (1 nodes): `toast.tsx`
+- **Thin community `Community 101`** (1 nodes): `badge.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 90`** (1 nodes): `checkbox.tsx`
+- **Thin community `Community 102`** (1 nodes): `SharedComponents.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 91`** (1 nodes): `collapsible.tsx`
+- **Thin community `Community 103`** (1 nodes): `table.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 92`** (1 nodes): `dropdown-menu.tsx`
+- **Thin community `Community 104`** (1 nodes): `separator.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 93`** (1 nodes): `select.tsx`
+- **Thin community `Community 105`** (1 nodes): `button.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 94`** (1 nodes): `textarea.tsx`
+- **Thin community `Community 106`** (1 nodes): `toggle.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 95`** (1 nodes): `input.tsx`
+- **Thin community `Community 107`** (1 nodes): `toast.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 96`** (1 nodes): `skeleton.tsx`
+- **Thin community `Community 108`** (1 nodes): `checkbox.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 97`** (1 nodes): `context-menu.tsx`
+- **Thin community `Community 109`** (1 nodes): `collapsible.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 98`** (1 nodes): `PropertyPanel.tsx`
+- **Thin community `Community 110`** (1 nodes): `dropdown-menu.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 99`** (1 nodes): `templates.ts`
+- **Thin community `Community 111`** (1 nodes): `select.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 100`** (1 nodes): `OptionsMenu.tsx`
+- **Thin community `Community 112`** (1 nodes): `textarea.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 101`** (1 nodes): `CommentsList.tsx`
+- **Thin community `Community 113`** (1 nodes): `input.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 102`** (1 nodes): `Graphify Knowledge Graph Config (CLAUDE.md)`
+- **Thin community `Community 114`** (1 nodes): `skeleton.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 103`** (1 nodes): `Robots.txt Crawl Policy (All Bots Allowed)`
+- **Thin community `Community 115`** (1 nodes): `context-menu.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 104`** (1 nodes): `Placeholder SVG Image (1200x1200, Gray Background, Circle + Crosshair)`
+- **Thin community `Community 116`** (1 nodes): `templates.ts`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 117`** (1 nodes): `OptionsMenu.tsx`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 118`** (1 nodes): `CommentsList.tsx`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 119`** (1 nodes): `Graphify Knowledge Graph Config (CLAUDE.md)`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 120`** (1 nodes): `Robots.txt Crawl Policy (All Bots Allowed)`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 121`** (1 nodes): `Placeholder SVG Image (1200x1200, Gray Background, Circle + Crosshair)`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
+- **Why does `Toaster()` connect `Community 9` to `Community 6`?**
+  _High betweenness centrality (0.001) - this node is a cross-community bridge._
+- **Why does `useToast()` connect `Community 6` to `Community 9`?**
+  _High betweenness centrality (0.001) - this node is a cross-community bridge._
 - **What connects `Vite (Build Tool)`, `TypeScript`, `React` to the rest of the system?**
   _13 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.08 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.1 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
+  _Cohesion score 0.12 - nodes in this community are weakly interconnected._
+- **Should `Community 3` be split into smaller, more focused modules?**
   _Cohesion score 0.12 - nodes in this community are weakly interconnected._

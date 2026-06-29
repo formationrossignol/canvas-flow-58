@@ -37,6 +37,7 @@ interface CanvasHeaderProps {
   onResetBoard?: () => void;
   onToggleTimer?: () => void;
   elementCount?: number;
+  onPresent?: () => void;
 }
 
 export const CanvasHeader = ({
@@ -44,7 +45,7 @@ export const CanvasHeader = ({
   onOpenTemplates, onOpenExport, onOpenComments,
   selectedCount = 0, onDuplicateSelected,
   boardId, lastSavedAt, isSaving, onSaveNow, onResetBoard, onToggleTimer,
-  elementCount = 0,
+  elementCount = 0, onPresent,
 }: CanvasHeaderProps) => {
   const navigate = useNavigate();
   const [emailInvite, setEmailInvite] = useState("");
@@ -176,7 +177,7 @@ export const CanvasHeader = ({
       <div className="flex items-center gap-1.5 flex-shrink-0">
         {/* Présenter */}
         <button
-          onClick={() => toast.info('Mode présentation bientôt disponible')}
+          onClick={onPresent}
           className="h-[30px] px-[10px] rounded-[7px] text-[12.5px] font-medium text-gray-700 flex items-center gap-[5px] hover:bg-gray-50 transition-colors"
           style={{ border: '1px solid rgba(15,23,42,0.09)' }}
         >

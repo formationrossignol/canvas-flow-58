@@ -1,7 +1,7 @@
 import {
   MousePointer2, Hand, StickyNote, Type, Square, Circle, Smile,
   Pen, Eraser, MessageCircle, Share2, Undo2, Redo2,
-  Clock, Download, LayoutGrid, FileDown, Settings, MoreVertical, Image,
+  Clock, Download, FileJson2, Upload, Settings,
 } from "lucide-react";
 import { CanvasElement } from "./Canvas";
 import { useState } from "react";
@@ -22,15 +22,15 @@ interface CanvasToolbarProps {
   onToggleTimer: () => void;
   onToggleTextEditor: () => void;
   onToggleOptions: () => void;
-  onToggleShapeLibrary?: () => void;
-  onExportPDF?: () => void;
-  onExportSelectedArea?: () => void;
-  hasSelection?: boolean;
   canUndo?: boolean;
   canRedo?: boolean;
   onUndo?: () => void;
   onRedo?: () => void;
   onInsertEmoji?: (emoji: string) => void;
+  onExportPNG?: () => void;
+  onExportJSON?: () => void;
+  onImportJSON?: () => void;
+  onOpenShortcuts?: () => void;
 }
 
 const SEP = () => <Divider vertical />;
@@ -48,12 +48,33 @@ const TB_BTN_ACTIVE: React.CSSProperties = {
   color: '#6366F1',
 };
 
-const colors = [
-  ...STICKY_COLORS.map(c => ({ hex: c.bg, label: c.label })),
-  { hex: COLORS.neutral[900], label: 'Noir' },
-  { hex: COLORS.neutral[500], label: 'Gris' },
-  { hex: '#FFFFFF', label: 'Blanc' },
-  { hex: COLORS.primary[500], label: 'Indigo' },
+const COLOR_GROUPS = [
+  {
+    label: 'Pastels',
+    colors: STICKY_COLORS.map(c => ({ hex: c.bg, label: c.label })),
+  },
+  {
+    label: 'Couleurs',
+    colors: [
+      { hex: COLORS.primary[500], label: 'Indigo' },
+      { hex: COLORS.secondary[500], label: 'Violet' },
+      { hex: COLORS.accent[500], label: 'Rose' },
+      { hex: COLORS.success[500], label: 'Vert' },
+      { hex: COLORS.warning[500], label: 'Ambre' },
+      { hex: COLORS.danger[500], label: 'Rouge' },
+      { hex: '#3B82F6', label: 'Bleu' },
+      { hex: '#F97316', label: 'Orange' },
+    ],
+  },
+  {
+    label: 'Nuances',
+    colors: [
+      { hex: '#111827', label: 'Noir' },
+      { hex: '#4B5563', label: 'Anthracite' },
+      { hex: '#9CA3AF', label: 'Gris' },
+      { hex: '#FFFFFF', label: 'Blanc' },
+    ],
+  },
 ];
 
 const emojis = ['😀','😂','🎉','❤️','👍','🔥','💡','⭐','🎯','✅','🚀','🙏','🎨','🏆','💪','🌟','🤔','😍','🤝','💯','🧠','⚡','🌈','🦄'];
@@ -68,10 +89,9 @@ export const CanvasToolbar = ({
   selectedTool, selectedColor, brushThickness,
   onToolSelect, onColorSelect, onBrushThicknessChange,
   onAddElement, isConnecting, onToggleConnecting,
-  isTimerVisible, onToggleTimer, onToggleTextEditor, onToggleOptions,
-  onToggleShapeLibrary, onExportPDF,
+  isTimerVisible, onToggleTimer, onToggleTextEditor,
   canUndo = false, canRedo = false, onUndo, onRedo,
-  onInsertEmoji,
+  onInsertEmoji, onExportPNG, onExportJSON, onImportJSON, onOpenShortcuts,
 }: CanvasToolbarProps) => {
   const [showColors, setShowColors] = useState(false);
   const [showEmoji, setShowEmoji] = useState(false);
@@ -93,8 +113,10 @@ export const CanvasToolbar = ({
 
   return (
     <div
-      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-10"
-      style={{ animation: 'float-in 0.45s cubic-bezier(0.175,0.885,0.32,1.275) both' }}
+      style={{
+        position: 'absolute', bottom: 24, left: '50%', zIndex: 10,
+        animation: 'toolbar-in 0.45s cubic-bezier(0.175,0.885,0.32,1.275) both',
+      }}
     >
       <div
         style={{
@@ -166,11 +188,6 @@ export const CanvasToolbar = ({
           )}
         </div>
 
-        {/* Image */}
-        <button style={toolBtn('image')} onClick={() => handleTool('image')} title="Image (I)">
-          <Image size={17} />
-        </button>
-
         <SEP />
 
         {/* Draw tools */}
@@ -231,22 +248,26 @@ export const CanvasToolbar = ({
                 background: 'white', border: '1px solid rgba(15,23,42,0.08)',
                 borderRadius: 12, padding: 12,
                 boxShadow: '0 8px 28px rgba(0,0,0,0.12)', zIndex: 60,
-                minWidth: 172,
+                minWidth: 200, display: 'flex', flexDirection: 'column', gap: 10,
               }}
               className="animate-in fade-in slide-in-from-bottom-2 duration-150"
             >
-              <div style={{ fontSize: 10.5, fontWeight: 600, color: '#9CA3AF', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 8 }}>Couleur</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 5 }}>
-                {colors.map(c => (
-                  <ColorSwatch
-                    key={c.hex}
-                    color={c.hex}
-                    selected={selectedColor === c.hex}
-                    label={c.label}
-                    onClick={() => { onColorSelect(c.hex); setShowColors(false); }}
-                  />
-                ))}
-              </div>
+              {COLOR_GROUPS.map(group => (
+                <div key={group.label}>
+                  <div style={{ fontSize: 10.5, fontWeight: 600, color: '#9CA3AF', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 6 }}>{group.label}</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 5 }}>
+                    {group.colors.map(c => (
+                      <ColorSwatch
+                        key={c.hex}
+                        color={c.hex}
+                        selected={selectedColor === c.hex}
+                        label={c.label}
+                        onClick={() => { onColorSelect(c.hex); setShowColors(false); }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
@@ -282,25 +303,23 @@ export const CanvasToolbar = ({
           <Clock size={17} />
         </button>
 
-        {/* Export PDF */}
-        {onExportPDF && (
-          <button style={TB_BTN_BASE} onClick={onExportPDF} title="Exporter en PDF">
-            <Download size={17} />
-          </button>
-        )}
-
-        {/* Shape Library */}
-        {onToggleShapeLibrary && (
-          <button style={TB_BTN_BASE} onClick={onToggleShapeLibrary} title="Formes & Bibliothèque">
-            <LayoutGrid size={17} />
-          </button>
-        )}
-
-        {/* Export / Options */}
-        <button style={TB_BTN_BASE} onClick={onToggleOptions} title="Options du board">
-          <FileDown size={17} />
+        {/* Export PNG */}
+        <button style={TB_BTN_BASE} onClick={onExportPNG} title="Exporter en PNG">
+          <Download size={17} />
         </button>
-        <button style={TB_BTN_BASE} onClick={onToggleOptions} title="Paramètres">
+
+        {/* Export JSON */}
+        <button style={TB_BTN_BASE} onClick={onExportJSON} title="Exporter en JSON">
+          <FileJson2 size={17} />
+        </button>
+
+        {/* Import JSON */}
+        <button style={TB_BTN_BASE} onClick={onImportJSON} title="Importer JSON">
+          <Upload size={17} />
+        </button>
+
+        {/* Settings / Shortcuts */}
+        <button style={TB_BTN_BASE} onClick={onOpenShortcuts} title="Raccourcis clavier">
           <Settings size={17} />
         </button>
       </div>
