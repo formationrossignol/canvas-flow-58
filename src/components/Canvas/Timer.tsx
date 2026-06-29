@@ -1,310 +1,140 @@
-import { useState, useEffect, useRef } from "react";
-import { Play, Pause, RotateCcw, Timer as TimerIcon, Plus, Minus, Music, Volume2, VolumeX } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { useState, useEffect } from "react";
+import { Play, Pause } from "lucide-react";
 
 interface TimerProps {
   isVisible: boolean;
   onToggle: () => void;
 }
 
-const musicTracks = [
-  { id: 1, name: "Lofi Study Beats", url: "https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3" },
-  { id: 2, name: "Ambient Focus", url: "https://assets.mixkit.co/music/preview/mixkit-sleepy-cat-135.mp3" },
-  { id: 3, name: "Peaceful Piano", url: "https://assets.mixkit.co/music/preview/mixkit-dreaming-big-31.mp3" },
-  { id: 4, name: "Nature Sounds", url: "https://assets.mixkit.co/music/preview/mixkit-forest-treasure-138.mp3" },
+const PRESETS = [
+  { label: '5m', seconds: 300 },
+  { label: '10m', seconds: 600 },
+  { label: '15m', seconds: 900 },
+  { label: '20m', seconds: 1200 },
 ];
 
-export const Timer = ({ isVisible, onToggle }: TimerProps) => {
-  const [time, setTime] = useState(300); // 5 minutes par défaut
-  const [initialTime, setInitialTime] = useState(300);
-  const [isRunning, setIsRunning] = useState(false);
-  const [isCountdown, setIsCountdown] = useState(true);
-  const [customMinutes, setCustomMinutes] = useState(5);
-  const [selectedTrack, setSelectedTrack] = useState<number | null>(null);
-  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+const R = 52;
+const CIRC = 2 * Math.PI * R;
+
+export const Timer = ({ isVisible }: TimerProps) => {
+  const [totalSeconds, setTotalSeconds] = useState(300);
+  const [elapsed, setElapsed] = useState(0);
+  const [running, setRunning] = useState(false);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    
-    if (isRunning) {
-      interval = setInterval(() => {
-        setTime(prev => {
-          if (isCountdown) {
-            if (prev <= 1) {
-              setIsRunning(false);
-              setIsMusicPlaying(false);
-              if (audioRef.current) {
-                audioRef.current.pause();
-              }
-              playNotificationSound();
-              return 0;
-            }
-            return prev - 1;
-          } else {
-            return prev + 1;
-          }
-        });
-      }, 1000);
+    if (!running) return;
+    if (elapsed >= totalSeconds) {
+      setRunning(false);
+      return;
     }
-    
-    return () => clearInterval(interval);
-  }, [isRunning, isCountdown]);
+    const id = setInterval(() => setElapsed(p => p + 1), 1000);
+    return () => clearInterval(id);
+  }, [running, elapsed, totalSeconds]);
 
-  useEffect(() => {
-    if (selectedTrack !== null && isMusicPlaying) {
-      const track = musicTracks.find(t => t.id === selectedTrack);
-      if (track) {
-        if (audioRef.current) {
-          audioRef.current.pause();
-        }
-        audioRef.current = new Audio(track.url);
-        audioRef.current.loop = true;
-        audioRef.current.volume = 0.3;
-        audioRef.current.play();
-      }
-    } else if (audioRef.current) {
-      audioRef.current.pause();
-    }
+  const timeLeft = Math.max(0, totalSeconds - elapsed);
+  const done = elapsed >= totalSeconds && totalSeconds > 0;
+  const statusLabel = done ? '⏰ Temps écoulé !' : running ? 'En cours...' : elapsed > 0 ? 'En pause' : 'Prêt';
+  const progress = totalSeconds > 0 ? elapsed / totalSeconds : 0;
+  const dashOffset = CIRC * (1 - progress);
 
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-    };
-  }, [selectedTrack, isMusicPlaying]);
-
-  const playNotificationSound = () => {
-    // Create a simple beep sound using Web Audio API
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    oscillator.frequency.value = 800; // 800 Hz frequency
-    oscillator.type = 'sine';
-    
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-    
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.5);
+  const fmt = (s: number) => {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
   };
 
-  const formatTime = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    
-    if (hours > 0) {
-      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    }
-    return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  const handlePreset = (seconds: number) => {
+    setTotalSeconds(seconds);
+    setElapsed(0);
+    setRunning(false);
   };
 
-  const toggleTimer = () => {
-    setIsRunning(!isRunning);
-  };
-
-  const resetTimer = () => {
-    setIsRunning(false);
-    setIsMusicPlaying(false);
-    if (audioRef.current) {
-      audioRef.current.pause();
-    }
-    if (isCountdown) {
-      setTime(initialTime);
-    } else {
-      setTime(0);
-    }
-  };
-
-  const toggleMusic = (trackId: number) => {
-    if (selectedTrack === trackId && isMusicPlaying) {
-      setIsMusicPlaying(false);
-    } else {
-      setSelectedTrack(trackId);
-      setIsMusicPlaying(true);
-    }
-  };
-
-  const setCustomTime = () => {
-    const newTime = customMinutes * 60;
-    setTime(newTime);
-    setInitialTime(newTime);
-    setIsRunning(false);
-  };
-
-  const toggleMode = () => {
-    setIsCountdown(!isCountdown);
-    setIsRunning(false);
-    if (!isCountdown) {
-      // Switching to countdown mode
-      setTime(initialTime);
-    } else {
-      // Switching to stopwatch mode
-      setTime(0);
-    }
+  const handleReset = () => {
+    setElapsed(0);
+    setRunning(false);
   };
 
   if (!isVisible) return null;
 
   return (
-    <div className="absolute top-20 right-6 z-40 animate-float-in">
-      <div className="floating-element bg-card/95 backdrop-blur-sm rounded-xl border border-border p-4 w-80">
-        <div className="flex items-center gap-3 mb-4">
-          <TimerIcon size={20} className="text-primary" />
-          <h3 className="font-semibold text-foreground">
-            {isCountdown ? 'Compte à rebours' : 'Chronomètre'}
-          </h3>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onToggle}
-            className="ml-auto"
+    <div style={{
+      position: 'fixed', bottom: 90, left: '50%', transform: 'translateX(-50%)',
+      zIndex: 60, background: 'white', border: '1px solid rgba(15,23,42,0.08)',
+      borderRadius: 18, padding: '20px 24px',
+      boxShadow: '0 16px 48px rgba(0,0,0,0.13), 0 4px 12px rgba(0,0,0,0.06)',
+      minWidth: 260,
+    }}>
+      {/* Ring + time */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, marginBottom: 16 }}>
+        <svg width="130" height="130" viewBox="0 0 130 130">
+          <circle cx="65" cy="65" r={R} fill="none" stroke="#E5E7EB" strokeWidth="8" />
+          <circle
+            cx="65" cy="65" r={R} fill="none"
+            stroke={done ? '#EF4444' : '#6366F1'} strokeWidth="8"
+            strokeDasharray={CIRC} strokeDashoffset={dashOffset}
+            strokeLinecap="round"
+            style={{ transform: 'rotate(-90deg)', transformOrigin: '65px 65px', transition: 'stroke-dashoffset 0.9s linear' }}
+          />
+          <text
+            x="65" y="62" textAnchor="middle" dominantBaseline="middle"
+            style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 22, fontWeight: 700, fill: '#111827' }}
           >
-            ×
-          </Button>
-        </div>
+            {fmt(timeLeft)}
+          </text>
+          <text
+            x="65" y="80" textAnchor="middle" dominantBaseline="middle"
+            style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 600, fill: '#9CA3AF', letterSpacing: 1, textTransform: 'uppercase' }}
+          >
+            {statusLabel.toUpperCase()}
+          </text>
+        </svg>
+      </div>
 
-        {/* Mode Toggle */}
-        <div className="flex gap-2 mb-4">
-          <Button
-            variant={isCountdown ? "default" : "outline"}
-            size="sm"
-            onClick={toggleMode}
-            className="flex-1"
+      {/* Presets */}
+      <div style={{ display: 'flex', gap: 5, marginBottom: 12 }}>
+        {PRESETS.map(p => (
+          <button
+            key={p.label}
+            onClick={() => handlePreset(p.seconds)}
+            style={{
+              flex: 1, height: 32, borderRadius: 8,
+              background: totalSeconds === p.seconds ? 'rgba(99,102,241,0.12)' : 'rgba(15,23,42,0.04)',
+              border: totalSeconds === p.seconds ? '1px solid rgba(99,102,241,0.3)' : '1px solid rgba(15,23,42,0.08)',
+              cursor: 'pointer', fontSize: 12, fontWeight: 600,
+              color: totalSeconds === p.seconds ? '#6366F1' : '#6B7280',
+              fontFamily: 'inherit',
+            }}
           >
-            Compte à rebours
-          </Button>
-          <Button
-            variant={!isCountdown ? "default" : "outline"}
-            size="sm"
-            onClick={toggleMode}
-            className="flex-1"
-          >
-            Chronomètre
-          </Button>
-        </div>
+            {p.label}
+          </button>
+        ))}
+      </div>
 
-        {/* Custom Time Setting for Countdown */}
-        {isCountdown && !isRunning && (
-          <div className="mb-4 p-3 bg-muted/50 rounded-lg">
-            <label className="text-xs text-muted-foreground mb-2 block">Définir la durée (minutes)</label>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  const newMinutes = Math.max(1, customMinutes - 1);
-                  setCustomMinutes(newMinutes);
-                }}
-                className="w-8 h-8 p-0"
-              >
-                <Minus size={14} />
-              </Button>
-              <Input
-                type="number"
-                value={customMinutes}
-                onChange={(e) => setCustomMinutes(Math.max(1, parseInt(e.target.value) || 1))}
-                className="text-center h-8"
-                min="1"
-                max="120"
-              />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  const newMinutes = Math.min(120, customMinutes + 1);
-                  setCustomMinutes(newMinutes);
-                }}
-                className="w-8 h-8 p-0"
-              >
-                <Plus size={14} />
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={setCustomTime}
-                className="ml-2"
-              >
-                OK
-              </Button>
-            </div>
-          </div>
-        )}
-        
-        <div className="text-center mb-4">
-          <div className={`text-3xl font-mono font-bold mb-2 ${
-            isCountdown && time <= 10 && time > 0 ? 'text-destructive animate-pulse' : 'text-foreground'
-          }`}>
-            {formatTime(time)}
-          </div>
-          <div className="text-sm text-muted-foreground">
-            {isRunning ? 'En cours...' : isCountdown && time === 0 ? 'Terminé !' : 'Arrêté'}
-          </div>
-        </div>
-        
-        <div className="flex gap-2 mb-4">
-          <Button
-            variant={isRunning ? "destructive" : "default"}
-            size="sm"
-            onClick={toggleTimer}
-            className="flex-1 gap-2"
-          >
-            {isRunning ? <Pause size={16} /> : <Play size={16} />}
-            {isRunning ? 'Pause' : 'Start'}
-          </Button>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={resetTimer}
-            className="gap-2"
-          >
-            <RotateCcw size={16} />
-            Reset
-          </Button>
-        </div>
-
-        {/* Music List - Only show during countdown */}
-        {isCountdown && (
-          <div className="border-t border-border pt-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Music size={16} className="text-primary" />
-              <h4 className="text-sm font-semibold">Musique d'ambiance</h4>
-            </div>
-            <ScrollArea className="h-40">
-              <div className="space-y-2">
-                {musicTracks.map((track) => {
-                  const isActive = selectedTrack === track.id && isMusicPlaying;
-                  return (
-                    <button
-                      key={track.id}
-                      onClick={() => toggleMusic(track.id)}
-                      className={`w-full flex items-center justify-between p-2 rounded-lg transition-colors ${
-                        isActive 
-                          ? 'bg-primary/10 border border-primary/30' 
-                          : 'bg-muted/50 hover:bg-muted border border-transparent'
-                      }`}
-                    >
-                      <span className="text-sm text-foreground">{track.name}</span>
-                      {isActive ? (
-                        <Volume2 size={16} className="text-primary" />
-                      ) : (
-                        <VolumeX size={16} className="text-muted-foreground" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </ScrollArea>
-          </div>
-        )}
+      {/* Controls */}
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button
+          onClick={() => { if (done) { handleReset(); setRunning(true); } else setRunning(r => !r); }}
+          style={{
+            flex: 1, height: 36, borderRadius: 10,
+            background: '#6366F1', border: 'none', cursor: 'pointer',
+            fontSize: 13, fontWeight: 600, color: 'white', fontFamily: 'inherit',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+            boxShadow: '0 1px 4px rgba(99,102,241,0.3)',
+          }}
+        >
+          {running ? <Pause size={14} /> : <Play size={14} />}
+          {running ? 'Pause' : done ? 'Relancer' : 'Démarrer'}
+        </button>
+        <button
+          onClick={handleReset}
+          style={{
+            height: 36, padding: '0 14px', borderRadius: 10,
+            background: 'rgba(15,23,42,0.05)', border: '1px solid rgba(15,23,42,0.08)',
+            cursor: 'pointer', fontSize: 13, fontWeight: 500, color: '#6B7280', fontFamily: 'inherit',
+          }}
+        >
+          Réinitialiser
+        </button>
       </div>
     </div>
   );

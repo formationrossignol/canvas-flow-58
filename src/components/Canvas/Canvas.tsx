@@ -958,35 +958,55 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       />
 
       {/* Tag Filter Bar — inline 36px strip below header */}
-      {allTags.length > 0 && (
-        <div style={{
-          position: 'fixed', top: 48, left: 0, right: 0, height: 36, zIndex: 10,
-          background: 'rgba(241,243,246,0.96)', borderBottom: '1px solid rgba(15,23,42,0.06)',
-          backdropFilter: 'blur(8px)',
-          display: 'flex', alignItems: 'center', gap: 4, padding: '0 16px', overflowX: 'auto',
-        }}>
-          <span style={{ fontSize: 10.5, fontWeight: 600, color: '#9CA3AF', letterSpacing: '0.06em', textTransform: 'uppercase', marginRight: 4 }}>Tags</span>
-          <button
-            onClick={() => setActiveTagFilter(null)}
-            style={{
-              padding: '2px 10px', borderRadius: 20, border: 'none', cursor: 'pointer', fontSize: 11.5, fontWeight: 600, transition: 'all 0.12s', whiteSpace: 'nowrap',
-              background: activeTagFilter === null ? '#6366F1' : 'rgba(99,102,241,0.08)',
-              color: activeTagFilter === null ? 'white' : '#6366F1',
-            }}
-          >Tous</button>
-          {allTags.map(tag => (
-            <button
-              key={tag}
-              onClick={() => setActiveTagFilter(activeTagFilter === tag ? null : tag)}
-              style={{
-                padding: '2px 10px', borderRadius: 20, border: 'none', cursor: 'pointer', fontSize: 11.5, fontWeight: 600, transition: 'all 0.12s', whiteSpace: 'nowrap',
-                background: activeTagFilter === tag ? '#6366F1' : 'rgba(99,102,241,0.08)',
-                color: activeTagFilter === tag ? 'white' : '#6366F1',
-              }}
-            >#{tag}</button>
-          ))}
-        </div>
-      )}
+      {allTags.length > 0 && (() => {
+        const tagPalette = [
+          { bg: '#D1FAE5', text: '#059669', activeBg: '#059669' },
+          { bg: '#FEE2E2', text: '#DC2626', activeBg: '#DC2626' },
+          { bg: '#FEF9C3', text: '#D97706', activeBg: '#D97706' },
+          { bg: '#DBEAFE', text: '#2563EB', activeBg: '#2563EB' },
+          { bg: '#EDE9FE', text: '#7C3AED', activeBg: '#7C3AED' },
+          { bg: '#FCE7F3', text: '#DB2777', activeBg: '#DB2777' },
+        ];
+        return (
+          <div style={{
+            position: 'fixed', top: 52, left: 0, right: 0, height: 36, zIndex: 10,
+            background: 'white', borderBottom: '1px solid rgba(15,23,42,0.06)',
+            display: 'flex', alignItems: 'center', gap: 6, padding: '0 14px', overflowX: 'auto',
+          }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', letterSpacing: '0.05em', textTransform: 'uppercase', whiteSpace: 'nowrap', flexShrink: 0 }}>Tags</span>
+            {allTags.map((tag, i) => {
+              const pal = tagPalette[i % tagPalette.length];
+              const active = activeTagFilter === tag;
+              return (
+                <button
+                  key={tag}
+                  onClick={() => setActiveTagFilter(active ? null : tag)}
+                  style={{
+                    height: 22, padding: '0 10px', borderRadius: 20, border: 'none', cursor: 'pointer',
+                    fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap', flexShrink: 0,
+                    fontFamily: 'inherit', transition: 'all 0.12s',
+                    background: active ? pal.activeBg : pal.bg,
+                    color: active ? 'white' : pal.text,
+                  }}
+                >
+                  {tag}
+                </button>
+              );
+            })}
+            {activeTagFilter && (
+              <button
+                onClick={() => setActiveTagFilter(null)}
+                style={{
+                  height: 22, padding: '0 9px', borderRadius: 20,
+                  border: '1px solid rgba(15,23,42,0.12)', background: 'transparent',
+                  color: '#9CA3AF', fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                  fontFamily: 'inherit', whiteSpace: 'nowrap', flexShrink: 0, marginLeft: 4,
+                }}
+              >× Tout afficher</button>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Pending element hint banner */}
       {pendingElement && (
@@ -1255,6 +1275,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         canvasTransform={canvasTransform}
         onNavigate={(x, y) => setCanvasTransform(prev => ({ ...prev, x, y }))}
         onZoomChange={(scale) => setCanvasTransform(prev => ({ ...prev, scale }))}
+        onFitToScreen={handleFitToScreen}
       />
 
       {/* Template Panel */}
