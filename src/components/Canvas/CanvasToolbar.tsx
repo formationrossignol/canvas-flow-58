@@ -6,6 +6,7 @@ import {
 import { CanvasElement } from "./Canvas";
 import { useState } from "react";
 import { STICKY_COLORS, COLORS } from "@/tokens/colors";
+import { ColorSwatch, Divider } from "@/components/UI/SharedComponents";
 
 interface CanvasToolbarProps {
   selectedTool: string;
@@ -32,9 +33,7 @@ interface CanvasToolbarProps {
   onInsertEmoji?: (emoji: string) => void;
 }
 
-const SEP = () => (
-  <div style={{ width: 1, height: 18, background: 'rgba(15,23,42,0.08)', margin: '0 3px', flexShrink: 0 }} />
-);
+const SEP = () => <Divider vertical />;
 
 const TB_BTN_BASE: React.CSSProperties = {
   width: 36, height: 36, borderRadius: 9, background: 'none', border: 'none',
@@ -239,16 +238,12 @@ export const CanvasToolbar = ({
               <div style={{ fontSize: 10.5, fontWeight: 600, color: '#9CA3AF', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 8 }}>Couleur</div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: 4 }}>
                 {colors.map(c => (
-                  <button
+                  <ColorSwatch
                     key={c.hex}
+                    color={c.hex}
+                    selected={selectedColor === c.hex}
+                    label={c.label}
                     onClick={() => { onColorSelect(c.hex); setShowColors(false); }}
-                    title={c.label}
-                    style={{
-                      width: 22, height: 22, borderRadius: 5, cursor: 'pointer',
-                      background: c.hex, border: selectedColor === c.hex ? '2px solid #6366F1' : '1.5px solid rgba(15,23,42,0.1)',
-                      transform: selectedColor === c.hex ? 'scale(1.15)' : 'scale(1)',
-                      transition: 'transform 0.12s',
-                    }}
                   />
                 ))}
               </div>

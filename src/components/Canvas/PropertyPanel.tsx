@@ -3,9 +3,10 @@ import { Palette, Copy, Trash2, Tag, User, X, AlignLeft, AlignCenter, AlignRight
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CanvasElement } from "./Canvas";
+import { ColorSwatch, TagBadge, PanelHeader, SectionLabel } from "@/components/UI/SharedComponents";
+import { STICKY_COLORS, COLORS } from "@/tokens/colors";
 
 interface PropertyPanelProps {
   selectedElements: CanvasElement[];
@@ -19,10 +20,15 @@ interface PropertyPanelProps {
 }
 
 const colorOptions = [
-  '#FFE066', '#FF8A80', '#81C784', '#64B5F6',
-  '#FFB74D', '#E1BEE7', '#A5D6A7', '#F48FB1',
-  '#90CAF9', '#FFCC02', '#FF5722', '#4CAF50',
-  '#2196F3', '#FF9800', '#9C27B0', '#8BC34A',
+  ...STICKY_COLORS.map(c => c.bg),
+  COLORS.neutral[900],
+  COLORS.neutral[500],
+  '#FFFFFF',
+  COLORS.primary[500],
+  COLORS.success[500],
+  COLORS.danger[500],
+  COLORS.warning[500],
+  COLORS.accent[500],
 ];
 
 export const PropertyPanel = ({
@@ -154,20 +160,16 @@ export const PropertyPanel = ({
         overflowY: 'auto'
       }}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border">
-        <h3 className="font-semibold text-foreground">
-          {hasSelection 
-            ? isMultiSelect 
+      <PanelHeader
+        title={
+          hasSelection
+            ? isMultiSelect
               ? `${selectedElements.length} éléments sélectionnés`
-              : `${firstElement.type === 'sticky' ? 'Post-it' : firstElement.type === 'text' ? 'Texte' : firstElement.type}`
+              : firstElement.type === 'sticky' ? 'Post-it' : firstElement.type === 'text' ? 'Texte' : firstElement.type
             : 'Propriétés'
-          }
-        </h3>
-        <Button variant="ghost" size="sm" onClick={onClose}>
-          <X size={16} />
-        </Button>
-      </div>
+        }
+        onClose={onClose}
+      />
 
       {hasSelection ? (
         <div className="p-4 space-y-4">
@@ -195,17 +197,14 @@ export const PropertyPanel = ({
             <div className="space-y-4">
               {/* Colors */}
               <div>
-                <label className="text-sm font-medium text-foreground mb-2 block">Couleur</label>
-                <div className="grid grid-cols-8 gap-2">
+                <SectionLabel>Couleur</SectionLabel>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8,1fr)', gap: 4 }}>
                   {colorOptions.map((color) => (
-                    <button
+                    <ColorSwatch
                       key={color}
+                      color={color}
+                      selected={firstElement?.color === color}
                       onClick={() => handleColorChange(color)}
-                      className={`w-6 h-6 rounded-md border-2 transition-all hover:scale-110 ${
-                        firstElement?.color === color ? 'border-foreground' : 'border-border'
-                      }`}
-                      style={{ backgroundColor: color }}
-                      title={color}
                     />
                   ))}
                 </div>
@@ -214,10 +213,7 @@ export const PropertyPanel = ({
               {/* Tags - Only for sticky notes */}
               {firstElement?.type === 'sticky' && (
                 <div>
-                  <label className="text-sm font-medium text-foreground mb-2 flex items-center gap-2">
-                    <Tag size={14} />
-                    Tags
-                  </label>
+                  <SectionLabel><Tag size={12} style={{ display: 'inline', marginRight: 4 }} />Tags</SectionLabel>
                   <div className="flex gap-2 mb-2">
                     <Input
                       value={newTag}
@@ -230,17 +226,13 @@ export const PropertyPanel = ({
                       Ajouter
                     </Button>
                   </div>
-                  <div className="flex flex-wrap gap-1">
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                     {(firstElement.tags || []).map((tag) => (
-                      <Badge key={tag} variant="secondary" className="gap-1">
-                        {tag}
-                        <button
-                          onClick={() => handleRemoveTag(tag)}
-                          className="hover:text-destructive"
-                        >
-                          <X size={12} />
-                        </button>
-                      </Badge>
+                      <TagBadge
+                        key={tag}
+                        label={tag}
+                        onRemove={() => handleRemoveTag(tag)}
+                      />
                     ))}
                   </div>
                 </div>

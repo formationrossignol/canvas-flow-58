@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { Trash2, Edit3, Lock, Unlock, Heart, MessageCircle, CheckSquare, Square } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { TagBadge } from "@/components/UI/SharedComponents";
 import { CanvasElement, Comment } from "./Canvas";
 import { CommentThread } from "./CommentThread";
 import { relativeTime as formatRelativeTime } from "@/utils/canvasHelpers";
@@ -419,9 +419,7 @@ export const CanvasObject = ({
           {element.tags && element.tags.length > 0 && (
             <div className="flex flex-wrap gap-1 px-3 pb-2 shrink-0">
               {element.tags.slice(0, 2).map((tag) => (
-                <Badge key={tag} variant="outline" className="text-[9px] px-1 py-0 h-3.5 border-black/20" style={{ color: '#2D3748' }}>
-                  {tag}
-                </Badge>
+                <TagBadge key={tag} label={`#${tag}`} />
               ))}
             </div>
           )}
