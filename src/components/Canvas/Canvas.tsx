@@ -211,6 +211,19 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     ).map(el => el.id));
   }, [elements, searchQuery]);
 
+  // Alignment panel: position above selection in canvas coords (screen space)
+  const alignPanelPosition = useMemo(() => {
+    if (selection.selectedIds.length < 2) return null;
+    const selEls = elements.filter(el => selection.selectedIds.includes(el.id));
+    if (selEls.length < 2) return null;
+    const bMinX = Math.min(...selEls.map(el => el.x));
+    const bMaxX = Math.max(...selEls.map(el => el.x + el.width));
+    const bMinY = Math.min(...selEls.map(el => el.y));
+    const screenCx = canvasTransform.x + (bMinX + bMaxX) / 2 * canvasTransform.scale;
+    const screenTopY = canvasTransform.y + bMinY * canvasTransform.scale;
+    return { left: screenCx, top: Math.max(8, screenTopY - 44) };
+  }, [selection.selectedIds, elements, canvasTransform]);
+
   const templateAppliedRef = useRef(false);
 
   const handleForceSave = useCallback(() => {
@@ -1031,51 +1044,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         </div>
       )}
 
-      {/* Alignment panel — shown when 2+ elements selected */}
-      {selection.selectedIds.length > 1 && (
-        <div style={{
-          position: 'fixed', bottom: 88, left: '50%', transform: 'translateX(-50%)',
-          background: 'rgba(255,255,255,0.97)', border: '1px solid rgba(15,23,42,0.07)',
-          borderRadius: 12, padding: '5px 8px',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-          display: 'flex', alignItems: 'center', gap: 2, zIndex: 15,
-        }}>
-          {([
-            { dir: 'left' as const, Icon: AlignStartHorizontal, title: 'Aligner à gauche' },
-            { dir: 'centerH' as const, Icon: AlignCenterHorizontal, title: 'Centrer horizontalement' },
-            { dir: 'right' as const, Icon: AlignEndHorizontal, title: 'Aligner à droite' },
-          ]).map(({ dir, Icon, title }) => (
-            <button key={dir} onClick={() => handleAlign(dir)} title={title}
-              style={{ width: 30, height: 30, borderRadius: 7, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#374151' }}>
-              <Icon size={15} />
-            </button>
-          ))}
-          <div style={{ width: 1, height: 14, background: 'rgba(15,23,42,0.1)', margin: '0 2px' }} />
-          {([
-            { dir: 'top' as const, Icon: AlignStartVertical, title: 'Aligner en haut' },
-            { dir: 'centerV' as const, Icon: AlignCenterVertical, title: 'Centrer verticalement' },
-            { dir: 'bottom' as const, Icon: AlignEndVertical, title: 'Aligner en bas' },
-          ]).map(({ dir, Icon, title }) => (
-            <button key={dir} onClick={() => handleAlign(dir)} title={title}
-              style={{ width: 30, height: 30, borderRadius: 7, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#374151' }}>
-              <Icon size={15} />
-            </button>
-          ))}
-          {selection.selectedIds.length > 2 && (
-            <>
-              <div style={{ width: 1, height: 14, background: 'rgba(15,23,42,0.1)', margin: '0 2px' }} />
-              <button onClick={() => handleDistribute('h')} title="Distribuer horizontalement"
-                style={{ width: 30, height: 30, borderRadius: 7, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#374151' }}>
-                <AlignHorizontalSpaceBetween size={15} />
-              </button>
-              <button onClick={() => handleDistribute('v')} title="Distribuer verticalement"
-                style={{ width: 30, height: 30, borderRadius: 7, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#374151' }}>
-                <AlignVerticalSpaceBetween size={15} />
-              </button>
-            </>
-          )}
-        </div>
-      )}
+      {/* (Alignment panel is rendered inside canvas container — see below) */}
 
       {/* Canvas Container */}
       <div
@@ -1094,10 +1063,60 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         }}
       >
         <CollaboratorCursors cursors={remoteCursors} />
-        <CollaboratorsList 
-          participants={remoteParticipants} 
+        <CollaboratorsList
+          participants={remoteParticipants}
           currentUserName={localCollaborator.name}
         />
+
+        {/* Alignment panel — absolute, floats above selection */}
+        {alignPanelPosition && (
+          <div style={{
+            position: 'absolute',
+            left: alignPanelPosition.left,
+            top: alignPanelPosition.top,
+            transform: 'translateX(-50%)',
+            display: 'flex', alignItems: 'center', gap: 1,
+            background: 'rgba(255,255,255,0.97)', border: '1px solid rgba(15,23,42,0.07)',
+            borderRadius: 10, padding: '3px',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
+            zIndex: 50, whiteSpace: 'nowrap', pointerEvents: 'auto',
+          }}>
+            {([
+              { dir: 'left' as const, Icon: AlignStartHorizontal, title: 'Aligner à gauche' },
+              { dir: 'centerH' as const, Icon: AlignCenterHorizontal, title: 'Centrer horizontalement' },
+              { dir: 'right' as const, Icon: AlignEndHorizontal, title: 'Aligner à droite' },
+            ]).map(({ dir, Icon, title }) => (
+              <button key={dir} onClick={() => handleAlign(dir)} title={title}
+                style={{ width: 28, height: 28, borderRadius: 7, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#374151' }}>
+                <Icon size={13} />
+              </button>
+            ))}
+            <div style={{ width: 1, height: 16, background: 'rgba(15,23,42,0.1)', margin: '0 2px' }} />
+            {([
+              { dir: 'top' as const, Icon: AlignStartVertical, title: 'Aligner en haut' },
+              { dir: 'centerV' as const, Icon: AlignCenterVertical, title: 'Centrer verticalement' },
+              { dir: 'bottom' as const, Icon: AlignEndVertical, title: 'Aligner en bas' },
+            ]).map(({ dir, Icon, title }) => (
+              <button key={dir} onClick={() => handleAlign(dir)} title={title}
+                style={{ width: 28, height: 28, borderRadius: 7, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#374151' }}>
+                <Icon size={13} />
+              </button>
+            ))}
+            <div style={{ width: 1, height: 16, background: 'rgba(15,23,42,0.1)', margin: '0 2px' }} />
+            <button onClick={() => handleDistribute('h')} title="Espacer horizontalement"
+              style={{ width: 28, height: 28, borderRadius: 7, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#374151' }}>
+              <AlignHorizontalSpaceBetween size={13} />
+            </button>
+            <button onClick={() => handleDistribute('v')} title="Espacer verticalement"
+              style={{ width: 28, height: 28, borderRadius: 7, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#374151' }}>
+              <AlignVerticalSpaceBetween size={13} />
+            </button>
+            <div style={{ width: 1, height: 16, background: 'rgba(15,23,42,0.1)', margin: '0 2px' }} />
+            <span style={{ fontSize: 11, color: '#9CA3AF', fontWeight: 500, padding: '0 6px', whiteSpace: 'nowrap' }}>
+              {selection.selectedIds.length} élément{selection.selectedIds.length > 1 ? 's' : ''}
+            </span>
+          </div>
+        )}
         {/* Canvas Content */}
         <div
           className="absolute bg-canvas"
@@ -1277,15 +1296,6 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         selectedElements={elements.filter(el => selection.selectedIds.includes(el.id))}
         isVisible={selection.selectedIds.length > 0}
         onClose={clearSelection}
-        canvasTransform={canvasTransform}
-        elementPosition={
-          selection.selectedIds.length === 1
-            ? (() => {
-                const el = elements.find(e => e.id === selection.selectedIds[0]);
-                return el ? { x: el.x, y: el.y, width: el.width, height: el.height } : undefined;
-              })()
-            : undefined
-        }
         onUpdate={handleElementUpdate}
         onDelete={handleElementDelete}
         onDuplicate={handleElementDuplicate}

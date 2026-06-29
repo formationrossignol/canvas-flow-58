@@ -236,7 +236,7 @@ export const CanvasToolbar = ({
               className="animate-in fade-in slide-in-from-bottom-2 duration-150"
             >
               <div style={{ fontSize: 10.5, fontWeight: 600, color: '#9CA3AF', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 8 }}>Couleur</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: 4 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 5 }}>
                 {colors.map(c => (
                   <ColorSwatch
                     key={c.hex}

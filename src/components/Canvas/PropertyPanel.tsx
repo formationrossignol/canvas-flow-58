@@ -15,8 +15,6 @@ interface PropertyPanelProps {
   onDuplicate: (id: string) => void;
   isVisible: boolean;
   onClose: () => void;
-  elementPosition?: { x: number; y: number; width: number; height: number };
-  canvasTransform: { x: number; y: number; scale: number };
 }
 
 const colorOptions = [
@@ -38,8 +36,6 @@ export const PropertyPanel = ({
   onDuplicate,
   isVisible,
   onClose,
-  elementPosition,
-  canvasTransform,
 }: PropertyPanelProps) => {
   const [panelTab, setPanelTab] = useState<'style' | 'arrange'>('style');
   const [newTag, setNewTag] = useState('');
@@ -102,62 +98,15 @@ export const PropertyPanel = ({
     return null;
   }
 
-  // Calculate panel position above the selected element
-  const panelWidth = 320;
-  const panelHeight = 500; // approximate max height
-  const padding = 16;
-  
-  let panelX = 0;
-  let panelY = 0;
-  
-  if (elementPosition) {
-    // Convert element position to screen coordinates
-    const screenX = elementPosition.x * canvasTransform.scale + canvasTransform.x;
-    const screenY = elementPosition.y * canvasTransform.scale + canvasTransform.y;
-    const screenWidth = elementPosition.width * canvasTransform.scale;
-    const screenHeight = elementPosition.height * canvasTransform.scale;
-    
-    // Position panel above the element, centered horizontally
-    panelX = screenX + (screenWidth / 2) - (panelWidth / 2);
-    panelY = screenY - panelHeight - padding;
-    
-    // Keep panel within viewport bounds
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    
-    if (panelX < padding) panelX = padding;
-    if (panelX + panelWidth > viewportWidth - padding) {
-      panelX = viewportWidth - panelWidth - padding;
-    }
-    
-    // If panel would be above viewport, position it below the element
-    if (panelY < padding) {
-      panelY = screenY + screenHeight + padding;
-    }
-    
-    // If still doesn't fit, position on the side
-    if (panelY + panelHeight > viewportHeight - padding) {
-      panelY = screenY;
-      panelX = screenX + screenWidth + padding;
-
-      // If doesn't fit on right, try left (clamped so never off-screen)
-      if (panelX + panelWidth > viewportWidth - padding) {
-        panelX = Math.max(padding, screenX - panelWidth - padding);
-      }
-
-      // Clamp vertical so panel stays within viewport
-      panelY = Math.max(padding, Math.min(panelY, viewportHeight - panelHeight - padding));
-    }
-  }
-
   return (
-    <div 
-      className="fixed z-[100] w-80 bg-card backdrop-blur-sm rounded-xl border border-border shadow-2xl animate-scale-in"
+    <div
       style={{
-        left: `${panelX}px`,
-        top: `${panelY}px`,
-        maxHeight: '80vh',
-        overflowY: 'auto'
+        position: 'fixed', right: 20, bottom: 90,
+        width: 240, maxHeight: '60vh',
+        background: 'white', border: '1px solid rgba(15,23,42,0.07)',
+        borderRadius: 14, boxShadow: '0 16px 40px rgba(0,0,0,0.10), 0 4px 12px rgba(0,0,0,0.05)',
+        zIndex: 45, display: 'flex', flexDirection: 'column',
+        overflow: 'hidden',
       }}
     >
       <PanelHeader
@@ -198,7 +147,7 @@ export const PropertyPanel = ({
               {/* Colors */}
               <div>
                 <SectionLabel>Couleur</SectionLabel>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8,1fr)', gap: 4 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 5 }}>
                   {colorOptions.map((color) => (
                     <ColorSwatch
                       key={color}
