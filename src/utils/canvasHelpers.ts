@@ -3,7 +3,7 @@
  * Fonctions pures pour les opérations courantes
  */
 
-import type { CanvasElement } from './CanvasStateManager';
+import type { CanvasElement } from '../state/CanvasStateManager';
 
 // ─── SMOOTH PATH (Pen drawing)
 export const smoothPath = (points: [number, number][]): string => {

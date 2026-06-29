@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { CanvasElement } from "./Canvas";
 import { useState } from "react";
+import { STICKY_COLORS, COLORS } from "@/tokens/colors";
 
 interface CanvasToolbarProps {
   selectedTool: string;
@@ -49,18 +50,11 @@ const TB_BTN_ACTIVE: React.CSSProperties = {
 };
 
 const colors = [
-  { hex: '#FFE066', label: 'Jaune' },
-  { hex: '#FF8A80', label: 'Corail' },
-  { hex: '#81C784', label: 'Vert' },
-  { hex: '#64B5F6', label: 'Bleu' },
-  { hex: '#FFB74D', label: 'Orange' },
-  { hex: '#E1BEE7', label: 'Lavande' },
-  { hex: '#A5D6A7', label: 'Menthe' },
-  { hex: '#F48FB1', label: 'Rose' },
-  { hex: '#111827', label: 'Noir' },
-  { hex: '#6B7280', label: 'Gris' },
+  ...STICKY_COLORS.map(c => ({ hex: c.bg, label: c.label })),
+  { hex: COLORS.neutral[900], label: 'Noir' },
+  { hex: COLORS.neutral[500], label: 'Gris' },
   { hex: '#FFFFFF', label: 'Blanc' },
-  { hex: '#6366F1', label: 'Indigo' },
+  { hex: COLORS.primary[500], label: 'Indigo' },
 ];
 
 const emojis = ['😀','😂','🎉','❤️','👍','🔥','💡','⭐','🎯','✅','🚀','🙏','🎨','🏆','💪','🌟','🤔','😍','🤝','💯','🧠','⚡','🌈','🦄'];

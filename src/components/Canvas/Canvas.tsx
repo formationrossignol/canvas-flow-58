@@ -19,7 +19,8 @@ import { MiniMap } from "./MiniMap";
 import { TextEditor } from "./TextEditor";
 import { useCanvasInteraction } from "./hooks/useCanvasInteraction";
 import { useSelection } from "./hooks/useSelection";
-import { useHistory } from "./hooks/useHistory";
+import { useCanvasStateManager } from "@/state/useCanvasStateManager";
+import { screenToCanvas, generateId } from "@/utils/canvasHelpers";
 import { templates } from "./templates";
 import { useBoardPersistence, type StoredBoardSnapshot } from "@/hooks/useBoardPersistence";
 import { useLocalCollaborator } from "@/hooks/useLocalCollaborator";
@@ -76,8 +77,8 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   const [selectedTool, setSelectedTool] = useState<string>('select');
   const [pendingElement, setPendingElement] = useState<CanvasElement['type'] | null>(null);
   
-  // History management
-  const { addToHistory, undo, redo, canUndo, canRedo, resetHistory } = useHistory(elements);
+  // History management via CanvasStateManager
+  const { addToHistory, undo, redo, canUndo, canRedo, resetHistory } = useCanvasStateManager<CanvasElement>();
   const [selectedColor, setSelectedColor] = useState('#FFE066');
   const [boardTitle, setBoardTitle] = useState('Tableau sans titre');
   const [isTemplatePanelVisible, setIsTemplatePanelVisible] = useState(false);
@@ -256,7 +257,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
 
   const createElementAtPosition = useCallback((type: CanvasElement['type'], x: number, y: number) => {
     const newElement: CanvasElement = {
-      id: `${type}-${Date.now()}`,
+      id: generateId(type),
       type,
       x,
       y,
@@ -457,9 +458,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     if (pendingElement && !isSpacePressed) {
       const rect = containerRef.current?.getBoundingClientRect();
       if (!rect) return;
-
-      const x = (e.clientX - rect.left - canvasTransform.x) / canvasTransform.scale;
-      const y = (e.clientY - rect.top - canvasTransform.y) / canvasTransform.scale;
+      const { x, y } = screenToCanvas(e.clientX, e.clientY, rect, canvasTransform);
 
       // Keep pendingElement active so user can continue creating
       createElementAtPosition(pendingElement, x, y);
@@ -469,9 +468,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     if (selectedTool === 'select' && !isSpacePressed) {
       const rect = containerRef.current?.getBoundingClientRect();
       if (!rect) return;
-
-      const x = (e.clientX - rect.left - canvasTransform.x) / canvasTransform.scale;
-      const y = (e.clientY - rect.top - canvasTransform.y) / canvasTransform.scale;
+      const { x, y } = screenToCanvas(e.clientX, e.clientY, rect, canvasTransform);
 
       // Start selection box
       startSelectionBox(x, y);
@@ -491,10 +488,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     if (selection.selectionBox.isActive) {
       const rect = containerRef.current?.getBoundingClientRect();
       if (!rect) return;
-
-      const x = (e.clientX - rect.left - canvasTransform.x) / canvasTransform.scale;
-      const y = (e.clientY - rect.top - canvasTransform.y) / canvasTransform.scale;
-
+      const { x, y } = screenToCanvas(e.clientX, e.clientY, rect, canvasTransform);
       updateSelectionBox(x, y);
     } else {
       canvasMouseMove(e);
@@ -594,8 +588,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     e.preventDefault();
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
-    const canvasX = (e.clientX - rect.left - canvasTransform.x) / canvasTransform.scale;
-    const canvasY = (e.clientY - rect.top - canvasTransform.y) / canvasTransform.scale;
+    const { x: canvasX, y: canvasY } = screenToCanvas(e.clientX, e.clientY, rect, canvasTransform);
     setContextMenu({ x: e.clientX, y: e.clientY, targetElement: null, canvasX, canvasY });
   }, [canvasTransform]);
 

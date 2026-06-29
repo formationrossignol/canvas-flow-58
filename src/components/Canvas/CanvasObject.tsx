@@ -3,15 +3,7 @@ import { Trash2, Edit3, Lock, Unlock, Heart, MessageCircle, CheckSquare, Square 
 import { Badge } from "@/components/ui/badge";
 import { CanvasElement, Comment } from "./Canvas";
 import { CommentThread } from "./CommentThread";
-
-const formatRelativeTime = (ts: number) => {
-  const m = Math.floor((Date.now() - ts) / 60000);
-  if (m < 1) return 'À l\'instant';
-  if (m < 60) return `${m}min`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h`;
-  return `${Math.floor(h / 24)}j`;
-};
+import { relativeTime as formatRelativeTime } from "@/utils/canvasHelpers";
 
 interface CanvasObjectProps {
   element: CanvasElement;

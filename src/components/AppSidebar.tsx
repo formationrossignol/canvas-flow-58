@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/sidebar";
 import { SearchDialog } from "@/components/SearchDialog";
 import { useBranding } from "@/contexts/BrandingContext";
+import { COLORS, GRADIENTS } from "@/tokens/colors";
 
 const navLinks = [
   { title: "Mes tableaux", url: "/", icon: Home },
@@ -35,8 +36,8 @@ const NAV_BTN = (active: boolean, open: boolean): React.CSSProperties => ({
   justifyContent: open ? "flex-start" : "center",
   minHeight: 36, fontSize: 13.5, fontWeight: 500,
   transition: "background 0.12s",
-  background: active ? "rgba(99,102,241,0.12)" : "transparent",
-  color: active ? "#A5B4FC" : "rgba(255,255,255,0.5)",
+  background: active ? `rgba(99,102,241,0.12)` : "transparent",
+  color: active ? COLORS.primary[300] : "rgba(255,255,255,0.5)",
   whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
   textDecoration: "none",
 });
@@ -49,8 +50,8 @@ const BOARD_BTN = (active: boolean, open: boolean): React.CSSProperties => ({
   justifyContent: open ? "flex-start" : "center",
   minHeight: 34, fontSize: 13.5, fontWeight: 500,
   transition: "background 0.12s",
-  background: active ? "rgba(99,102,241,0.1)" : "transparent",
-  color: active ? "#A5B4FC" : "rgba(255,255,255,0.44)",
+  background: active ? `rgba(99,102,241,0.1)` : "transparent",
+  color: active ? COLORS.primary[300] : "rgba(255,255,255,0.44)",
   whiteSpace: "nowrap", overflow: "hidden", textDecoration: "none",
 });
 
@@ -71,14 +72,14 @@ export function AppSidebar() {
 
       <Sidebar
         collapsible="icon"
-        style={{ background: "#0F1117", borderRight: "1px solid rgba(255,255,255,0.06)" }}
+        style={{ background: COLORS.bg.dark, borderRight: "1px solid rgba(255,255,255,0.06)" }}
         className="z-50"
       >
         <SidebarContent style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
 
           {/* Logo header */}
           <div style={{ height: 52, display: "flex", alignItems: "center", gap: 10, padding: "0 14px", borderBottom: "1px solid rgba(255,255,255,0.07)", flexShrink: 0, overflow: "hidden" }}>
-            <div style={{ width: 28, height: 28, background: "linear-gradient(135deg,#6366F1 0%,#8B5CF6 100%)", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 2px 8px rgba(99,102,241,0.35)" }}>
+            <div style={{ width: 28, height: 28, background: GRADIENTS.primaryGradient, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 2px 8px rgba(99,102,241,0.35)" }}>
               {logoUrl
                 ? <img src={logoUrl} alt={displayBrandName} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
                 : <span style={{ fontSize: 12, fontWeight: 700, color: "white" }}>{brandInitials}</span>
@@ -172,7 +173,7 @@ export function AppSidebar() {
           {/* User profile */}
           <div style={{ padding: "10px 8px", borderTop: "1px solid rgba(255,255,255,0.06)", flexShrink: 0 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, padding: 6, borderRadius: 9 }}>
-              <div style={{ width: 28, height: 28, borderRadius: 8, background: "linear-gradient(135deg,#6366F1,#8B5CF6)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: "white", flexShrink: 0 }}>
+              <div style={{ width: 28, height: 28, borderRadius: 8, background: GRADIENTS.primaryGradient, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: "white", flexShrink: 0 }}>
                 M
               </div>
               {open && (
