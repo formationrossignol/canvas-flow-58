@@ -53,15 +53,15 @@
     --shadow-float: var(--ap-shadow-float);
     --shadow-card: var(--ap-shadow-card);
 
-    /* Sidebar */
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 258 36% 16%;
-    --sidebar-primary: 258 100% 65%;
+    /* Sidebar - dark (#0F1117 from DC reference) */
+    --sidebar-background: 225 21% 7%;
+    --sidebar-foreground: 0 0% 85%;
+    --sidebar-primary: 239 84% 67%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 37 43% 92%;
-    --sidebar-accent-foreground: 258 36% 16%;
-    --sidebar-border: 37 43% 88%;
-    --sidebar-ring: 258 100% 65%;
+    --sidebar-accent: 235 30% 15%;
+    --sidebar-accent-foreground: 230 94% 82%;
+    --sidebar-border: 225 15% 12%;
+    --sidebar-ring: 239 84% 67%;
   }
 
   * {
@@ -84,6 +84,11 @@
 
   .tool-button {
     @apply transition-all duration-200 ease-out hover:scale-105 active:scale-95;
+  }
+
+  .bg-gradient-primary {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(270 100% 65%) 100%);
+    color: hsl(var(--primary-foreground));
   }
 
   .hover-lift {

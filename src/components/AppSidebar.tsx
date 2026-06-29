@@ -107,11 +107,11 @@ export function AppSidebar() {
             <div className="p-4 border-b border-sidebar-border">
               <Button
                 variant="outline"
-                className="w-full justify-start gap-3 h-12 text-base bg-sidebar-accent/30 hover:bg-sidebar-accent border-sidebar-border"
+                className="w-full justify-start gap-3 h-12 text-base bg-sidebar-accent/30 hover:bg-sidebar-accent border-sidebar-border text-sidebar-foreground/60"
                 onClick={() => setSearchOpen(true)}
               >
                 <Search className="h-5 w-5" />
-                <span className="text-muted-foreground">Rechercher...</span>
+                <span>Rechercher...</span>
               </Button>
             </div>
           )}
@@ -123,7 +123,8 @@ export function AppSidebar() {
             <select
               value={selectedTeam}
               onChange={(e) => setSelectedTeam(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-sidebar-accent border border-sidebar-border text-sidebar-foreground text-sm"
+              className="w-full px-3 py-2 rounded-lg bg-sidebar-accent border border-sidebar-border text-sidebar-foreground text-sm focus:outline-none focus:ring-1 focus:ring-sidebar-ring"
+              style={{ colorScheme: 'dark' }}
             >
               {teams.map(team => (
                 <option key={team.id} value={team.id}>{team.name}</option>
