@@ -1,9 +1,4 @@
 import { useRef, useState, useCallback, useEffect, useMemo } from "react";
-import { Search,
-  AlignStartHorizontal, AlignCenterHorizontal, AlignEndHorizontal,
-  AlignStartVertical, AlignCenterVertical, AlignEndVertical,
-  AlignHorizontalSpaceBetween, AlignVerticalSpaceBetween,
-} from "lucide-react";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { toast } from "sonner";
@@ -24,8 +19,7 @@ import { MiniMap } from "./MiniMap";
 import { TextEditor } from "./TextEditor";
 import { useCanvasInteraction } from "./hooks/useCanvasInteraction";
 import { useSelection } from "./hooks/useSelection";
-import { useCanvasStateManager } from "@/state/useCanvasStateManager";
-import { screenToCanvas, generateId } from "@/utils/canvasHelpers";
+import { useHistory } from "./hooks/useHistory";
 import { templates } from "./templates";
 import { useBoardPersistence, type StoredBoardSnapshot } from "@/hooks/useBoardPersistence";
 import { useLocalCollaborator } from "@/hooks/useLocalCollaborator";
@@ -82,8 +76,8 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   const [selectedTool, setSelectedTool] = useState<string>('select');
   const [pendingElement, setPendingElement] = useState<CanvasElement['type'] | null>(null);
   
-  // History management via CanvasStateManager
-  const { addToHistory, undo, redo, canUndo, canRedo, resetHistory } = useCanvasStateManager<CanvasElement>();
+  // History management
+  const { addToHistory, undo, redo, canUndo, canRedo, resetHistory } = useHistory(elements);
   const [selectedColor, setSelectedColor] = useState('#FFE066');
   const [boardTitle, setBoardTitle] = useState('Tableau sans titre');
   const [isTemplatePanelVisible, setIsTemplatePanelVisible] = useState(false);
@@ -97,8 +91,6 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   const [isTimerVisible, setIsTimerVisible] = useState(false);
   const [bgStyle, setBgStyle] = useState<'dots' | 'grid' | 'cross' | 'blank'>('dots');
   const [activeTagFilter, setActiveTagFilter] = useState<string | null>(null);
-  const [showSearch, setShowSearch] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const isTextEditorVisible = selectedTool === 'text';
   const [textStyle, setTextStyle] = useState<{
     fontFamily?: string;
@@ -201,16 +193,6 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     });
   }, [selection.selectedIds, elements]);
 
-  const searchMatchIds = useMemo(() => {
-    if (!searchQuery.trim()) return null;
-    const q = searchQuery.toLowerCase();
-    return new Set(elements.filter(el =>
-      el.content?.toLowerCase().includes(q) ||
-      el.author?.toLowerCase().includes(q) ||
-      el.tags?.some(t => t.toLowerCase().includes(q))
-    ).map(el => el.id));
-  }, [elements, searchQuery]);
-
   const templateAppliedRef = useRef(false);
 
   const handleForceSave = useCallback(() => {
@@ -274,7 +256,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
 
   const createElementAtPosition = useCallback((type: CanvasElement['type'], x: number, y: number) => {
     const newElement: CanvasElement = {
-      id: generateId(type),
+      id: `${type}-${Date.now()}`,
       type,
       x,
       y,
@@ -475,7 +457,9 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     if (pendingElement && !isSpacePressed) {
       const rect = containerRef.current?.getBoundingClientRect();
       if (!rect) return;
-      const { x, y } = screenToCanvas(e.clientX, e.clientY, rect, canvasTransform);
+
+      const x = (e.clientX - rect.left - canvasTransform.x) / canvasTransform.scale;
+      const y = (e.clientY - rect.top - canvasTransform.y) / canvasTransform.scale;
 
       // Keep pendingElement active so user can continue creating
       createElementAtPosition(pendingElement, x, y);
@@ -485,7 +469,9 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     if (selectedTool === 'select' && !isSpacePressed) {
       const rect = containerRef.current?.getBoundingClientRect();
       if (!rect) return;
-      const { x, y } = screenToCanvas(e.clientX, e.clientY, rect, canvasTransform);
+
+      const x = (e.clientX - rect.left - canvasTransform.x) / canvasTransform.scale;
+      const y = (e.clientY - rect.top - canvasTransform.y) / canvasTransform.scale;
 
       // Start selection box
       startSelectionBox(x, y);
@@ -505,7 +491,10 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     if (selection.selectionBox.isActive) {
       const rect = containerRef.current?.getBoundingClientRect();
       if (!rect) return;
-      const { x, y } = screenToCanvas(e.clientX, e.clientY, rect, canvasTransform);
+
+      const x = (e.clientX - rect.left - canvasTransform.x) / canvasTransform.scale;
+      const y = (e.clientY - rect.top - canvasTransform.y) / canvasTransform.scale;
+
       updateSelectionBox(x, y);
     } else {
       canvasMouseMove(e);
@@ -542,14 +531,6 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       canvasMouseUp();
     }
   }, [selection.selectionBox, elements, selectMultiple, endSelectionBox, canvasMouseUp]);
-
-  const handleCanvasDoubleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (pendingElement || isConnecting || selectedTool !== 'select') return;
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const { x, y } = screenToCanvas(e.clientX, e.clientY, rect, canvasTransform);
-    createElementAtPosition('sticky', x - 100, y - 100);
-  }, [pendingElement, isConnecting, selectedTool, canvasTransform, createElementAtPosition]);
 
   const handleElementClick = useCallback((id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -613,7 +594,8 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     e.preventDefault();
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
-    const { x: canvasX, y: canvasY } = screenToCanvas(e.clientX, e.clientY, rect, canvasTransform);
+    const canvasX = (e.clientX - rect.left - canvasTransform.x) / canvasTransform.scale;
+    const canvasY = (e.clientY - rect.top - canvasTransform.y) / canvasTransform.scale;
     setContextMenu({ x: e.clientX, y: e.clientY, targetElement: null, canvasX, canvasY });
   }, [canvasTransform]);
 
@@ -699,9 +681,6 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         e.preventDefault();
         const nextElements = redo();
         if (nextElements) setElements(nextElements);
-      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') {
-        e.preventDefault();
-        setShowSearch(prev => !prev);
       } else if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'H') {
         e.preventDefault();
         handleFitToScreen();
@@ -835,81 +814,19 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     setElements(prev => { const n = [...prev, newEl]; addToHistory(n); return n; });
   }, [canvasTransform, selectedColor, addToHistory]);
 
-  const handleAlign = useCallback((dir: 'left' | 'centerH' | 'right' | 'top' | 'centerV' | 'bottom') => {
-    if (selection.selectedIds.length < 2) return;
-    const selected = elements.filter(el => selection.selectedIds.includes(el.id));
-    const updates: Record<string, Partial<CanvasElement>> = {};
-    if (dir === 'left') {
-      const minX = Math.min(...selected.map(el => el.x));
-      selected.forEach(el => { updates[el.id] = { x: minX }; });
-    } else if (dir === 'centerH') {
-      const minX = Math.min(...selected.map(el => el.x));
-      const maxX = Math.max(...selected.map(el => el.x + el.width));
-      const cx = (minX + maxX) / 2;
-      selected.forEach(el => { updates[el.id] = { x: cx - el.width / 2 }; });
-    } else if (dir === 'right') {
-      const maxX = Math.max(...selected.map(el => el.x + el.width));
-      selected.forEach(el => { updates[el.id] = { x: maxX - el.width }; });
-    } else if (dir === 'top') {
-      const minY = Math.min(...selected.map(el => el.y));
-      selected.forEach(el => { updates[el.id] = { y: minY }; });
-    } else if (dir === 'centerV') {
-      const minY = Math.min(...selected.map(el => el.y));
-      const maxY = Math.max(...selected.map(el => el.y + el.height));
-      const cy = (minY + maxY) / 2;
-      selected.forEach(el => { updates[el.id] = { y: cy - el.height / 2 }; });
-    } else if (dir === 'bottom') {
-      const maxY = Math.max(...selected.map(el => el.y + el.height));
-      selected.forEach(el => { updates[el.id] = { y: maxY - el.height }; });
-    }
-    setElements(prev => {
-      const next = prev.map(el => updates[el.id] ? { ...el, ...updates[el.id] } : el);
-      addToHistory(next);
-      return next;
-    });
-  }, [selection.selectedIds, elements, addToHistory]);
-
-  const handleDistribute = useCallback((axis: 'h' | 'v') => {
-    if (selection.selectedIds.length < 3) return;
-    const selected = elements.filter(el => selection.selectedIds.includes(el.id));
-    const updates: Record<string, Partial<CanvasElement>> = {};
-    if (axis === 'h') {
-      const sorted = [...selected].sort((a, b) => a.x - b.x);
-      const minX = sorted[0].x;
-      const maxX = sorted[sorted.length - 1].x + sorted[sorted.length - 1].width;
-      const totalW = sorted.reduce((s, el) => s + el.width, 0);
-      const gap = (maxX - minX - totalW) / (sorted.length - 1);
-      let cx = minX;
-      sorted.forEach(el => { updates[el.id] = { x: cx }; cx += el.width + gap; });
-    } else {
-      const sorted = [...selected].sort((a, b) => a.y - b.y);
-      const minY = sorted[0].y;
-      const maxY = sorted[sorted.length - 1].y + sorted[sorted.length - 1].height;
-      const totalH = sorted.reduce((s, el) => s + el.height, 0);
-      const gap = (maxY - minY - totalH) / (sorted.length - 1);
-      let cy = minY;
-      sorted.forEach(el => { updates[el.id] = { y: cy }; cy += el.height + gap; });
-    }
-    setElements(prev => {
-      const next = prev.map(el => updates[el.id] ? { ...el, ...updates[el.id] } : el);
-      addToHistory(next);
-      return next;
-    });
-  }, [selection.selectedIds, elements, addToHistory]);
-
   const bgPatterns: Record<string, React.CSSProperties> = {
     grid: {
-      backgroundImage: 'linear-gradient(rgba(107,114,128,0.15) 1px,transparent 1px),linear-gradient(90deg,rgba(107,114,128,0.15) 1px,transparent 1px)',
+      backgroundImage: 'linear-gradient(rgba(99,102,241,0.1) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,0.1) 1px,transparent 1px)',
       backgroundSize: `${32 / canvasTransform.scale}px ${32 / canvasTransform.scale}px`,
       backgroundPosition: `${canvasTransform.x}px ${canvasTransform.y}px`,
     },
     dots: {
-      backgroundImage: 'radial-gradient(circle,rgba(107,114,128,0.25) 1.5px,transparent 1.5px)',
+      backgroundImage: 'radial-gradient(circle,rgba(99,102,241,0.2) 1.5px,transparent 1.5px)',
       backgroundSize: `${24 / canvasTransform.scale}px ${24 / canvasTransform.scale}px`,
       backgroundPosition: `${canvasTransform.x}px ${canvasTransform.y}px`,
     },
     cross: {
-      backgroundImage: 'linear-gradient(rgba(107,114,128,0.1) 1px,transparent 1px),linear-gradient(90deg,rgba(107,114,128,0.1) 1px,transparent 1px)',
+      backgroundImage: 'linear-gradient(rgba(99,102,241,0.08) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,0.08) 1px,transparent 1px)',
       backgroundSize: `${48 / canvasTransform.scale}px ${48 / canvasTransform.scale}px`,
       backgroundPosition: `${canvasTransform.x}px ${canvasTransform.y}px`,
     },
@@ -944,154 +861,38 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         elementCount={elements.length}
       />
 
-      {/* Tag Filter Bar — inline 36px strip below header */}
+      {/* Tag Filter Bar */}
       {allTags.length > 0 && (
-        <div style={{
-          position: 'fixed', top: 48, left: 0, right: 0, height: 36, zIndex: 10,
-          background: 'rgba(241,243,246,0.96)', borderBottom: '1px solid rgba(15,23,42,0.06)',
-          backdropFilter: 'blur(8px)',
-          display: 'flex', alignItems: 'center', gap: 4, padding: '0 16px', overflowX: 'auto',
-        }}>
-          <span style={{ fontSize: 10.5, fontWeight: 600, color: '#9CA3AF', letterSpacing: '0.06em', textTransform: 'uppercase', marginRight: 4 }}>Tags</span>
+        <div className="absolute top-14 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 px-3 py-1.5 bg-card/90 backdrop-blur-sm rounded-full border border-border shadow-soft">
           <button
             onClick={() => setActiveTagFilter(null)}
-            style={{
-              padding: '2px 10px', borderRadius: 20, border: 'none', cursor: 'pointer', fontSize: 11.5, fontWeight: 600, transition: 'all 0.12s', whiteSpace: 'nowrap',
-              background: activeTagFilter === null ? '#6366F1' : 'rgba(99,102,241,0.08)',
-              color: activeTagFilter === null ? 'white' : '#6366F1',
-            }}
-          >Tous</button>
+            className={`px-2 py-0.5 rounded-full text-xs font-medium transition-colors ${activeTagFilter === null ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+          >
+            Tous
+          </button>
           {allTags.map(tag => (
             <button
               key={tag}
               onClick={() => setActiveTagFilter(activeTagFilter === tag ? null : tag)}
-              style={{
-                padding: '2px 10px', borderRadius: 20, border: 'none', cursor: 'pointer', fontSize: 11.5, fontWeight: 600, transition: 'all 0.12s', whiteSpace: 'nowrap',
-                background: activeTagFilter === tag ? '#6366F1' : 'rgba(99,102,241,0.08)',
-                color: activeTagFilter === tag ? 'white' : '#6366F1',
-              }}
-            >#{tag}</button>
-          ))}
-        </div>
-      )}
-
-      {/* Pending element hint banner */}
-      {pendingElement && (
-        <div style={{
-          position: 'fixed', top: allTags.length > 0 ? 92 : 56, left: '50%', transform: 'translateX(-50%)',
-          background: 'rgba(15,23,42,0.72)', color: 'white',
-          fontSize: 12, fontWeight: 500, padding: '6px 16px',
-          borderRadius: 20, pointerEvents: 'none', zIndex: 25,
-          backdropFilter: 'blur(8px)', whiteSpace: 'nowrap', letterSpacing: -0.1,
-        }}>
-          Cliquez pour placer · Échap pour annuler
-        </div>
-      )}
-
-      {/* Connecting mode banner */}
-      {isConnecting && !pendingElement && (
-        <div style={{
-          position: 'fixed', top: allTags.length > 0 ? 92 : 56, left: '50%', transform: 'translateX(-50%)',
-          background: 'rgba(99,102,241,0.88)', color: 'white',
-          fontSize: 12, fontWeight: 500, padding: '6px 16px',
-          borderRadius: 20, pointerEvents: 'none', zIndex: 25,
-          backdropFilter: 'blur(8px)', whiteSpace: 'nowrap',
-        }}>
-          🔗 Mode connexion — Cliquez sur un élément cible
-        </div>
-      )}
-
-      {/* Search bar */}
-      {showSearch && (
-        <div style={{
-          position: 'fixed', top: allTags.length > 0 ? 92 : 56, right: 16, zIndex: 50,
-          background: 'white', border: '1px solid rgba(15,23,42,0.08)',
-          borderRadius: 12, padding: '6px 12px',
-          boxShadow: '0 8px 28px rgba(0,0,0,0.12)',
-          display: 'flex', alignItems: 'center', gap: 8,
-        }}>
-          <Search size={14} style={{ color: '#9CA3AF', flexShrink: 0 }} />
-          <input
-            autoFocus
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Escape') { setShowSearch(false); setSearchQuery(''); } }}
-            placeholder="Rechercher..."
-            style={{ border: 'none', outline: 'none', fontSize: 13, width: 180, background: 'transparent' }}
-          />
-          {searchQuery && (
-            <span style={{ fontSize: 11, color: '#9CA3AF', whiteSpace: 'nowrap' }}>
-              {searchMatchIds?.size ?? 0} résultat{(searchMatchIds?.size ?? 0) !== 1 ? 's' : ''}
-            </span>
-          )}
-          <button
-            onClick={() => { setShowSearch(false); setSearchQuery(''); }}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', fontSize: 14, padding: 2, display: 'flex', alignItems: 'center' }}
-          >✕</button>
-        </div>
-      )}
-
-      {/* Alignment panel — shown when 2+ elements selected */}
-      {selection.selectedIds.length > 1 && (
-        <div style={{
-          position: 'fixed', bottom: 88, left: '50%', transform: 'translateX(-50%)',
-          background: 'rgba(255,255,255,0.97)', border: '1px solid rgba(15,23,42,0.07)',
-          borderRadius: 12, padding: '5px 8px',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-          display: 'flex', alignItems: 'center', gap: 2, zIndex: 15,
-        }}>
-          {([
-            { dir: 'left' as const, Icon: AlignStartHorizontal, title: 'Aligner à gauche' },
-            { dir: 'centerH' as const, Icon: AlignCenterHorizontal, title: 'Centrer horizontalement' },
-            { dir: 'right' as const, Icon: AlignEndHorizontal, title: 'Aligner à droite' },
-          ]).map(({ dir, Icon, title }) => (
-            <button key={dir} onClick={() => handleAlign(dir)} title={title}
-              style={{ width: 30, height: 30, borderRadius: 7, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#374151' }}>
-              <Icon size={15} />
+              className={`px-2 py-0.5 rounded-full text-xs font-medium transition-colors ${activeTagFilter === tag ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+            >
+              #{tag}
             </button>
           ))}
-          <div style={{ width: 1, height: 14, background: 'rgba(15,23,42,0.1)', margin: '0 2px' }} />
-          {([
-            { dir: 'top' as const, Icon: AlignStartVertical, title: 'Aligner en haut' },
-            { dir: 'centerV' as const, Icon: AlignCenterVertical, title: 'Centrer verticalement' },
-            { dir: 'bottom' as const, Icon: AlignEndVertical, title: 'Aligner en bas' },
-          ]).map(({ dir, Icon, title }) => (
-            <button key={dir} onClick={() => handleAlign(dir)} title={title}
-              style={{ width: 30, height: 30, borderRadius: 7, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#374151' }}>
-              <Icon size={15} />
-            </button>
-          ))}
-          {selection.selectedIds.length > 2 && (
-            <>
-              <div style={{ width: 1, height: 14, background: 'rgba(15,23,42,0.1)', margin: '0 2px' }} />
-              <button onClick={() => handleDistribute('h')} title="Distribuer horizontalement"
-                style={{ width: 30, height: 30, borderRadius: 7, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#374151' }}>
-                <AlignHorizontalSpaceBetween size={15} />
-              </button>
-              <button onClick={() => handleDistribute('v')} title="Distribuer verticalement"
-                style={{ width: 30, height: 30, borderRadius: 7, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#374151' }}>
-                <AlignVerticalSpaceBetween size={15} />
-              </button>
-            </>
-          )}
         </div>
       )}
 
       {/* Canvas Container */}
       <div
         ref={containerRef}
-        className={`absolute inset-0 overflow-hidden ${cursor}`}
+        className={`absolute inset-0 pt-12 overflow-hidden ${cursor}`}
         onMouseDown={handleCanvasMouseDown}
         onMouseMove={handleCanvasMouseMove}
         onMouseUp={handleCanvasMouseUp}
         onMouseLeave={handleCanvasMouseLeave}
         onWheel={handleWheel}
         onContextMenu={handleCanvasContextMenu}
-        onDoubleClick={handleCanvasDoubleClick}
-        style={{
-          paddingTop: allTags.length > 0 ? 84 : 48,
-          cursor: cursor === 'canvas-cursor-grab' ? 'grab' : cursor === 'canvas-cursor-grabbing' ? 'grabbing' : cursor,
-        }}
+        style={{ cursor: cursor === 'canvas-cursor-grab' ? 'grab' : cursor === 'canvas-cursor-grabbing' ? 'grabbing' : cursor }}
       >
         <CollaboratorCursors cursors={remoteCursors} />
         <CollaboratorsList 
@@ -1147,9 +948,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
             <CanvasObject
               key={element.id}
               element={
-                searchMatchIds !== null && !searchMatchIds.has(element.id)
-                  ? { ...element, opacity: Math.min(element.opacity ?? 1, 0.12) }
-                  : activeTagFilter !== null && element.type === 'sticky' && !element.tags?.includes(activeTagFilter)
+                activeTagFilter !== null && element.type === 'sticky' && !element.tags?.includes(activeTagFilter)
                   ? { ...element, opacity: Math.min(element.opacity ?? 1, 0.15) }
                   : element
               }

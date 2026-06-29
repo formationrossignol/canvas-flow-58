@@ -10,7 +10,7 @@
     --background: 37 100% 97%;        /* --ap-paper   #fff8ee */
     --foreground: 258 36% 16%;        /* --ap-ink     #241b3a */
 
-    --canvas: 37 55% 95%;             /* slightly warmer than paper */
+    --canvas: 216 22% 96%;             /* DC reference #F1F3F6 */
     --card: 0 0% 100%;
     --card-foreground: 258 36% 16%;
 
@@ -69,7 +69,7 @@
   }
 
   body {
-    font-family: var(--ap-font-body, 'Nunito', system-ui, sans-serif);
+    font-family: 'DM Sans', system-ui, sans-serif;
     @apply bg-background text-foreground antialiased;
     font-weight: 600;
   }
