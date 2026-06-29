@@ -1,11 +1,11 @@
 # Graph Report - /Users/loicrossignol/Desktop/vibecoding/canvas-flow-58  (2026-06-29)
 
 ## Corpus Check
-- 151 files · ~196,682 words
+- 151 files · ~196,462 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 420 nodes · 476 edges · 122 communities detected
+- 421 nodes · 475 edges · 122 communities detected
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 10 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
@@ -215,16 +215,16 @@ Cohesion: 0.25
 Nodes (0): 
 
 ### Community 12 - "Community 12"
-Cohesion: 0.29
-Nodes (0): 
+Cohesion: 0.38
+Nodes (3): exportAsJSON(), exportAsPNG(), handleImport()
 
 ### Community 13 - "Community 13"
 Cohesion: 0.29
 Nodes (0): 
 
 ### Community 14 - "Community 14"
-Cohesion: 0.6
-Nodes (3): exportAsJSON(), exportAsPNG(), handleImport()
+Cohesion: 0.29
+Nodes (0): 
 
 ### Community 15 - "Community 15"
 Cohesion: 0.6

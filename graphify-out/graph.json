@@ -1013,34 +1013,34 @@
       "source_file": "/Users/loicrossignol/Desktop/vibecoding/canvas-flow-58/Tableau collaboratif premium/Tableau collaboratif premium/src/components/Canvas/ExportImportModal.tsx",
       "source_location": "L1",
       "id": "users_loicrossignol_desktop_vibecoding_canvas_flow_58_tableau_collaboratif_premium_tableau_collaboratif_premium_src_components_canvas_exportimportmodal_tsx",
-      "community": 14,
+      "community": 12,
       "norm_label": "exportimportmodal.tsx"
     },
     {
       "label": "exportAsJSON()",
       "file_type": "code",
-      "source_file": "src/components/Canvas/ExportImportModal.tsx",
+      "source_file": "/Users/loicrossignol/Desktop/vibecoding/canvas-flow-58/Tableau collaboratif premium/src/components/Canvas/ExportImportModal.tsx",
       "source_location": "L32",
       "id": "exportimportmodal_exportasjson",
-      "community": 14,
+      "community": 12,
       "norm_label": "exportasjson()"
     },
     {
       "label": "exportAsPNG()",
       "file_type": "code",
-      "source_file": "src/components/Canvas/ExportImportModal.tsx",
+      "source_file": "/Users/loicrossignol/Desktop/vibecoding/canvas-flow-58/Tableau collaboratif premium/src/components/Canvas/ExportImportModal.tsx",
       "source_location": "L53",
       "id": "exportimportmodal_exportaspng",
-      "community": 14,
+      "community": 12,
       "norm_label": "exportaspng()"
     },
     {
       "label": "handleImport()",
       "file_type": "code",
-      "source_file": "src/components/Canvas/ExportImportModal.tsx",
-      "source_location": "L172",
+      "source_file": "/Users/loicrossignol/Desktop/vibecoding/canvas-flow-58/src/components/Canvas/ExportImportModal.tsx",
+      "source_location": "L50",
       "id": "exportimportmodal_handleimport",
-      "community": 14,
+      "community": 12,
       "norm_label": "handleimport()"
     },
     {
@@ -1263,7 +1263,7 @@
       "label": "handleKeyDown()",
       "file_type": "code",
       "source_file": "/Users/loicrossignol/Desktop/vibecoding/canvas-flow-58/src/components/Canvas/Canvas.tsx",
-      "source_location": "L732",
+      "source_location": "L784",
       "id": "canvas_handlekeydown",
       "community": 1,
       "norm_label": "handlekeydown()"
@@ -1472,7 +1472,7 @@
       "source_file": "/Users/loicrossignol/Desktop/vibecoding/canvas-flow-58/Tableau collaboratif premium/src/components/Canvas/ExportImportModal.tsx",
       "source_location": "L1",
       "id": "users_loicrossignol_desktop_vibecoding_canvas_flow_58_tableau_collaboratif_premium_src_components_canvas_exportimportmodal_tsx",
-      "community": 14,
+      "community": 12,
       "norm_label": "exportimportmodal.tsx"
     },
     {
@@ -1767,7 +1767,7 @@
       "label": "NAV_BTN()",
       "file_type": "code",
       "source_file": "/Users/loicrossignol/Desktop/vibecoding/canvas-flow-58/src/components/AppSidebar.tsx",
-      "source_location": "L31",
+      "source_location": "L55",
       "id": "appsidebar_nav_btn",
       "community": 36,
       "norm_label": "nav_btn()"
@@ -1776,7 +1776,7 @@
       "label": "BOARD_BTN()",
       "file_type": "code",
       "source_file": "/Users/loicrossignol/Desktop/vibecoding/canvas-flow-58/src/components/AppSidebar.tsx",
-      "source_location": "L45",
+      "source_location": "L69",
       "id": "appsidebar_board_btn",
       "community": 36,
       "norm_label": "board_btn()"
@@ -2468,11 +2468,20 @@
     {
       "label": "ExportImportModal.tsx",
       "file_type": "code",
-      "source_file": "src/components/Canvas/ExportImportModal.tsx",
+      "source_file": "/Users/loicrossignol/Desktop/vibecoding/canvas-flow-58/src/components/Canvas/ExportImportModal.tsx",
       "source_location": "L1",
-      "id": "src_components_canvas_exportimportmodal_tsx",
-      "community": 14,
+      "id": "users_loicrossignol_desktop_vibecoding_canvas_flow_58_src_components_canvas_exportimportmodal_tsx",
+      "community": 12,
       "norm_label": "exportimportmodal.tsx"
+    },
+    {
+      "label": "ICON_WRAP()",
+      "file_type": "code",
+      "source_file": "/Users/loicrossignol/Desktop/vibecoding/canvas-flow-58/src/components/Canvas/ExportImportModal.tsx",
+      "source_location": "L36",
+      "id": "exportimportmodal_icon_wrap",
+      "community": 12,
+      "norm_label": "icon_wrap()"
     },
     {
       "label": "CollaboratorsList.tsx",
@@ -2651,7 +2660,7 @@
       "source_file": "src/components/Canvas/ContextMenu.tsx",
       "source_location": "L1",
       "id": "src_components_canvas_contextmenu_tsx",
-      "community": 12,
+      "community": 13,
       "norm_label": "contextmenu.tsx"
     },
     {
@@ -2660,7 +2669,7 @@
       "source_file": "src/components/Canvas/ContextMenu.tsx",
       "source_location": "L28",
       "id": "contextmenu_item",
-      "community": 12,
+      "community": 13,
       "norm_label": "item()"
     },
     {
@@ -2669,7 +2678,7 @@
       "source_file": "src/components/Canvas/ContextMenu.tsx",
       "source_location": "L53",
       "id": "contextmenu_separator",
-      "community": 12,
+      "community": 13,
       "norm_label": "separator()"
     },
     {
@@ -2678,7 +2687,7 @@
       "source_file": "src/components/Canvas/ContextMenu.tsx",
       "source_location": "L66",
       "id": "contextmenu_handleclickoutside",
-      "community": 12,
+      "community": 13,
       "norm_label": "handleclickoutside()"
     },
     {
@@ -2687,7 +2696,7 @@
       "source_file": "src/components/Canvas/ContextMenu.tsx",
       "source_location": "L71",
       "id": "contextmenu_handlekeydown",
-      "community": 12,
+      "community": 13,
       "norm_label": "handlekeydown()"
     },
     {
@@ -2696,7 +2705,7 @@
       "source_file": "src/components/Canvas/ContextMenu.tsx",
       "source_location": "L74",
       "id": "contextmenu_handlescroll",
-      "community": 12,
+      "community": 13,
       "norm_label": "handlescroll()"
     },
     {
@@ -2705,7 +2714,7 @@
       "source_file": "src/components/Canvas/ContextMenu.tsx",
       "source_location": "L91",
       "id": "contextmenu_wrap",
-      "community": 12,
+      "community": 13,
       "norm_label": "wrap()"
     },
     {
@@ -2793,7 +2802,7 @@
       "label": "handleKeyUp()",
       "file_type": "code",
       "source_file": "/Users/loicrossignol/Desktop/vibecoding/canvas-flow-58/src/components/Canvas/Canvas.tsx",
-      "source_location": "L796",
+      "source_location": "L848",
       "id": "canvas_handlekeyup",
       "community": 1,
       "norm_label": "handlekeyup()"
@@ -3560,7 +3569,7 @@
       "source_file": "src/pages/Teams.tsx",
       "source_location": "L1",
       "id": "src_pages_teams_tsx",
-      "community": 13,
+      "community": 14,
       "norm_label": "teams.tsx"
     },
     {
@@ -3569,7 +3578,7 @@
       "source_file": "src/pages/Teams.tsx",
       "source_location": "L86",
       "id": "teams_handlecreateteam",
-      "community": 13,
+      "community": 14,
       "norm_label": "handlecreateteam()"
     },
     {
@@ -3578,7 +3587,7 @@
       "source_file": "src/pages/Teams.tsx",
       "source_location": "L107",
       "id": "teams_handleupdateteam",
-      "community": 13,
+      "community": 14,
       "norm_label": "handleupdateteam()"
     },
     {
@@ -3587,7 +3596,7 @@
       "source_file": "src/pages/Teams.tsx",
       "source_location": "L123",
       "id": "teams_handledeleteteam",
-      "community": 13,
+      "community": 14,
       "norm_label": "handledeleteteam()"
     },
     {
@@ -3596,7 +3605,7 @@
       "source_file": "src/pages/Teams.tsx",
       "source_location": "L131",
       "id": "teams_startediting",
-      "community": 13,
+      "community": 14,
       "norm_label": "startediting()"
     },
     {
@@ -3605,7 +3614,7 @@
       "source_file": "src/pages/Teams.tsx",
       "source_location": "L140",
       "id": "teams_handleaddmember",
-      "community": 13,
+      "community": 14,
       "norm_label": "handleaddmember()"
     },
     {
@@ -3614,7 +3623,7 @@
       "source_file": "src/pages/Teams.tsx",
       "source_location": "L162",
       "id": "teams_handleremovemember",
-      "community": 13,
+      "community": 14,
       "norm_label": "handleremovemember()"
     },
     {
@@ -6821,18 +6830,6 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "src/components/Canvas/ExportImportModal.tsx",
-      "source_location": "L32",
-      "weight": 1.0,
-      "_src": "src_components_canvas_exportimportmodal_tsx",
-      "_tgt": "exportimportmodal_exportasjson",
-      "source": "exportimportmodal_exportasjson",
-      "target": "src_components_canvas_exportimportmodal_tsx",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
       "source_file": "/Users/loicrossignol/Desktop/vibecoding/canvas-flow-58/Tableau collaboratif premium/src/components/Canvas/ExportImportModal.tsx",
       "source_location": "L53",
       "weight": 1.0,
@@ -6840,18 +6837,6 @@
       "_tgt": "exportimportmodal_exportaspng",
       "source": "exportimportmodal_exportaspng",
       "target": "users_loicrossignol_desktop_vibecoding_canvas_flow_58_tableau_collaboratif_premium_src_components_canvas_exportimportmodal_tsx",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/Canvas/ExportImportModal.tsx",
-      "source_location": "L53",
-      "weight": 1.0,
-      "_src": "src_components_canvas_exportimportmodal_tsx",
-      "_tgt": "exportimportmodal_exportaspng",
-      "source": "exportimportmodal_exportaspng",
-      "target": "src_components_canvas_exportimportmodal_tsx",
       "confidence_score": 1.0
     },
     {
@@ -6869,13 +6854,13 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "src/components/Canvas/ExportImportModal.tsx",
-      "source_location": "L172",
+      "source_file": "/Users/loicrossignol/Desktop/vibecoding/canvas-flow-58/src/components/Canvas/ExportImportModal.tsx",
+      "source_location": "L50",
       "weight": 1.0,
-      "_src": "src_components_canvas_exportimportmodal_tsx",
+      "_src": "users_loicrossignol_desktop_vibecoding_canvas_flow_58_src_components_canvas_exportimportmodal_tsx",
       "_tgt": "exportimportmodal_handleimport",
       "source": "exportimportmodal_handleimport",
-      "target": "src_components_canvas_exportimportmodal_tsx",
+      "target": "users_loicrossignol_desktop_vibecoding_canvas_flow_58_src_components_canvas_exportimportmodal_tsx",
       "confidence_score": 1.0
     },
     {
@@ -7362,7 +7347,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "/Users/loicrossignol/Desktop/vibecoding/canvas-flow-58/src/components/Canvas/Canvas.tsx",
-      "source_location": "L732",
+      "source_location": "L784",
       "weight": 1.0,
       "_src": "users_loicrossignol_desktop_vibecoding_canvas_flow_58_src_components_canvas_canvas_tsx",
       "_tgt": "canvas_handlekeydown",
@@ -7914,7 +7899,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "/Users/loicrossignol/Desktop/vibecoding/canvas-flow-58/src/components/AppSidebar.tsx",
-      "source_location": "L31",
+      "source_location": "L55",
       "weight": 1.0,
       "_src": "users_loicrossignol_desktop_vibecoding_canvas_flow_58_src_components_appsidebar_tsx",
       "_tgt": "appsidebar_nav_btn",
@@ -7926,7 +7911,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "/Users/loicrossignol/Desktop/vibecoding/canvas-flow-58/src/components/AppSidebar.tsx",
-      "source_location": "L45",
+      "source_location": "L69",
       "weight": 1.0,
       "_src": "users_loicrossignol_desktop_vibecoding_canvas_flow_58_src_components_appsidebar_tsx",
       "_tgt": "appsidebar_board_btn",
@@ -8213,6 +8198,18 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "/Users/loicrossignol/Desktop/vibecoding/canvas-flow-58/src/components/Canvas/ExportImportModal.tsx",
+      "source_location": "L36",
+      "weight": 1.0,
+      "_src": "users_loicrossignol_desktop_vibecoding_canvas_flow_58_src_components_canvas_exportimportmodal_tsx",
+      "_tgt": "exportimportmodal_icon_wrap",
+      "source": "users_loicrossignol_desktop_vibecoding_canvas_flow_58_src_components_canvas_exportimportmodal_tsx",
+      "target": "exportimportmodal_icon_wrap",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "src/components/Canvas/ConnectionSystem.tsx",
       "source_location": "L42",
       "weight": 1.0,
@@ -8466,7 +8463,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "/Users/loicrossignol/Desktop/vibecoding/canvas-flow-58/src/components/Canvas/Canvas.tsx",
-      "source_location": "L796",
+      "source_location": "L848",
       "weight": 1.0,
       "_src": "users_loicrossignol_desktop_vibecoding_canvas_flow_58_src_components_canvas_canvas_tsx",
       "_tgt": "canvas_handlekeyup",

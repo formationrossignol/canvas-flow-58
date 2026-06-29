@@ -487,19 +487,71 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     toast.success("Données importées avec succès");
   }, [clearSelection, addToHistory]);
 
-  const handleExportPNG = useCallback(async () => {
-    if (!containerRef.current) return;
-    try {
-      const canvas = await html2canvas(containerRef.current, { useCORS: true, allowTaint: true, scale: 2 });
-      const link = document.createElement('a');
-      link.download = `${boardTitle || 'tableau'}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-      toast.success('Export PNG réussi');
-    } catch {
-      toast.error("Erreur lors de l'export PNG");
+  const handleExportCapture = useCallback(async (format: 'png' | 'pdf', selectedOnly = false) => {
+    const canvasContent = containerRef.current?.querySelector('[data-canvas-content]') as HTMLElement;
+    if (!canvasContent) return;
+
+    const elementsToExport = selectedOnly && selection.selectedIds.length > 0
+      ? elements.filter(el => selection.selectedIds.includes(el.id))
+      : elements;
+
+    if (elementsToExport.length === 0) {
+      toast.warning('Aucun élément à exporter');
+      return;
     }
-  }, [boardTitle]);
+
+    const originalTransform = canvasContent.style.transform;
+    try {
+      canvasContent.style.transform = 'translate(0px, 0px) scale(1)';
+
+      const bounds = elementsToExport.reduce((b, el) => ({
+        minX: Math.min(b.minX, el.x),
+        minY: Math.min(b.minY, el.y),
+        maxX: Math.max(b.maxX, el.x + el.width),
+        maxY: Math.max(b.maxY, el.y + el.height),
+      }), {
+        minX: elementsToExport[0].x, minY: elementsToExport[0].y,
+        maxX: elementsToExport[0].x + elementsToExport[0].width,
+        maxY: elementsToExport[0].y + elementsToExport[0].height,
+      });
+
+      const padding = 60;
+      const w = Math.max(400, bounds.maxX - bounds.minX + padding * 2);
+      const h = Math.max(300, bounds.maxY - bounds.minY + padding * 2);
+      const suffix = selectedOnly ? '-sélection' : '';
+
+      const capturedCanvas = await html2canvas(canvasContent, {
+        x: Math.max(0, bounds.minX - padding),
+        y: Math.max(0, bounds.minY - padding),
+        width: w, height: h,
+        scale: format === 'png' ? 2 : 1,
+        useCORS: true, allowTaint: true,
+        backgroundColor: '#ffffff',
+      });
+
+      if (format === 'png') {
+        const link = document.createElement('a');
+        link.download = `${boardTitle || 'tableau'}${suffix}.png`;
+        link.href = capturedCanvas.toDataURL('image/png');
+        link.click();
+        toast.success('Export PNG réussi');
+      } else {
+        const imgData = capturedCanvas.toDataURL('image/png');
+        const pdf = new jsPDF({
+          orientation: w > h ? 'landscape' : 'portrait',
+          unit: 'px',
+          format: [w, h],
+        });
+        pdf.addImage(imgData, 'PNG', 0, 0, w, h);
+        pdf.save(`${boardTitle || 'tableau'}${suffix}.pdf`);
+        toast.success('Export PDF réussi');
+      }
+    } catch {
+      toast.error(`Erreur lors de l'export ${format.toUpperCase()}`);
+    } finally {
+      canvasContent.style.transform = originalTransform;
+    }
+  }, [elements, boardTitle, selection.selectedIds]);
 
   const handleExportJSON = useCallback(() => {
     const data = JSON.stringify({ elements, connections, boardTitle }, null, 2);
@@ -826,81 +878,6 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     setDrawingStrokes(prev => prev.filter(s => s.id !== id));
   }, []);
 
-  const handleExportPDF = useCallback(async (exportOnlySelected = false) => {
-    if (!containerRef.current) return;
-
-    const canvasContent = containerRef.current.querySelector('[style*="transform"]') as HTMLElement;
-    if (!canvasContent) return;
-
-    try {
-      // Temporarily reset transform for capture
-      const originalTransform = canvasContent.style.transform;
-      canvasContent.style.transform = 'translate(0px, 0px) scale(1)';
-      
-      // Determine which elements to export
-      const elementsToExport = exportOnlySelected && selection.selectedIds.length > 0
-        ? elements.filter(el => selection.selectedIds.includes(el.id))
-        : elements;
-
-      if (elementsToExport.length === 0) {
-        console.warn('Aucun élément à exporter');
-        canvasContent.style.transform = originalTransform;
-        return;
-      }
-      
-      // Calculate visible area based on elements to export
-      const elementBounds = elementsToExport.reduce((bounds, element) => {
-        return {
-          minX: Math.min(bounds.minX, element.x),
-          minY: Math.min(bounds.minY, element.y),
-          maxX: Math.max(bounds.maxX, element.x + element.width),
-          maxY: Math.max(bounds.maxY, element.y + element.height),
-        };
-      }, { 
-        minX: elementsToExport[0].x, 
-        minY: elementsToExport[0].y, 
-        maxX: elementsToExport[0].x + elementsToExport[0].width, 
-        maxY: elementsToExport[0].y + elementsToExport[0].height 
-      });
-
-      // Add padding
-      const padding = 50;
-      const captureWidth = Math.max(400, elementBounds.maxX - elementBounds.minX + padding * 2);
-      const captureHeight = Math.max(300, elementBounds.maxY - elementBounds.minY + padding * 2);
-
-      const canvas = await html2canvas(canvasContent, {
-        x: Math.max(0, elementBounds.minX - padding),
-        y: Math.max(0, elementBounds.minY - padding),
-        width: captureWidth,
-        height: captureHeight,
-        scale: 1,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-      });
-
-      // Restore original transform
-      canvasContent.style.transform = originalTransform;
-
-      // Create PDF
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: captureWidth > captureHeight ? 'landscape' : 'portrait',
-        unit: 'px',
-        format: [captureWidth, captureHeight]
-      });
-
-      pdf.addImage(imgData, 'PNG', 0, 0, captureWidth, captureHeight);
-      const fileName = exportOnlySelected ? `${boardTitle || 'board'}-selection.pdf` : `${boardTitle || 'board'}.pdf`;
-      pdf.save(fileName);
-    } catch (error) {
-      console.error('Erreur lors de l\'export PDF:', error);
-    }
-  }, [elements, boardTitle, selection.selectedIds]);
-
-  const handleExportSelectedArea = useCallback(() => {
-    handleExportPDF(true);
-  }, [handleExportPDF]);
 
   const handleInsertEmoji = useCallback((emoji: string) => {
     const cx = (-canvasTransform.x + window.innerWidth / 2) / canvasTransform.scale;
@@ -1208,6 +1185,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
 
         {/* Canvas Content */}
         <div
+          data-canvas-content="true"
           className="absolute"
           style={{
             transform: `translate(${canvasTransform.x}px, ${canvasTransform.y}px) scale(${canvasTransform.scale})`,
@@ -1314,7 +1292,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         onUndo={() => { const prev = undo(); if (prev) setElements(prev); }}
         onRedo={() => { const next = redo(); if (next) setElements(next); }}
         onInsertEmoji={handleInsertEmoji}
-        onExportPNG={handleExportPNG}
+        onExportPNG={() => handleExportCapture('png', false)}
         onExportJSON={handleExportJSON}
         onImportJSON={handleImportJSON}
         onOpenShortcuts={() => setShowShortcuts(true)}
@@ -1368,11 +1346,12 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       <ExportImportModal
         isVisible={isExportModalVisible}
         onClose={() => setIsExportModalVisible(false)}
-        elements={elements}
         onImport={handleImportElements}
-        canvasTransform={canvasTransform}
-        onExportPDF={() => handleExportPDF(false)}
-        onExportSelectedArea={handleExportSelectedArea}
+        onExportPNG={() => handleExportCapture('png', false)}
+        onExportPNGSelected={() => handleExportCapture('png', true)}
+        onExportPDF={() => handleExportCapture('pdf', false)}
+        onExportPDFSelected={() => handleExportCapture('pdf', true)}
+        onExportJSON={handleExportJSON}
         hasSelection={selection.selectedIds.length > 0}
       />
 
