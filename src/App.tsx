@@ -26,27 +26,25 @@ const DashboardHeaderBar = () => {
   const isDark = theme === 'dark';
 
   return (
-    <header style={{
-      height: 52, display: 'flex', alignItems: 'center',
-      borderBottom: '1px solid #E5E7EB', padding: '0 16px', gap: 12,
-      flexShrink: 0, background: 'white',
-    }}>
+    <header className="flex h-[52px] shrink-0 items-center gap-3 border-b border-border bg-card px-4">
       <SidebarTrigger />
       {title && (
-        <span style={{ fontSize: 15, fontWeight: 600, color: '#0F172A', letterSpacing: -0.2, whiteSpace: 'nowrap' }}>
+        <span className="whitespace-nowrap text-[15px] font-semibold tracking-tight text-foreground">
           {title}
         </span>
       )}
-      <div style={{ flex: 1 }} />
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        {isDark ? <Moon size={14} style={{ color: '#64748B' }} /> : <Sun size={14} style={{ color: '#64748B' }} />}
+      <div className="flex-1" />
+      {action && <div className="flex items-center">{action}</div>}
+      <div className="flex items-center gap-1.5 pl-3 border-l border-border">
+        {isDark
+          ? <Moon size={13} className="text-muted-foreground" />
+          : <Sun size={13} className="text-amber-400" />}
         <Switch
           checked={isDark}
           onCheckedChange={checked => setTheme(checked ? 'dark' : 'light')}
-          className="data-[state=checked]:bg-primary/70 h-5 w-9"
+          className="data-[state=checked]:bg-primary/80 h-5 w-9"
         />
       </div>
-      {action && <div style={{ display: 'flex', alignItems: 'center' }}>{action}</div>}
     </header>
   );
 };

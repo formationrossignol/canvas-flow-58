@@ -269,7 +269,7 @@ const Dashboard = () => {
       <Button
         size="sm"
         variant="ghost"
-        className="h-8 rounded-full border border-[#E5E7EB] bg-white px-3 text-xs font-semibold text-[#64748B] hover:border-primary/40 hover:text-primary"
+        className="h-8 rounded-full border border-border bg-card px-3 text-xs font-semibold text-muted-foreground hover:border-primary/40 hover:text-primary"
         onClick={() => setIsDiagramDialogOpen(true)}
       >
         Diagramme
@@ -285,7 +285,7 @@ const Dashboard = () => {
   );
 
   return (
-    <div className="min-h-[calc(100vh-3.25rem)] w-full overflow-y-auto bg-[#F8FAFC] pb-20">
+    <div className="min-h-[calc(100vh-3.25rem)] w-full overflow-y-auto bg-background pb-20">
       <PageTitle title="Mes tableaux" action={headerAction} />
 
       <div className="mx-auto flex max-w-[1400px] flex-col gap-5 px-5 pt-6 md:px-8">
@@ -297,33 +297,33 @@ const Dashboard = () => {
             { label: "En direct", value: totalLiveBoards, icon: <Zap size={14} />, accent: true },
             { label: "Dernière MàJ", value: lastUpdatedBoard?.lastModified.toLocaleDateString("fr-FR", { day: "numeric", month: "short" }) ?? "—", icon: <Clock size={14} /> },
           ].map(stat => (
-            <div key={stat.label} className="flex items-center gap-3 rounded-xl border border-[#E5E7EB] bg-white px-4 py-3 shadow-soft">
-              <div style={{ width: 30, height: 30, borderRadius: 8, background: stat.accent ? 'rgba(79,70,229,0.09)' : '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: stat.accent ? '#4F46E5' : '#64748B', flexShrink: 0 }}>
+            <div key={stat.label} className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 shadow-soft">
+              <div className={`flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg ${stat.accent ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
                 {stat.icon}
               </div>
               <div>
-                <div className="text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8]">{stat.label}</div>
-                <div className="text-base font-semibold text-[#0F172A]">{stat.value}</div>
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70">{stat.label}</div>
+                <div className="text-base font-semibold text-foreground">{stat.value}</div>
               </div>
             </div>
           ))}
         </div>
 
         {/* Filters */}
-        <section className="flex flex-col gap-4 rounded-xl border border-[#E5E7EB] bg-white p-4 shadow-soft">
+        <section className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 shadow-soft">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="flex flex-1 flex-wrap items-center gap-3">
-              <div className="flex min-w-[220px] flex-1 items-center gap-2 rounded-lg border border-[#E5E7EB] bg-[#F1F5F9] px-3 py-2">
-                <Search className="h-3.5 w-3.5 shrink-0 text-[#94A3B8]" />
+              <div className="flex min-w-[220px] flex-1 items-center gap-2 rounded-lg border border-border bg-muted px-3 py-2">
+                <Search className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                 <Input
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   placeholder="Rechercher..."
-                  className="h-7 flex-1 border-0 bg-transparent text-sm placeholder:text-[#94A3B8] focus-visible:ring-0"
+                  className="h-7 flex-1 border-0 bg-transparent text-sm placeholder:text-muted-foreground focus-visible:ring-0"
                 />
               </div>
               <Select value={selectedTeam} onValueChange={setSelectedTeam}>
-                <SelectTrigger className="h-9 w-[180px] rounded-lg border border-[#E5E7EB] bg-white text-sm font-medium">
+                <SelectTrigger className="h-9 w-[180px] rounded-lg border border-border bg-card text-sm font-medium">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -334,18 +334,18 @@ const Dashboard = () => {
 
             <div className="flex items-center gap-2.5">
               <ToggleGroup type="single" value={viewMode} onValueChange={v => v && setViewMode(v as "grid" | "list")}>
-                <ToggleGroupItem value="grid" className="h-9 w-9 rounded-lg border border-[#E5E7EB] bg-[#F1F5F9] data-[state=on]:border-primary/50 data-[state=on]:bg-[#EEF2FF] data-[state=on]:text-primary">
+                <ToggleGroupItem value="grid" className="h-9 w-9 rounded-lg border border-border bg-muted data-[state=on]:border-primary/50 data-[state=on]:bg-primary/10 data-[state=on]:text-primary">
                   <LayoutGrid className="h-3.5 w-3.5" />
                 </ToggleGroupItem>
-                <ToggleGroupItem value="list" className="h-9 w-9 rounded-lg border border-[#E5E7EB] bg-[#F1F5F9] data-[state=on]:border-primary/50 data-[state=on]:bg-[#EEF2FF] data-[state=on]:text-primary">
+                <ToggleGroupItem value="list" className="h-9 w-9 rounded-lg border border-border bg-muted data-[state=on]:border-primary/50 data-[state=on]:bg-primary/10 data-[state=on]:text-primary">
                   <List className="h-3.5 w-3.5" />
                 </ToggleGroupItem>
               </ToggleGroup>
-              <div className="flex items-center gap-1.5 rounded-full border border-[#E5E7EB] bg-[#F1F5F9] px-3 py-1.5 text-[11px] font-medium text-[#64748B]">
+              <div className="flex items-center gap-1.5 rounded-full border border-border bg-muted px-3 py-1.5 text-[11px] font-medium text-muted-foreground">
                 <Filter className="h-3 w-3" />
                 {filteredBoards.length}
               </div>
-              <div className="flex items-center gap-2 rounded-full border border-[#E5E7EB] bg-[#F1F5F9] px-3 py-1.5 text-[11px] font-semibold text-[#64748B]">
+              <div className="flex items-center gap-2 rounded-full border border-border bg-muted px-3 py-1.5 text-[11px] font-semibold text-muted-foreground">
                 Favoris
                 <Switch checked={showFavoritesOnly} onCheckedChange={setShowFavoritesOnly} className="data-[state=checked]:bg-primary h-4 w-7" />
               </div>
@@ -360,8 +360,8 @@ const Dashboard = () => {
                   onClick={() => toggleTagFilter(tag)}
                   className={`rounded-full border px-3 py-0.5 text-[11px] font-semibold uppercase tracking-wider transition ${
                     selectedBoardTags.includes(tag)
-                      ? 'border-primary/50 bg-[#EEF2FF] text-primary'
-                      : 'border-[#E5E7EB] bg-white text-[#64748B] hover:border-primary/30 hover:text-primary'
+                      ? 'border-primary/50 bg-primary/10 text-primary'
+                      : 'border-border bg-card text-muted-foreground hover:border-primary/30 hover:text-primary'
                   }`}
                 >
                   #{tag}
@@ -375,17 +375,17 @@ const Dashboard = () => {
         {/* Boards */}
         <section className="flex flex-col gap-4">
           {filteredBoards.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-[#E5E7EB] bg-white p-12 text-center shadow-soft">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#EEF2FF] text-primary">
+            <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card p-12 text-center shadow-soft">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <LayoutGrid className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-[#0F172A]">Aucun tableau trouvé</p>
-                <p className="mt-0.5 text-xs text-[#64748B]">Ajustez vos filtres ou créez un nouveau tableau.</p>
+                <p className="text-sm font-semibold text-foreground">Aucun tableau trouvé</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">Ajustez vos filtres ou créez un nouveau tableau.</p>
               </div>
               <div className="flex gap-2">
                 <Button size="sm" className="rounded-full bg-primary px-4 text-xs text-primary-foreground hover:bg-primary/90" onClick={() => setIsCreateDialogOpen(true)}>Créer un tableau</Button>
-                <Button size="sm" variant="ghost" className="rounded-full border border-[#E5E7EB] bg-white px-4 text-xs hover:border-primary/40 hover:text-primary" onClick={() => setSelectedBoardTags([])}>Réinitialiser</Button>
+                <Button size="sm" variant="ghost" className="rounded-full border border-border bg-card px-4 text-xs hover:border-primary/40 hover:text-primary" onClick={() => setSelectedBoardTags([])}>Réinitialiser</Button>
               </div>
             </div>
           ) : viewMode === "grid" ? (
@@ -400,13 +400,13 @@ const Dashboard = () => {
                     onDragStart={() => setDraggingBoardId(board.id)}
                     onDragOver={e => handleDragOver(e, board.id)}
                     onDragEnd={() => setDraggingBoardId(null)}
-                    className={`group flex flex-col gap-4 rounded-xl border bg-white p-5 shadow-soft transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md cursor-default ${draggingBoardId === board.id ? 'border-primary/50 ring-2 ring-primary/20' : 'border-[#E5E7EB]'}`}
+                    className={`group flex flex-col gap-4 rounded-xl border bg-card p-5 shadow-soft transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md cursor-default ${draggingBoardId === board.id ? 'border-primary/50 ring-2 ring-primary/20' : 'border-border'}`}
                   >
                     {/* Card header */}
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex min-w-0 flex-col gap-1.5">
                         <div className="flex items-center gap-2">
-                          {team && <span className="rounded-full bg-[#EEF2FF] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">{team.name}</span>}
+                          {team && <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">{team.name}</span>}
                           {board.isLive && (
                             <span className="relative flex h-2 w-2">
                               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/70" />
@@ -414,24 +414,24 @@ const Dashboard = () => {
                             </span>
                           )}
                         </div>
-                        <h3 className="text-sm font-semibold leading-snug text-[#0F172A] line-clamp-1">{board.name}</h3>
-                        <p className="text-xs leading-relaxed text-[#64748B] line-clamp-2">{board.description}</p>
+                        <h3 className="text-sm font-semibold leading-snug text-foreground line-clamp-1">{board.name}</h3>
+                        <p className="text-xs leading-relaxed text-muted-foreground line-clamp-2">{board.description}</p>
                       </div>
                       <div className="flex shrink-0 items-center gap-1">
                         <button
                           onClick={() => setSavedBoards(prev => prev.map(b => b.id === board.id ? { ...b, isFavorite: !b.isFavorite } : b))}
-                          className={`flex h-7 w-7 items-center justify-center rounded-lg border border-[#E5E7EB] bg-[#F8FAFC] transition hover:border-amber-300 ${board.isFavorite ? 'text-amber-500' : 'text-[#94A3B8]'}`}
+                          className={`flex h-7 w-7 items-center justify-center rounded-lg border border-border bg-muted/60 transition hover:border-amber-300 ${board.isFavorite ? 'text-amber-500' : 'text-muted-foreground'}`}
                         >
                           <Star className={`h-3.5 w-3.5 ${board.isFavorite ? 'fill-current' : ''}`} />
                         </button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <button className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#E5E7EB] bg-[#F8FAFC] text-[#94A3B8] transition hover:border-primary/30 hover:text-primary">
+                            <button className="flex h-7 w-7 items-center justify-center rounded-lg border border-border bg-muted/60 text-muted-foreground transition hover:border-primary/30 hover:text-primary">
                               <MoreVertical className="h-3.5 w-3.5" />
                             </button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-44 rounded-xl border border-[#E5E7EB] bg-white">
-                            <DropdownMenuLabel className="text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8]">Actions</DropdownMenuLabel>
+                          <DropdownMenuContent align="end" className="w-44 rounded-xl border border-border bg-popover">
+                            <DropdownMenuLabel className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Actions</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onSelect={() => navigate(`/canvas/${board.id}`)} className="cursor-pointer rounded-lg text-xs"><ArrowRight className="mr-2 h-3.5 w-3.5" />Ouvrir</DropdownMenuItem>
                             <DropdownMenuItem onSelect={() => handleDuplicateBoard(board)} className="cursor-pointer rounded-lg text-xs"><Copy className="mr-2 h-3.5 w-3.5" />Dupliquer</DropdownMenuItem>
@@ -448,17 +448,17 @@ const Dashboard = () => {
                     {(board.tags ?? []).length > 0 && (
                       <div className="flex flex-wrap gap-1.5">
                         {(board.tags ?? []).map(tag => (
-                          <span key={tag} className="rounded-full border border-[#E5E7EB] bg-[#F1F5F9] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#64748B]">{tag}</span>
+                          <span key={tag} className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{tag}</span>
                         ))}
                       </div>
                     )}
 
                     {/* Footer */}
-                    <div className="flex items-center justify-between gap-2 border-t border-[#F1F5F9] pt-3">
-                      <div className="flex items-center gap-2 text-[11px] text-[#94A3B8]">
+                    <div className="flex items-center justify-between gap-2 border-t border-border/40 pt-3">
+                      <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
                         <div className="flex -space-x-2">
                           {boardCollabs.slice(0, 3).map(c => (
-                            <Avatar key={c.id} className="h-6 w-6 border border-white">
+                            <Avatar key={c.id} className="h-6 w-6 border border-card">
                               <AvatarImage src={c.avatar} alt={c.name} />
                               <AvatarFallback className="text-[9px]">{c.name.slice(0, 2)}</AvatarFallback>
                             </Avatar>
@@ -486,22 +486,22 @@ const Dashboard = () => {
                     onDragStart={() => setDraggingBoardId(board.id)}
                     onDragOver={e => handleDragOver(e, board.id)}
                     onDragEnd={() => setDraggingBoardId(null)}
-                    className={`group flex items-center gap-4 rounded-xl border bg-white px-5 py-4 shadow-soft transition-all duration-200 hover:shadow-md ${draggingBoardId === board.id ? 'border-primary/50 ring-2 ring-primary/20' : 'border-[#E5E7EB]'}`}
+                    className={`group flex items-center gap-4 rounded-xl border bg-card px-5 py-4 shadow-soft transition-all duration-200 hover:shadow-md ${draggingBoardId === board.id ? 'border-primary/50 ring-2 ring-primary/20' : 'border-border'}`}
                   >
                     <div className="flex min-w-0 flex-1 flex-col gap-1">
                       <div className="flex items-center gap-2">
-                        {team && <span className="rounded-full bg-[#EEF2FF] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">{team.name}</span>}
+                        {team && <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">{team.name}</span>}
                         {board.isLive && <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/70" /><span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" /></span>}
-                        {(board.tags ?? []).map(tag => <span key={tag} className="rounded-full border border-[#E5E7EB] bg-[#F1F5F9] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#64748B]">{tag}</span>)}
+                        {(board.tags ?? []).map(tag => <span key={tag} className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{tag}</span>)}
                       </div>
-                      <h3 className="text-sm font-semibold text-[#0F172A] truncate">{board.name}</h3>
-                      <p className="text-xs text-[#64748B] truncate">{board.description}</p>
+                      <h3 className="text-sm font-semibold text-foreground truncate">{board.name}</h3>
+                      <p className="text-xs text-muted-foreground truncate">{board.description}</p>
                     </div>
                     <div className="flex shrink-0 items-center gap-3">
-                      <div className="hidden items-center gap-1.5 text-[11px] text-[#94A3B8] md:flex">
+                      <div className="hidden items-center gap-1.5 text-[11px] text-muted-foreground md:flex">
                         <div className="flex -space-x-2">
                           {boardCollabs.slice(0, 3).map(c => (
-                            <Avatar key={c.id} className="h-6 w-6 border border-white">
+                            <Avatar key={c.id} className="h-6 w-6 border border-card">
                               <AvatarImage src={c.avatar} alt={c.name} />
                               <AvatarFallback className="text-[9px]">{c.name.slice(0, 2)}</AvatarFallback>
                             </Avatar>
@@ -509,16 +509,16 @@ const Dashboard = () => {
                         </div>
                         <span><Dot className="inline h-4 w-4" />{board.lastModified.toLocaleDateString("fr-FR")}</span>
                       </div>
-                      <button onClick={() => setSavedBoards(prev => prev.map(b => b.id === board.id ? { ...b, isFavorite: !b.isFavorite } : b))} className={`flex h-7 w-7 items-center justify-center rounded-lg border border-[#E5E7EB] bg-[#F8FAFC] transition hover:border-amber-300 ${board.isFavorite ? 'text-amber-500' : 'text-[#94A3B8]'}`}>
+                      <button onClick={() => setSavedBoards(prev => prev.map(b => b.id === board.id ? { ...b, isFavorite: !b.isFavorite } : b))} className={`flex h-7 w-7 items-center justify-center rounded-lg border border-border bg-muted/60 transition hover:border-amber-300 ${board.isFavorite ? 'text-amber-500' : 'text-muted-foreground'}`}>
                         <Star className={`h-3.5 w-3.5 ${board.isFavorite ? 'fill-current' : ''}`} />
                       </button>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <button className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#E5E7EB] bg-[#F8FAFC] text-[#94A3B8] transition hover:border-primary/30 hover:text-primary">
+                          <button className="flex h-7 w-7 items-center justify-center rounded-lg border border-border bg-muted/60 text-muted-foreground transition hover:border-primary/30 hover:text-primary">
                             <MoreVertical className="h-3.5 w-3.5" />
                           </button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-44 rounded-xl border border-[#E5E7EB] bg-white">
+                        <DropdownMenuContent align="end" className="w-44 rounded-xl border border-border bg-popover">
                           <DropdownMenuSeparator />
                           <DropdownMenuItem onSelect={() => navigate(`/canvas/${board.id}`)} className="cursor-pointer rounded-lg text-xs"><ArrowRight className="mr-2 h-3.5 w-3.5" />Ouvrir</DropdownMenuItem>
                           <DropdownMenuItem onSelect={() => handleDuplicateBoard(board)} className="cursor-pointer rounded-lg text-xs"><Copy className="mr-2 h-3.5 w-3.5" />Dupliquer</DropdownMenuItem>
@@ -553,39 +553,39 @@ const Dashboard = () => {
 
       {/* Create board dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="max-w-[480px] rounded-2xl border border-[#E5E7EB] bg-white">
+        <DialogContent className="max-w-[480px] rounded-2xl border border-border bg-card">
           <DialogHeader>
-            <DialogTitle className="text-base font-semibold text-[#0F172A]">Nouveau tableau</DialogTitle>
-            <DialogDescription className="text-xs text-[#64748B]">Créez un espace collaboratif et invitez votre équipe.</DialogDescription>
+            <DialogTitle className="text-base font-semibold text-foreground">Nouveau tableau</DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">Créez un espace collaboratif et invitez votre équipe.</DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-[#64748B]">Nom</Label>
-              <Input value={newBoard.name} onChange={e => setNewBoard(p => ({ ...p, name: e.target.value }))} placeholder="Ex : Sprint planning Q3" className="h-9 rounded-lg border-[#E5E7EB] bg-[#F8FAFC] text-sm focus-visible:ring-1 focus-visible:ring-primary/30" />
+              <Label className="text-xs font-semibold text-muted-foreground">Nom</Label>
+              <Input value={newBoard.name} onChange={e => setNewBoard(p => ({ ...p, name: e.target.value }))} placeholder="Ex : Sprint planning Q3" className="h-9 rounded-lg border-border bg-muted/50 text-sm focus-visible:ring-1 focus-visible:ring-primary/30" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-[#64748B]">Description</Label>
-              <Textarea value={newBoard.description} onChange={e => setNewBoard(p => ({ ...p, description: e.target.value }))} placeholder="Description optionnelle..." className="min-h-[80px] rounded-lg border-[#E5E7EB] bg-[#F8FAFC] text-sm focus-visible:ring-1 focus-visible:ring-primary/30" />
+              <Label className="text-xs font-semibold text-muted-foreground">Description</Label>
+              <Textarea value={newBoard.description} onChange={e => setNewBoard(p => ({ ...p, description: e.target.value }))} placeholder="Description optionnelle..." className="min-h-[80px] rounded-lg border-border bg-muted/50 text-sm focus-visible:ring-1 focus-visible:ring-primary/30" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-[#64748B]">Équipe</Label>
+              <Label className="text-xs font-semibold text-muted-foreground">Équipe</Label>
               <Select value={newBoard.teamId} onValueChange={v => setNewBoard(p => ({ ...p, teamId: v }))}>
-                <SelectTrigger className="h-9 rounded-lg border-[#E5E7EB] bg-[#F8FAFC] text-sm"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="h-9 rounded-lg border-border bg-muted/50 text-sm"><SelectValue /></SelectTrigger>
                 <SelectContent>{teams.filter(t => t.id !== "all").map(t => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-[#64748B]">Tags</Label>
+              <Label className="text-xs font-semibold text-muted-foreground">Tags</Label>
               <div className="flex gap-2">
-                <Input value={tagInput} onChange={e => setTagInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); handleAddTag(); } }} placeholder="Ajouter un tag..." className="h-9 flex-1 rounded-lg border-[#E5E7EB] bg-[#F8FAFC] text-sm focus-visible:ring-1 focus-visible:ring-primary/30" />
+                <Input value={tagInput} onChange={e => setTagInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); handleAddTag(); } }} placeholder="Ajouter un tag..." className="h-9 flex-1 rounded-lg border-border bg-muted/50 text-sm focus-visible:ring-1 focus-visible:ring-primary/30" />
                 <Button type="button" size="sm" className="h-9 rounded-lg bg-primary text-xs text-primary-foreground hover:bg-primary/90" onClick={handleAddTag}>Ajouter</Button>
               </div>
               {newBoard.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
                   {newBoard.tags.map(tag => (
-                    <span key={tag} className="flex items-center gap-1 rounded-full border border-[#E5E7EB] bg-[#F1F5F9] px-2.5 py-0.5 text-[11px] font-semibold text-[#64748B]">
+                    <span key={tag} className="flex items-center gap-1 rounded-full border border-border bg-muted px-2.5 py-0.5 text-[11px] font-semibold text-muted-foreground">
                       #{tag}
-                      <button onClick={() => handleRemoveTag(tag)} className="text-[#94A3B8] hover:text-red-500">×</button>
+                      <button onClick={() => handleRemoveTag(tag)} className="text-muted-foreground hover:text-red-500">×</button>
                     </span>
                   ))}
                 </div>
@@ -593,7 +593,7 @@ const Dashboard = () => {
             </div>
           </div>
           <DialogFooter className="mt-2 gap-2">
-            <Button variant="ghost" size="sm" className="rounded-lg border border-[#E5E7EB] bg-white text-xs hover:border-primary/40 hover:text-primary" onClick={() => setIsCreateDialogOpen(false)}>Annuler</Button>
+            <Button variant="ghost" size="sm" className="rounded-lg border border-border bg-card text-xs hover:border-primary/40 hover:text-primary" onClick={() => setIsCreateDialogOpen(false)}>Annuler</Button>
             <Button size="sm" className="rounded-lg bg-primary px-5 text-xs text-primary-foreground hover:bg-primary/90" onClick={handleCreateBoard}>Créer</Button>
           </DialogFooter>
         </DialogContent>
@@ -601,30 +601,30 @@ const Dashboard = () => {
 
       {/* Create diagram dialog */}
       <Dialog open={isDiagramDialogOpen} onOpenChange={setIsDiagramDialogOpen}>
-        <DialogContent className="max-w-[480px] rounded-2xl border border-[#E5E7EB] bg-white">
+        <DialogContent className="max-w-[480px] rounded-2xl border border-border bg-card">
           <DialogHeader>
-            <DialogTitle className="text-base font-semibold text-[#0F172A]">Nouveau diagramme</DialogTitle>
-            <DialogDescription className="text-xs text-[#64748B]">Créez un flow collaboratif avec sections et transitions.</DialogDescription>
+            <DialogTitle className="text-base font-semibold text-foreground">Nouveau diagramme</DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">Créez un flow collaboratif avec sections et transitions.</DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-[#64748B]">Nom</Label>
-              <Input value={newBoard.name} onChange={e => setNewBoard(p => ({ ...p, name: e.target.value }))} placeholder="Ex : Parcours onboarding" className="h-9 rounded-lg border-[#E5E7EB] bg-[#F8FAFC] text-sm focus-visible:ring-1 focus-visible:ring-primary/30" />
+              <Label className="text-xs font-semibold text-muted-foreground">Nom</Label>
+              <Input value={newBoard.name} onChange={e => setNewBoard(p => ({ ...p, name: e.target.value }))} placeholder="Ex : Parcours onboarding" className="h-9 rounded-lg border-border bg-muted/50 text-sm focus-visible:ring-1 focus-visible:ring-primary/30" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-[#64748B]">Description</Label>
-              <Textarea value={newBoard.description} onChange={e => setNewBoard(p => ({ ...p, description: e.target.value }))} placeholder="Description optionnelle..." className="min-h-[80px] rounded-lg border-[#E5E7EB] bg-[#F8FAFC] text-sm focus-visible:ring-1 focus-visible:ring-primary/30" />
+              <Label className="text-xs font-semibold text-muted-foreground">Description</Label>
+              <Textarea value={newBoard.description} onChange={e => setNewBoard(p => ({ ...p, description: e.target.value }))} placeholder="Description optionnelle..." className="min-h-[80px] rounded-lg border-border bg-muted/50 text-sm focus-visible:ring-1 focus-visible:ring-primary/30" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-[#64748B]">Équipe</Label>
+              <Label className="text-xs font-semibold text-muted-foreground">Équipe</Label>
               <Select value={newBoard.teamId} onValueChange={v => setNewBoard(p => ({ ...p, teamId: v }))}>
-                <SelectTrigger className="h-9 rounded-lg border-[#E5E7EB] bg-[#F8FAFC] text-sm"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="h-9 rounded-lg border-border bg-muted/50 text-sm"><SelectValue /></SelectTrigger>
                 <SelectContent>{teams.filter(t => t.id !== "all").map(t => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}</SelectContent>
               </Select>
             </div>
           </div>
           <DialogFooter className="mt-2 gap-2">
-            <Button variant="ghost" size="sm" className="rounded-lg border border-[#E5E7EB] bg-white text-xs hover:border-primary/40 hover:text-primary" onClick={() => setIsDiagramDialogOpen(false)}>Annuler</Button>
+            <Button variant="ghost" size="sm" className="rounded-lg border border-border bg-card text-xs hover:border-primary/40 hover:text-primary" onClick={() => setIsDiagramDialogOpen(false)}>Annuler</Button>
             <Button size="sm" className="rounded-lg bg-primary px-5 text-xs text-primary-foreground hover:bg-primary/90" onClick={handleCreateDiagram}>Créer</Button>
           </DialogFooter>
         </DialogContent>
@@ -646,13 +646,13 @@ const Dashboard = () => {
 
       {/* Delete confirmation */}
       <AlertDialog open={Boolean(boardToDelete)} onOpenChange={() => setBoardToDelete(null)}>
-        <AlertDialogContent className="max-w-sm rounded-2xl border border-[#E5E7EB] bg-white">
+        <AlertDialogContent className="max-w-sm rounded-2xl border border-border bg-card">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-base font-semibold">Supprimer ce tableau ?</AlertDialogTitle>
-            <AlertDialogDescription className="text-xs text-[#64748B]">Action irréversible. Toutes les données seront supprimées.</AlertDialogDescription>
+            <AlertDialogDescription className="text-xs text-muted-foreground">Action irréversible. Toutes les données seront supprimées.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-lg border border-[#E5E7EB] bg-white text-xs hover:border-primary/40 hover:text-primary">Annuler</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-lg border border-border bg-card text-xs hover:border-primary/40 hover:text-primary">Annuler</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteBoard} className="rounded-lg bg-destructive text-xs text-destructive-foreground hover:brightness-110">Supprimer</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

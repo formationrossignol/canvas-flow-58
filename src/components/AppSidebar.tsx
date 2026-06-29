@@ -7,6 +7,7 @@ import {
 import { SearchDialog } from "@/components/SearchDialog";
 import { useBranding } from "@/contexts/BrandingContext";
 import { COLORS, GRADIENTS } from "@/tokens/colors";
+import { useTheme } from "next-themes";
 
 const navLinks = [
   { title: "Mes tableaux", url: "/", icon: Home },
@@ -28,15 +29,13 @@ const activities = [
   { id: 3, initial: "T", color: "#F59E0B", name: "Thomas B.", text: 'a voté sur "Mode hors..."', time: "3m" },
 ];
 
-// Light sidebar palette
-const S = {
+const LIGHT_S = {
   bg:          '#F1F5F9',
   border:      'rgba(15,23,42,0.08)',
   labelText:   '#94A3B8',
   navBg:       'rgba(79,70,229,0.09)',
   navColor:    '#4F46E5',
   navIdle:     '#64748B',
-  navHoverBg:  'rgba(15,23,42,0.05)',
   searchBg:    'rgba(15,23,42,0.04)',
   searchBorder:'rgba(15,23,42,0.09)',
   placeholder: '#94A3B8',
@@ -52,38 +51,62 @@ const S = {
   brandInitBg: GRADIENTS.primaryGradient,
 };
 
-const NAV_BTN = (active: boolean, open: boolean): React.CSSProperties => ({
-  display: "flex", alignItems: "center",
-  gap: open ? 10 : 0,
-  padding: "8px 10px", borderRadius: 8, cursor: "pointer",
-  border: "none", width: "100%", fontFamily: "inherit",
-  justifyContent: open ? "flex-start" : "center",
-  minHeight: 36, fontSize: 13.5, fontWeight: 500,
-  transition: "background 0.12s",
-  background: active ? S.navBg : "transparent",
-  color: active ? S.navColor : S.navIdle,
-  whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-  textDecoration: "none",
-});
-
-const BOARD_BTN = (active: boolean, open: boolean): React.CSSProperties => ({
-  display: "flex", alignItems: "center",
-  gap: open ? 8 : 0,
-  padding: "7px 10px", borderRadius: 8, cursor: "pointer",
-  border: "none", width: "100%", fontFamily: "inherit",
-  justifyContent: open ? "flex-start" : "center",
-  minHeight: 34, fontSize: 13.5, fontWeight: 500,
-  transition: "background 0.12s",
-  background: active ? S.navBg : "transparent",
-  color: active ? S.navColor : S.navIdle,
-  whiteSpace: "nowrap", overflow: "hidden", textDecoration: "none",
-});
+const DARK_S = {
+  bg:          '#070C17',
+  border:      'rgba(255,255,255,0.07)',
+  labelText:   '#475569',
+  navBg:       'rgba(123,127,245,0.14)',
+  navColor:    '#818CF8',
+  navIdle:     '#94A3B8',
+  searchBg:    'rgba(255,255,255,0.05)',
+  searchBorder:'rgba(255,255,255,0.10)',
+  placeholder: '#475569',
+  kbd:         'rgba(255,255,255,0.08)',
+  sep:         'rgba(255,255,255,0.07)',
+  activityTxt: '#CBD5E1',
+  activitySub: '#64748B',
+  userName:    '#E2E8F0',
+  userSub:     '#94A3B8',
+  iconMuted:   '#64748B',
+  plusBg:      'rgba(255,255,255,0.07)',
+  brandName:   '#F1F5F9',
+  brandInitBg: GRADIENTS.primaryGradient,
+};
 
 export function AppSidebar() {
   const { open } = useSidebar();
   const [searchOpen, setSearchOpen] = useState(false);
   const location = useLocation();
   const { logoUrl, brandName } = useBranding();
+  const { resolvedTheme } = useTheme();
+  const S = resolvedTheme === 'dark' ? DARK_S : LIGHT_S;
+
+  const NAV_BTN = (active: boolean): React.CSSProperties => ({
+    display: "flex", alignItems: "center",
+    gap: open ? 10 : 0,
+    padding: "8px 10px", borderRadius: 8, cursor: "pointer",
+    border: "none", width: "100%", fontFamily: "inherit",
+    justifyContent: open ? "flex-start" : "center",
+    minHeight: 36, fontSize: 13.5, fontWeight: 500,
+    transition: "background 0.12s",
+    background: active ? S.navBg : "transparent",
+    color: active ? S.navColor : S.navIdle,
+    whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+    textDecoration: "none",
+  });
+
+  const BOARD_BTN = (active: boolean): React.CSSProperties => ({
+    display: "flex", alignItems: "center",
+    gap: open ? 8 : 0,
+    padding: "7px 10px", borderRadius: 8, cursor: "pointer",
+    border: "none", width: "100%", fontFamily: "inherit",
+    justifyContent: open ? "flex-start" : "center",
+    minHeight: 34, fontSize: 13.5, fontWeight: 500,
+    transition: "background 0.12s",
+    background: active ? S.navBg : "transparent",
+    color: active ? S.navColor : S.navIdle,
+    whiteSpace: "nowrap", overflow: "hidden", textDecoration: "none",
+  });
 
   const displayBrandName = brandName.trim().length > 0 ? brandName : "FlowBoard";
   const brandInitials = displayBrandName
@@ -141,7 +164,7 @@ export function AppSidebar() {
             {navLinks.map(item => {
               const isActive = location.pathname === item.url || (item.url !== "/" && location.pathname.startsWith(item.url));
               return (
-                <NavLink key={item.title} to={item.url} style={NAV_BTN(isActive, open)}>
+                <NavLink key={item.title} to={item.url} style={NAV_BTN(isActive)}>
                   <item.icon size={16} style={{ flexShrink: 0 }} />
                   {open && <span>{item.title}</span>}
                 </NavLink>
@@ -161,7 +184,7 @@ export function AppSidebar() {
             {boards.map(board => {
               const isActive = location.pathname === board.url;
               return (
-                <NavLink key={board.id} to={board.url} style={BOARD_BTN(isActive, open)}>
+                <NavLink key={board.id} to={board.url} style={BOARD_BTN(isActive)}>
                   <div style={{ width: 6, height: 6, borderRadius: 2, background: board.color, flexShrink: 0 }} />
                   {open && (
                     <>

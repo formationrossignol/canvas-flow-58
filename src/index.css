@@ -6,15 +6,15 @@
 
 @layer base {
   :root {
-    /* Slate Blue Premium */
-    --background: 0 0% 100%;           /* #FFFFFF */
+    /* Slate Blue Premium — light */
+    --background: 210 20% 98%;         /* #F8FAFC page bg */
     --foreground: 222 84% 11%;         /* #0F172A */
 
-    --canvas: 0 0% 100%;               /* #FFFFFF */
-    --card: 220 14% 98%;               /* #FAFAFB */
+    --canvas: 0 0% 100%;
+    --card: 0 0% 100%;                 /* #FFFFFF card surfaces */
     --card-foreground: 222 84% 11%;
 
-    --popover: 220 14% 98%;            /* #FAFAFB */
+    --popover: 0 0% 100%;
     --popover-foreground: 222 84% 11%;
 
     --primary: 245 75% 59%;            /* #4F46E5 */
@@ -23,10 +23,10 @@
     --secondary: 210 40% 96%;          /* #F1F5F9 */
     --secondary-foreground: 222 84% 11%;
 
-    --muted: 210 40% 96%;              /* #F1F5F9 */
+    --muted: 210 40% 96%;              /* #F1F5F9 secondary surfaces */
     --muted-foreground: 215 16% 47%;   /* #64748B */
 
-    --accent: 173 40% 94%;             /* teal soft */
+    --accent: 173 40% 94%;
     --accent-foreground: 173 60% 25%;
 
     --destructive: 0 84% 60%;          /* #EF4444 */
@@ -34,34 +34,72 @@
 
     --border: 220 13% 91%;             /* #E5E7EB */
     --input: 220 13% 91%;
-    --ring: 245 75% 59%;               /* #4F46E5 */
+    --ring: 245 75% 59%;
 
     --radius: 1rem;
 
-    --success: 142 71% 45%;            /* #22C55E */
+    --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 92% 50%;             /* #F59E0B */
+    --warning: 38 92% 50%;
     --warning-foreground: 0 0% 10%;
 
-    /* Canvas tool colors */
     --tool-active: 245 75% 59%;
     --tool-hover: 210 40% 96%;
 
-    /* Shadows */
     --shadow-soft: var(--ap-shadow-soft);
     --shadow-float: var(--ap-shadow-float);
     --shadow-card: var(--ap-shadow-card);
 
-    /* Sidebar — light blue-gray */
     --sidebar-background: 210 40% 96%;   /* #F1F5F9 */
-    --sidebar-foreground: 222 84% 11%;   /* #0F172A */
-    --sidebar-primary: 245 75% 59%;      /* #4F46E5 */
+    --sidebar-foreground: 222 84% 11%;
+    --sidebar-primary: 245 75% 59%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 214 32% 91%;       /* #E2E8F0 */
+    --sidebar-accent: 214 32% 91%;
     --sidebar-accent-foreground: 222 84% 11%;
-    --sidebar-border: 220 13% 91%;       /* #E5E7EB */
+    --sidebar-border: 220 13% 91%;
     --sidebar-ring: 245 75% 59%;
+  }
+
+  .dark {
+    /* Slate Blue Premium — dark */
+    --background: 222 47% 8%;          /* #090F1A deep navy page bg */
+    --foreground: 210 40% 96%;         /* #F1F5F9 */
+
+    --canvas: 222 47% 8%;
+    --card: 215 32% 15%;               /* #192236 card surfaces */
+    --card-foreground: 210 40% 96%;
+
+    --popover: 215 32% 18%;            /* slightly lighter than card */
+    --popover-foreground: 210 40% 96%;
+
+    --primary: 239 84% 70%;            /* #7B7FF5 — brighter indigo for dark bg */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 215 32% 18%;
+    --secondary-foreground: 210 40% 96%;
+
+    --muted: 215 32% 18%;              /* secondary surfaces on dark cards */
+    --muted-foreground: 215 16% 58%;   /* #8B9CB3 */
+
+    --accent: 173 50% 22%;
+    --accent-foreground: 173 40% 85%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 215 24% 24%;             /* #2D3D52 subtle border */
+    --input: 215 24% 24%;
+    --ring: 239 84% 70%;
+
+    --sidebar-background: 222 52% 6%;  /* #070C17 even darker sidebar */
+    --sidebar-foreground: 210 40% 96%;
+    --sidebar-primary: 239 84% 70%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 215 32% 15%;
+    --sidebar-accent-foreground: 210 40% 96%;
+    --sidebar-border: 215 32% 15%;
+    --sidebar-ring: 239 84% 70%;
   }
 
   * {

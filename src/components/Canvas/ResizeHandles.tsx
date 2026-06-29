@@ -30,15 +30,17 @@ export const ResizeHandles = ({ element, onUpdateSilent, onResizeEnd, isVisible,
   const elementIdRef = useRef(element.id);
   elementIdRef.current = element.id;
 
+  // All handles placed OUTSIDE the element bounds (center at ±8px from edge)
+  // to avoid z-conflict with connection points which sit ON the edges.
   const handles: ResizeHandle[] = [
-    { position: 'nw', x: -4, y: -4 },
-    { position: 'ne', x: element.width - 4, y: -4 },
-    { position: 'sw', x: -4, y: element.height - 4 },
-    { position: 'se', x: element.width - 4, y: element.height - 4 },
-    { position: 'n', x: element.width / 2 - 4, y: -4 },
-    { position: 's', x: element.width / 2 - 4, y: element.height - 4 },
-    { position: 'e', x: element.width - 4, y: element.height / 2 - 4 },
-    { position: 'w', x: -4, y: element.height / 2 - 4 },
+    { position: 'nw', x: -14, y: -14 },
+    { position: 'ne', x: element.width + 2, y: -14 },
+    { position: 'sw', x: -14, y: element.height + 2 },
+    { position: 'se', x: element.width + 2, y: element.height + 2 },
+    { position: 'n',  x: element.width / 2 - 6, y: -14 },
+    { position: 's',  x: element.width / 2 - 6, y: element.height + 2 },
+    { position: 'e',  x: element.width + 2, y: element.height / 2 - 6 },
+    { position: 'w',  x: -14, y: element.height / 2 - 6 },
   ];
 
   const handleMouseDown = useCallback((e: React.MouseEvent, handlePos: string) => {
@@ -156,7 +158,7 @@ export const ResizeHandles = ({ element, onUpdateSilent, onResizeEnd, isVisible,
       {handles.map((handle) => (
         <div
           key={handle.position}
-          className="absolute w-3 h-3 bg-primary border-2 border-background rounded-full shadow-elegant hover:scale-150 transition-all pointer-events-auto"
+          className="absolute w-2.5 h-2.5 bg-card border-2 border-primary rounded-sm shadow-md hover:bg-primary hover:scale-125 transition-all pointer-events-auto"
           style={{
             left: handle.x,
             top: handle.y,

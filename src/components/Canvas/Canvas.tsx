@@ -305,7 +305,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       width: w,
       height: h,
       color: selectedColor,
-      content: type === 'sticky' ? 'Nouvelle idée...' :
+      content: type === 'sticky' ? '' :
                type === 'text' ? 'Tapez votre texte' :
                type === 'comment' ? '' : '',
       fontSize: type === 'text' ? 16 : 14,
