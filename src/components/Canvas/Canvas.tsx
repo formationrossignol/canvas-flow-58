@@ -85,7 +85,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   
   // History management via CanvasStateManager
   const { addToHistory, undo, redo, canUndo, canRedo, resetHistory } = useCanvasStateManager<CanvasElement>();
-  const [selectedColor, setSelectedColor] = useState('#FFE066');
+  const [selectedColor, setSelectedColor] = useState('#FFF7D6');
   const [boardTitle, setBoardTitle] = useState('Tableau sans titre');
   const [isTemplatePanelVisible, setIsTemplatePanelVisible] = useState(false);
   const [isShapeLibraryVisible, setIsShapeLibraryVisible] = useState(false);

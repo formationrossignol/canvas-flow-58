@@ -6,62 +6,62 @@
 
 @layer base {
   :root {
-    /* Arcade Pop tokens → Tailwind/shadcn CSS variables */
-    --background: 37 100% 97%;        /* --ap-paper   #fff8ee */
-    --foreground: 258 36% 16%;        /* --ap-ink     #241b3a */
+    /* Slate Blue Premium */
+    --background: 0 0% 100%;           /* #FFFFFF */
+    --foreground: 222 84% 11%;         /* #0F172A */
 
-    --canvas: 216 22% 96%;             /* DC reference #F1F3F6 */
-    --card: 0 0% 100%;
-    --card-foreground: 258 36% 16%;
+    --canvas: 0 0% 100%;               /* #FFFFFF */
+    --card: 220 14% 98%;               /* #FAFAFB */
+    --card-foreground: 222 84% 11%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 258 36% 16%;
+    --popover: 220 14% 98%;            /* #FAFAFB */
+    --popover-foreground: 222 84% 11%;
 
-    --primary: 258 100% 65%;          /* --ap-brand   #7048ff */
+    --primary: 245 75% 59%;            /* #4F46E5 */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 37 43% 92%;          /* --ap-paper-2 #f3ecdd */
-    --secondary-foreground: 258 36% 16%;
+    --secondary: 210 40% 96%;          /* #F1F5F9 */
+    --secondary-foreground: 222 84% 11%;
 
-    --muted: 37 43% 92%;
-    --muted-foreground: 261 18% 58%;  /* --ap-muted   #8a7fa6 */
+    --muted: 210 40% 96%;              /* #F1F5F9 */
+    --muted-foreground: 215 16% 47%;   /* #64748B */
 
-    --accent: 258 100% 96%;           /* --ap-brand-soft #efe9ff */
-    --accent-foreground: 258 100% 65%;
+    --accent: 173 40% 94%;             /* teal soft */
+    --accent-foreground: 173 60% 25%;
 
-    --destructive: 3 100% 65%;        /* --ap-quiz    #ff5a4d */
+    --destructive: 0 84% 60%;          /* #EF4444 */
     --destructive-foreground: 0 0% 100%;
 
-    --border: 37 43% 88%;             /* --ap-line    #efe6d3 */
-    --input: 37 43% 88%;
-    --ring: 258 100% 65%;
+    --border: 220 13% 91%;             /* #E5E7EB */
+    --input: 220 13% 91%;
+    --ring: 245 75% 59%;               /* #4F46E5 */
 
     --radius: 1rem;
 
-    --success: 160 79% 42%;           /* --ap-pres    #15c08a */
+    --success: 142 71% 45%;            /* #22C55E */
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 100% 56%;           /* --ap-flash   #ffb020 */
+    --warning: 38 92% 50%;             /* #F59E0B */
     --warning-foreground: 0 0% 10%;
 
     /* Canvas tool colors */
-    --tool-active: 258 100% 65%;
-    --tool-hover: 37 43% 92%;
+    --tool-active: 245 75% 59%;
+    --tool-hover: 210 40% 96%;
 
     /* Shadows */
     --shadow-soft: var(--ap-shadow-soft);
     --shadow-float: var(--ap-shadow-float);
     --shadow-card: var(--ap-shadow-card);
 
-    /* Sidebar - dark (#0F1117 from DC reference) */
-    --sidebar-background: 225 21% 7%;
-    --sidebar-foreground: 0 0% 85%;
-    --sidebar-primary: 239 84% 67%;
+    /* Sidebar — light blue-gray */
+    --sidebar-background: 210 40% 96%;   /* #F1F5F9 */
+    --sidebar-foreground: 222 84% 11%;   /* #0F172A */
+    --sidebar-primary: 245 75% 59%;      /* #4F46E5 */
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 235 30% 15%;
-    --sidebar-accent-foreground: 230 94% 82%;
-    --sidebar-border: 225 15% 12%;
-    --sidebar-ring: 239 84% 67%;
+    --sidebar-accent: 214 32% 91%;       /* #E2E8F0 */
+    --sidebar-accent-foreground: 222 84% 11%;
+    --sidebar-border: 220 13% 91%;       /* #E5E7EB */
+    --sidebar-ring: 245 75% 59%;
   }
 
   * {
@@ -87,7 +87,7 @@
   }
 
   .bg-gradient-primary {
-    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(270 100% 65%) 100%);
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(173 80% 40%) 100%);
     color: hsl(var(--primary-foreground));
   }
 

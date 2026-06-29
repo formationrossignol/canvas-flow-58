@@ -1,7 +1,7 @@
 # Graph Report - /Users/loicrossignol/Desktop/vibecoding/canvas-flow-58  (2026-06-29)
 
 ## Corpus Check
-- 151 files · ~196,484 words
+- 151 files · ~196,682 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary

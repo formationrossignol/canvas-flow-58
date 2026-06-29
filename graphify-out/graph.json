@@ -1137,7 +1137,7 @@
       "label": "getElementStyle()",
       "file_type": "code",
       "source_file": "/Users/loicrossignol/Desktop/vibecoding/canvas-flow-58/src/components/Canvas/CanvasObject.tsx",
-      "source_location": "L176",
+      "source_location": "L190",
       "id": "canvasobject_getelementstyle",
       "community": 24,
       "norm_label": "getelementstyle()"
@@ -7050,7 +7050,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "/Users/loicrossignol/Desktop/vibecoding/canvas-flow-58/src/components/Canvas/CanvasObject.tsx",
-      "source_location": "L176",
+      "source_location": "L190",
       "weight": 1.0,
       "_src": "users_loicrossignol_desktop_vibecoding_canvas_flow_58_src_components_canvas_canvasobject_tsx",
       "_tgt": "canvasobject_getelementstyle",

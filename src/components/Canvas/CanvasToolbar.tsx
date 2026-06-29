@@ -44,8 +44,8 @@ const TB_BTN_BASE: React.CSSProperties = {
 
 const TB_BTN_ACTIVE: React.CSSProperties = {
   ...TB_BTN_BASE,
-  background: 'rgba(99,102,241,0.12)',
-  color: '#6366F1',
+  background: 'rgba(79,70,229,0.10)',
+  color: '#4F46E5',
 };
 
 const COLOR_GROUPS = [
@@ -58,7 +58,7 @@ const COLOR_GROUPS = [
     colors: [
       { hex: COLORS.primary[500], label: 'Indigo' },
       { hex: COLORS.secondary[500], label: 'Violet' },
-      { hex: COLORS.accent[500], label: 'Rose' },
+      { hex: COLORS.accent[500], label: 'Turquoise' },
       { hex: COLORS.success[500], label: 'Vert' },
       { hex: COLORS.warning[500], label: 'Ambre' },
       { hex: COLORS.danger[500], label: 'Rouge' },
@@ -69,9 +69,9 @@ const COLOR_GROUPS = [
   {
     label: 'Nuances',
     colors: [
-      { hex: '#111827', label: 'Noir' },
-      { hex: '#4B5563', label: 'Anthracite' },
-      { hex: '#9CA3AF', label: 'Gris' },
+      { hex: '#0F172A', label: 'Nuit' },
+      { hex: '#64748B', label: 'Ardoise' },
+      { hex: '#CBD5E1', label: 'Gris' },
       { hex: '#FFFFFF', label: 'Blanc' },
     ],
   },

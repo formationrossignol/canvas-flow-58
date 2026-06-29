@@ -33,18 +33,18 @@ export const COLORS = {
     900: '#581C87',
   },
 
-  // ─── ACCENT (Rose)
+  // ─── ACCENT (Turquoise)
   accent: {
-    50: '#FDF2F8',
-    100: '#FCE7F3',
-    200: '#FBCFE8',
-    300: '#F8B4D5',
-    400: '#F472B6',
-    500: '#EC4899',
-    600: '#DB2777',
-    700: '#BE185D',
-    800: '#9D174D',
-    900: '#831843',
+    50: '#F0FDFA',
+    100: '#CCFBF1',
+    200: '#99F6E4',
+    300: '#5EEAD4',
+    400: '#2DD4BF',
+    500: '#14B8A6',
+    600: '#0D9488',
+    700: '#0F766E',
+    800: '#115E59',
+    900: '#134E4A',
   },
 
   // ─── SUCCÈS (Émeraude)
@@ -106,19 +106,19 @@ export const COLORS = {
 
   // ─── BACKGROUNDS
   bg: {
-    dark: '#0F1117',      // Sidebar, surfaces sombres
-    light: '#F1F3F6',     // Canvas, surfaces claires
-    surface: '#FFFFFF',   // Modales, panneaux
+    dark: '#0F172A',      // Surfaces sombres
+    light: '#F1F5F9',     // Canvas, surfaces claires
+    surface: '#FAFAFB',   // Modales, panneaux
     overlay: 'rgba(15, 23, 42, 0.3)', // Backdrop
   },
 
   // ─── TEXTE
   text: {
-    primary: '#111827',     // Sur fond clair
-    secondary: '#6B7280',   // Texte secondaire
-    tertiary: '#9CA3AF',    // Texte désactivé
-    light: '#F1F3F6',       // Sur fond sombre
-    muted: '#D1D5DB',       // Gris clair
+    primary: '#0F172A',     // Sur fond clair
+    secondary: '#64748B',   // Texte secondaire
+    tertiary: '#94A3B8',    // Texte désactivé
+    light: '#F1F5F9',       // Sur fond sombre
+    muted: '#CBD5E1',       // Gris clair
   },
 
   // ─── BORDERS & DIVIDERS
@@ -131,14 +131,12 @@ export const COLORS = {
 
 // ─── PALETTES COMPOSITES (Sticky notes, etc.)
 export const STICKY_COLORS = [
-  { bg: '#FFFBEB', border: '#FDE68A', label: 'Jaune' },
-  { bg: '#F0FDF4', border: '#86EFAC', label: 'Vert' },
-  { bg: '#FFF1F2', border: '#FECACA', label: 'Corail' },
-  { bg: '#EFF6FF', border: '#BFDBFE', label: 'Bleu' },
-  { bg: '#FAF5FF', border: '#E9D5FF', label: 'Violet' },
-  { bg: '#FFF7ED', border: '#FED7AA', label: 'Orange' },
-  { bg: '#ECFDF5', border: '#A7F3D0', label: 'Émeraude' },
-  { bg: '#F8FAFC', border: '#CBD5E1', label: 'Gris' },
+  { bg: '#FFF7D6', border: '#F59E0B', label: 'Jaune crème' },
+  { bg: '#FADADD', border: '#F472B6', label: 'Rose poudré' },
+  { bg: '#FFD8B1', border: '#F97316', label: 'Pêche' },
+  { bg: '#E6E0FF', border: '#8B5CF6', label: 'Lavande' },
+  { bg: '#DCEEFF', border: '#3B82F6', label: 'Bleu glacier' },
+  { bg: '#DDF5E5', border: '#22C55E', label: 'Vert menthe' },
 ] as const;
 
 export const PEN_COLORS = [

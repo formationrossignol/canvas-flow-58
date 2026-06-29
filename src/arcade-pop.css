@@ -23,15 +23,15 @@
   --ap-poll:        #2f7bff;  --ap-poll-deep:   #1f5fd0;  --ap-poll-soft:  #eef4ff;
   --ap-flash:       #ffb020;  --ap-flash-deep:  #d68f00;  --ap-flash-soft: #fff7e6;
 
-  /* Marque + neutres chauds */
-  --ap-brand:       #7048ff;  --ap-brand-deep:  #4f2fd0;  --ap-brand-soft: #efe9ff;
-  --ap-ink:         #241b3a;  /* texte principal */
-  --ap-muted:       #8a7fa6;  /* texte secondaire */
-  --ap-paper:       #fff8ee;  /* fond crème de l'app */
-  --ap-paper-2:     #f3ecdd;  /* fond crème plus soutenu (zones) */
-  --ap-card:        #ffffff;  /* surfaces */
-  --ap-line:        #efe6d3;  /* bordures / séparateurs */
-  --ap-line-2:      #d8ccb5;  /* bordures pointillées / dropzones */
+  /* Marque — Slate Blue Premium */
+  --ap-brand:       #4F46E5;  --ap-brand-deep:  #4338CA;  --ap-brand-soft: #EEF2FF;
+  --ap-ink:         #0F172A;  /* texte principal */
+  --ap-muted:       #64748B;  /* texte secondaire */
+  --ap-paper:       #FFFFFF;  /* fond blanc */
+  --ap-paper-2:     #F1F5F9;  /* fond bleu-gris clair */
+  --ap-card:        #FAFAFB;  /* surfaces */
+  --ap-line:        #E5E7EB;  /* bordures / séparateurs */
+  --ap-line-2:      #CBD5E1;  /* bordures pointillées / dropzones */
 
   /* Rayons — tout est rond */
   --ap-r-sm: 12px;
@@ -40,10 +40,10 @@
   --ap-r-xl: 30px;
   --ap-r-pill: 999px;
 
-  /* Ombres « 3D douce » : un offset plein (la couleur) + une diffuse */
-  --ap-shadow-soft:  0 4px 0 var(--ap-line);
-  --ap-shadow-card:  0 30px 60px rgba(60,40,120,.12), 0 4px 0 var(--ap-line);
-  --ap-shadow-float: 0 14px 30px rgba(60,40,120,.16);
+  /* Ombres premium */
+  --ap-shadow-soft:  0 2px 8px rgba(15,23,42,0.07);
+  --ap-shadow-card:  0 16px 40px rgba(15,23,42,0.10), 0 2px 8px rgba(15,23,42,0.06);
+  --ap-shadow-float: 0 12px 28px rgba(15,23,42,0.12);
 
   /* Typo */
   --ap-font-display: 'Fredoka', system-ui, sans-serif;  /* titres, boutons, chiffres */
