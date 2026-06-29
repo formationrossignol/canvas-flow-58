@@ -1,4 +1,4 @@
-import { Type, StickyNote, MousePointer2, Palette, Image, Edit3, Timer, Link2, Eye, Settings, Download, Undo2, Redo2, FileDown, Shapes, MessageCircle, Eraser } from "lucide-react";
+import { Type, StickyNote, MousePointer2, Palette, Image, Edit3, Timer, Link2, Eye, Settings, Download, Undo2, Redo2, FileDown, Shapes, MessageCircle, Eraser, Smile } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { CanvasElement } from "./Canvas";
@@ -26,6 +26,7 @@ interface CanvasToolbarProps {
   canRedo?: boolean;
   onUndo?: () => void;
   onRedo?: () => void;
+  onInsertEmoji?: (emoji: string) => void;
 }
 
 const tools = [
@@ -74,8 +75,12 @@ export const CanvasToolbar = ({
   canRedo = false,
   onUndo,
   onRedo,
+  onInsertEmoji,
 }: CanvasToolbarProps) => {
   const [showColors, setShowColors] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
+  const emojis = ['😀','😂','🎉','❤️','👍','🔥','💡','⭐','🎯','✅','🚀','🙏','🎨','🏆','💪','🌟','🤔','😍','🤝','💯','🧠','⚡','🌈','🦄'];
   
   const handleToolClick = (toolId: string) => {
     if (toolId === 'connect') {
@@ -140,12 +145,41 @@ export const CanvasToolbar = ({
                 title="Formes & Bibliothèque"
               >
                 <Shapes size={18} />
-                
-                {/* Tooltip */}
                 <div className="absolute bottom-full mb-3 px-2 py-1 bg-foreground text-background text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
                   Formes
                 </div>
               </Button>
+            )}
+
+            {/* Emoji Picker Button */}
+            {onInsertEmoji && (
+              <div className="relative">
+                <Button
+                  variant={showEmojiPicker ? "default" : "ghost"}
+                  size="sm"
+                  className={`w-10 h-10 p-0 tool-button relative group ${showEmojiPicker ? 'bg-primary text-primary-foreground' : 'hover:bg-tool-hover'}`}
+                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                  title="Stickers emoji"
+                >
+                  <Smile size={18} />
+                  <div className="absolute bottom-full mb-3 px-2 py-1 bg-foreground text-background text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
+                    Emojis
+                  </div>
+                </Button>
+                {showEmojiPicker && (
+                  <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 bg-card border border-border rounded-xl shadow-float p-2 grid grid-cols-6 gap-1 w-44 animate-in fade-in slide-in-from-bottom-2 duration-150">
+                    {emojis.map(emoji => (
+                      <button
+                        key={emoji}
+                        onClick={() => { onInsertEmoji(emoji); setShowEmojiPicker(false); }}
+                        className="w-6 h-6 text-base flex items-center justify-center rounded hover:bg-muted transition-colors"
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
           </div>
 

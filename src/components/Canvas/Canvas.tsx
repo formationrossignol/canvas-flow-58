@@ -59,6 +59,8 @@ export interface CanvasElement {
   comments?: Comment[];
   tags?: string[];
   author?: string;
+  done?: boolean;
+  createdAt?: number;
 }
 
 interface CanvasProps {
@@ -87,6 +89,8 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   const [drawingStrokes, setDrawingStrokes] = useState<DrawingStroke[]>([]);
   const [brushThickness, setBrushThickness] = useState(3);
   const [isTimerVisible, setIsTimerVisible] = useState(false);
+  const [bgStyle, setBgStyle] = useState<'dots' | 'grid' | 'cross' | 'blank'>('grid');
+  const [activeTagFilter, setActiveTagFilter] = useState<string | null>(null);
   const isTextEditorVisible = selectedTool === 'text';
   const [textStyle, setTextStyle] = useState<{
     fontFamily?: string;
@@ -170,6 +174,12 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     () => elements.reduce((acc, element) => acc + (element.comments?.length ?? 0), 0),
     [elements]
   );
+
+  const allTags = useMemo(() => {
+    const tagSet = new Set<string>();
+    elements.forEach(el => el.tags?.forEach(t => tagSet.add(t)));
+    return Array.from(tagSet);
+  }, [elements]);
 
   const areAllSelectedLocked = useMemo(() => {
     if (selection.selectedIds.length === 0) {
@@ -274,6 +284,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       imageUrl: type === 'image' ? (pendingImageUrlRef.current ?? undefined) : undefined,
       comments: type === 'comment' ? [] : undefined,
       author: type === 'sticky' ? localCollaborator.name : undefined,
+      createdAt: type === 'sticky' ? Date.now() : undefined,
     };
 
     if (type === 'image') {
@@ -790,6 +801,39 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     handleExportPDF(true);
   }, [handleExportPDF]);
 
+  const handleInsertEmoji = useCallback((emoji: string) => {
+    const cx = (-canvasTransform.x + window.innerWidth / 2) / canvasTransform.scale;
+    const cy = (-canvasTransform.y + window.innerHeight / 2) / canvasTransform.scale;
+    const newEl: CanvasElement = {
+      id: `text-${Date.now()}`, type: 'text',
+      x: cx - 32, y: cy - 32, width: 64, height: 64,
+      color: selectedColor, content: emoji, fontSize: 40,
+    };
+    setElements(prev => { const n = [...prev, newEl]; addToHistory(n); return n; });
+  }, [canvasTransform, selectedColor, addToHistory]);
+
+  const bgPatterns: Record<string, React.CSSProperties> = {
+    grid: {
+      backgroundImage: 'linear-gradient(rgba(99,102,241,0.1) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,0.1) 1px,transparent 1px)',
+      backgroundSize: `${32 / canvasTransform.scale}px ${32 / canvasTransform.scale}px`,
+      backgroundPosition: `${canvasTransform.x}px ${canvasTransform.y}px`,
+    },
+    dots: {
+      backgroundImage: 'radial-gradient(circle,rgba(99,102,241,0.2) 1.5px,transparent 1.5px)',
+      backgroundSize: `${24 / canvasTransform.scale}px ${24 / canvasTransform.scale}px`,
+      backgroundPosition: `${canvasTransform.x}px ${canvasTransform.y}px`,
+    },
+    cross: {
+      backgroundImage: 'linear-gradient(rgba(99,102,241,0.08) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,0.08) 1px,transparent 1px)',
+      backgroundSize: `${48 / canvasTransform.scale}px ${48 / canvasTransform.scale}px`,
+      backgroundPosition: `${canvasTransform.x}px ${canvasTransform.y}px`,
+    },
+    blank: {},
+  };
+
+  const bgLabels: Record<string, string> = { grid: '⊞', dots: '⠿', cross: '✚', blank: '□' };
+  const bgOrder: Array<'grid' | 'dots' | 'cross' | 'blank'> = ['grid', 'dots', 'cross', 'blank'];
+
   return (
     <div className="relative w-full h-screen overflow-hidden bg-canvas">
       {/* Header */}
@@ -813,6 +857,27 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         onResetBoard={handleResetBoard}
         onToggleTimer={() => setIsTimerVisible(!isTimerVisible)}
       />
+
+      {/* Tag Filter Bar */}
+      {allTags.length > 0 && (
+        <div className="absolute top-14 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 px-3 py-1.5 bg-card/90 backdrop-blur-sm rounded-full border border-border shadow-soft">
+          <button
+            onClick={() => setActiveTagFilter(null)}
+            className={`px-2 py-0.5 rounded-full text-xs font-medium transition-colors ${activeTagFilter === null ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+          >
+            Tous
+          </button>
+          {allTags.map(tag => (
+            <button
+              key={tag}
+              onClick={() => setActiveTagFilter(activeTagFilter === tag ? null : tag)}
+              className={`px-2 py-0.5 rounded-full text-xs font-medium transition-colors ${activeTagFilter === tag ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+            >
+              #{tag}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Canvas Container */}
       <div
@@ -843,17 +908,12 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
             minHeight: '200vh',
           }}
         >
-          {/* Grid Background with primary color - fixed scale */}
-          <div 
+          {/* Background pattern */}
+          <div
             className="absolute"
             style={{
-              left: '-20000px',
-              top: '-20000px',
-              width: '60000px',
-              height: '60000px',
-              backgroundImage: 'linear-gradient(rgba(99, 102, 241, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(99, 102, 241, 0.1) 1px, transparent 1px)',
-              backgroundSize: `${32 / canvasTransform.scale}px ${32 / canvasTransform.scale}px`,
-              backgroundPosition: `${canvasTransform.x}px ${canvasTransform.y}px`,
+              left: '-20000px', top: '-20000px', width: '60000px', height: '60000px',
+              ...bgPatterns[bgStyle],
             }}
           />
 
@@ -884,7 +944,11 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
           {elements.map(element => (
             <CanvasObject
               key={element.id}
-              element={element}
+              element={
+                activeTagFilter !== null && element.type === 'sticky' && !element.tags?.includes(activeTagFilter)
+                  ? { ...element, opacity: Math.min(element.opacity ?? 1, 0.15) }
+                  : element
+              }
               onUpdate={handleElementUpdate}
               onUpdateSilent={handleElementUpdateSilent}
               onDelete={handleElementDelete}
@@ -914,6 +978,15 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         </div>
       </div>
 
+      {/* Background Style Toggle */}
+      <button
+        onClick={() => setBgStyle(prev => bgOrder[(bgOrder.indexOf(prev) + 1) % bgOrder.length])}
+        className="fixed bottom-24 left-4 z-10 w-8 h-8 rounded-lg bg-card/80 backdrop-blur-sm border border-border shadow-soft text-sm hover:bg-card transition-colors"
+        title="Changer le fond"
+      >
+        {bgLabels[bgStyle]}
+      </button>
+
       {/* Bottom Toolbar */}
       <CanvasToolbar
         selectedTool={selectedTool}
@@ -937,6 +1010,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
         canRedo={canRedo}
         onUndo={() => { const prev = undo(); if (prev) setElements(prev); }}
         onRedo={() => { const next = redo(); if (next) setElements(next); }}
+        onInsertEmoji={handleInsertEmoji}
       />
 
       {/* Timer */}

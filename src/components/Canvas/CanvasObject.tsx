@@ -1,8 +1,17 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { Trash2, Edit3, Lock, Unlock, Heart, MessageCircle, User } from "lucide-react";
+import { Trash2, Edit3, Lock, Unlock, Heart, MessageCircle, CheckSquare, Square } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { CanvasElement, Comment } from "./Canvas";
 import { CommentThread } from "./CommentThread";
+
+const formatRelativeTime = (ts: number) => {
+  const m = Math.floor((Date.now() - ts) / 60000);
+  if (m < 1) return 'À l\'instant';
+  if (m < 60) return `${m}min`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h`;
+  return `${Math.floor(h / 24)}j`;
+};
 
 interface CanvasObjectProps {
   element: CanvasElement;
@@ -369,39 +378,76 @@ export const CanvasObject = ({
       );
     }
 
-    return (
-      <div className="w-full h-full p-3 flex flex-col gap-2">
-        {element.type === 'sticky' && (element.tags?.length || element.author) && (
-          <div className="flex flex-col gap-1 mb-1">
-            {element.author && (
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <User size={10} />
-                <span className="font-medium">{element.author}</span>
+    if (element.type === 'sticky') {
+      return (
+        <div className="w-full h-full flex flex-col relative">
+          {/* Corner fold */}
+          <div className="absolute bottom-0 right-0 w-5 h-5 pointer-events-none" style={{ background: 'linear-gradient(225deg,rgba(0,0,0,0.13) 50%,transparent 50%)', borderRadius: '0 0 8px 0' }} />
+
+          {/* Header: avatar + author + time + done toggle */}
+          {(element.author || element.createdAt) && (
+            <div className="flex items-center gap-1.5 px-3 pt-2.5 shrink-0">
+              {element.author && (
+                <div className="w-5 h-5 rounded-full bg-black/15 flex items-center justify-center text-[10px] font-bold shrink-0" style={{ color: '#2D3748' }}>
+                  {element.author.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div className="flex flex-col leading-none min-w-0 flex-1">
+                {element.author && <span className="text-[10px] font-semibold truncate" style={{ color: '#2D3748' }}>{element.author}</span>}
+                {element.createdAt && <span className="text-[9px] opacity-50" style={{ color: '#2D3748' }}>{formatRelativeTime(element.createdAt)}</span>}
               </div>
-            )}
-            {element.tags && element.tags.length > 0 && (
-              <div className="flex flex-wrap gap-1">
-                {element.tags.map((tag) => (
-                  <Badge key={tag} variant="outline" className="text-xs px-1 py-0 h-4">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            )}
+              <button
+                onMouseDown={e => e.stopPropagation()}
+                onClick={e => { e.stopPropagation(); onUpdate(element.id, { done: !element.done }); }}
+                className="shrink-0 opacity-60 hover:opacity-100 transition-opacity"
+                title={element.done ? 'Marquer non-fait' : 'Marquer fait'}
+              >
+                {element.done ? <CheckSquare size={13} style={{ color: '#2D3748' }} /> : <Square size={13} style={{ color: '#2D3748' }} />}
+              </button>
+            </div>
+          )}
+
+          {/* Content */}
+          <div
+            className="flex-1 px-3 py-2 leading-relaxed select-none overflow-hidden"
+            style={{
+              color: '#2D3748',
+              fontSize: element.fontSize || 14,
+              fontFamily: element.fontFamily || 'Arial',
+              textAlign: element.textAlign || 'left',
+              textDecoration: element.done ? 'line-through' : undefined,
+              opacity: element.done ? 0.55 : 1,
+              ...element.textStyle,
+            }}
+          >
+            {element.content || 'Double-clic pour éditer'}
           </div>
-        )}
-        <div
-          className="flex-1 flex items-center justify-center leading-relaxed select-none"
-          style={{
-            color: element.type === 'sticky' ? '#2D3748' : element.color,
-            fontSize: element.fontSize || 14,
-            fontFamily: element.fontFamily || 'Arial',
-            textAlign: element.textAlign || 'left',
-            ...element.textStyle,
-          }}
-        >
-          {element.content || (element.type === 'sticky' ? 'Double-clic pour éditer' : '')}
+
+          {/* Footer: tag badges */}
+          {element.tags && element.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1 px-3 pb-2 shrink-0">
+              {element.tags.slice(0, 2).map((tag) => (
+                <Badge key={tag} variant="outline" className="text-[9px] px-1 py-0 h-3.5 border-black/20" style={{ color: '#2D3748' }}>
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          )}
         </div>
+      );
+    }
+
+    return (
+      <div className="w-full h-full p-3 flex items-center justify-center leading-relaxed select-none"
+        style={{
+          color: element.color,
+          fontSize: element.fontSize || 14,
+          fontFamily: element.fontFamily || 'Arial',
+          textAlign: element.textAlign || 'left',
+          ...element.textStyle,
+        }}
+      >
+        {element.content}
       </div>
     );
   };
