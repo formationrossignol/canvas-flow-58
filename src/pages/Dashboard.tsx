@@ -93,28 +93,28 @@ const collaborators: Collaborator[] = [
     name: "Clara Morel",
     role: "Product Designer",
     avatar: "https://i.pravatar.cc/150?img=65",
-    accent: "bg-gradient-to-tr from-emerald-300/80 to-emerald-500/60",
+    accent: "bg-gradient-to-tr from-teal-100 to-teal-400/60",
   },
   {
     id: "alex",
     name: "Alex Dupont",
     role: "Lead Developer",
     avatar: "https://i.pravatar.cc/150?img=56",
-    accent: "bg-gradient-to-tr from-amber-200/80 to-amber-400/60",
+    accent: "bg-gradient-to-tr from-indigo-100 to-indigo-400/60",
   },
   {
     id: "nina",
     name: "Nina Lemaire",
     role: "UX Researcher",
     avatar: "https://i.pravatar.cc/150?img=47",
-    accent: "bg-gradient-to-tr from-rose-200/80 to-rose-400/60",
+    accent: "bg-gradient-to-tr from-violet-100 to-violet-400/60",
   },
   {
     id: "liam",
     name: "Liam Costa",
     role: "Growth Strategist",
     avatar: "https://i.pravatar.cc/150?img=12",
-    accent: "bg-gradient-to-tr from-sky-200/80 to-sky-400/60",
+    accent: "bg-gradient-to-tr from-sky-100 to-sky-400/50",
   },
 ];
 
@@ -482,16 +482,13 @@ const Dashboard = () => {
   const editingBoard = savedBoards.find(board => board.id === editingBoardId);
 
   return (
-    <div className="relative min-h-[calc(100vh-3.5rem)] w-full overflow-y-auto bg-transparent pb-24">
-      <div className="premium-gradient glass-spotlight pointer-events-none absolute inset-0 -z-10" />
-      <div className="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.35)_0%,transparent_55%)] dark:bg-[radial-gradient(circle_at_top,rgba(253,224,144,0.15)_0%,transparent_60%)]" />
-
+    <div className="relative min-h-[calc(100vh-3.5rem)] w-full overflow-y-auto bg-[#F8FAFC] pb-24">
       <div className="relative z-10 mx-auto flex max-w-[1400px] flex-col gap-8 px-5 pt-8 md:px-10">
         {/* Top Navigation */}
-        <header className="glass-effect sheen-highlight relative flex flex-col gap-6 rounded-3xl border-white/30 p-6 shadow-soft transition-all duration-500 ease-in-out hover:shadow-glow md:flex-row md:items-center md:justify-between">
+        <header className="relative flex flex-col gap-6 rounded-2xl border border-[#E5E7EB] bg-white p-6 shadow-soft transition-all duration-300 ease-in-out md:flex-row md:items-center md:justify-between">
           <div className="flex flex-1 flex-col gap-4 md:flex-row md:items-center">
             <div className="relative flex items-center gap-4">
-              <div className="floating-element relative flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 via-primary/50 to-accent/40 shadow-soft">
+              <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-[#EEF2FF] shadow-soft">
                 <Sparkles className="h-6 w-6 text-primary" />
                 <span className="absolute -bottom-1 right-2 h-2.5 w-2.5 rounded-full bg-emerald-400">
                   <span className="absolute inset-0 rounded-full bg-emerald-400/60 animate-ping" />
@@ -499,11 +496,11 @@ const Dashboard = () => {
               </div>
               <div>
                 <p className="text-xs font-medium uppercase tracking-[0.45em] text-muted-foreground">Canvas Flow</p>
-                <h1 className="text-2xl font-semibold text-foreground">Espace de travail premium</h1>
+                <h1 className="text-2xl font-semibold text-foreground">Espace de travail</h1>
               </div>
             </div>
 
-            <div className="hidden flex-1 items-center gap-2 rounded-2xl border border-white/20 bg-white/40 p-1 backdrop-blur-lg transition hover:border-primary/40 dark:bg-white/5 md:flex">
+            <div className="hidden flex-1 items-center gap-2 rounded-xl border border-[#E5E7EB] bg-[#F1F5F9] p-1 transition hover:border-primary/40 md:flex">
               <Search className="ml-3 h-4 w-4 text-muted-foreground" />
               <Input
                 value={searchQuery}
@@ -515,11 +512,11 @@ const Dashboard = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="hidden items-center gap-2 rounded-full border border-white/30 bg-white/40 px-3 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur-lg md:flex dark:bg-white/10">
+            <div className="hidden items-center gap-2 rounded-full border border-[#E5E7EB] bg-[#F1F5F9] px-3 py-1.5 text-xs font-medium text-muted-foreground md:flex">
               <Dot className="h-5 w-5 text-green-500" />
               {totalLiveBoards} board(s) en direct
             </div>
-            <div className="flex items-center gap-3 rounded-full border border-white/30 bg-white/50 px-2 py-1 backdrop-blur-lg dark:bg-white/5">
+            <div className="flex items-center gap-3 rounded-full border border-[#E5E7EB] bg-[#F1F5F9] px-2 py-1">
               <Sun className="h-4 w-4 text-amber-500" />
               <Switch
                 checked={isDark}
@@ -527,7 +524,7 @@ const Dashboard = () => {
                 className="data-[state=checked]:bg-primary/70"
               />
             </div>
-            <div className="flex items-center -space-x-3 rounded-full border border-white/30 bg-white/60 px-4 py-2 backdrop-blur-lg dark:bg-white/5">
+            <div className="flex items-center -space-x-3 rounded-full border border-[#E5E7EB] bg-white px-4 py-2">
               {collaborators.map(person => (
                 <Avatar key={person.id} className="h-9 w-9 border-2 border-white shadow-soft">
                   <AvatarImage src={person.avatar} alt={person.name} className="object-cover" />
@@ -540,38 +537,36 @@ const Dashboard = () => {
 
         {/* Hero Section */}
         <section className="grid gap-6 xl:grid-cols-[minmax(0,2.2fr)_minmax(0,1fr)]">
-          <Card className="relative overflow-hidden rounded-[32px] border-none bg-gradient-to-br from-white/80 via-white/60 to-white/30 p-0 shadow-soft backdrop-blur-3xl dark:from-white/10 dark:via-white/5 dark:to-white/0">
-            <div className="absolute inset-0 opacity-90" style={{ backgroundImage: "radial-gradient(circle at 20% 20%, hsla(37,79%,75%,0.35), transparent 60%), radial-gradient(circle at 80% 0%, hsla(151,32%,46%,0.28), transparent 60%)" }} />
-            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/white-diamond.png')] opacity-10 mix-blend-soft-light" />
+          <Card className="relative overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white p-0 shadow-soft">
             <CardContent className="relative flex flex-col gap-8 p-8 md:p-12">
               <div className="flex flex-col gap-4 text-balance">
-                <Badge className="w-fit rounded-full border border-white/40 bg-white/60 px-4 py-1 text-xs font-medium uppercase tracking-[0.3em] text-muted-foreground backdrop-blur-xl dark:bg-white/10">
+                <Badge className="w-fit rounded-full border border-[#C7D2FE] bg-[#EEF2FF] px-4 py-1 text-xs font-medium uppercase tracking-[0.3em] text-[#4F46E5]">
                   Luxurious flow
                 </Badge>
                 <h2 className="text-3xl font-semibold leading-tight text-foreground md:text-4xl">
-                  Organisez vos idées avec une <span className="bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">fluidité premium</span>
+                  Organisez vos idées avec une <span className="bg-gradient-to-r from-primary via-[#14B8A6] to-secondary bg-clip-text text-transparent">fluidité premium</span>
                 </h2>
                 <p className="max-w-2xl text-sm text-muted-foreground md:text-base">
-                  Une surface immersive inspirée d'Apple et Notion : glassmorphism, micro-interactions et profondeur lumineuse. Concevez, structurez et partagez vos stratégies avec élégance.
+                  Une surface de travail collaborative : post-its, formes, connexions et exports. Concevez, structurez et partagez vos stratégies avec élégance.
                 </p>
               </div>
 
-              <div className="flex flex-col gap-4 rounded-3xl border border-white/40 bg-white/40 p-4 backdrop-blur-xl dark:border-white/10 dark:bg-white/10 md:flex-row md:items-center md:justify-between">
+              <div className="flex flex-col gap-4 rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/20 text-primary shadow-inner">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#EEF2FF] text-primary">
                     <Wand2 className="h-5 w-5" />
                   </div>
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Mode focus</p>
-                    <p className="text-lg font-semibold">{filteredBoards.length} espaces raffinés</p>
+                    <p className="text-lg font-semibold">{filteredBoards.length} espaces actifs</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Button size="lg" className="h-11 rounded-full bg-primary/80 px-6 text-sm font-semibold text-primary-foreground shadow-soft transition hover:bg-primary hover:shadow-glow" onClick={() => setIsCreateDialogOpen(true)}>
+                  <Button size="lg" className="h-11 rounded-full bg-primary px-6 text-sm font-semibold text-primary-foreground shadow-soft transition hover:bg-primary/90" onClick={() => setIsCreateDialogOpen(true)}>
                     <Plus className="mr-2 h-4 w-4" /> Nouveau tableau
                   </Button>
-                  <Button variant="ghost" size="lg" className="h-11 rounded-full border border-white/30 bg-white/60 px-6 text-sm font-semibold text-foreground backdrop-blur-lg transition hover:border-primary/40 hover:text-primary dark:bg-white/5" onClick={() => setIsDiagramDialogOpen(true)}>
-                    Diagramme immersif
+                  <Button variant="ghost" size="lg" className="h-11 rounded-full border border-[#E5E7EB] bg-white px-6 text-sm font-semibold text-foreground transition hover:border-primary/40 hover:text-primary" onClick={() => setIsDiagramDialogOpen(true)}>
+                    Diagramme
                     <ChevronRight className="ml-2 h-4 w-4" />
                   </Button>
                 </div>
@@ -579,8 +574,8 @@ const Dashboard = () => {
 
               <div className="grid gap-4 md:grid-cols-2">
                 {heroHighlights.map(highlight => (
-                  <div key={highlight.title} className="group flex items-start gap-4 rounded-2xl border border-white/40 bg-white/40 p-4 backdrop-blur-xl transition duration-500 ease-in-out hover:border-primary/40 hover:shadow-glow dark:border-white/10 dark:bg-white/5">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 via-primary/40 to-accent/30 text-primary shadow-inner">
+                  <div key={highlight.title} className="group flex items-start gap-4 rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4 transition duration-300 hover:border-primary/30 hover:bg-[#EEF2FF]/40">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#EEF2FF] text-primary">
                       {highlight.icon}
                     </div>
                     <div className="space-y-1.5">
@@ -591,7 +586,7 @@ const Dashboard = () => {
                 ))}
               </div>
 
-              <div className="flex flex-col gap-4 rounded-2xl border border-white/30 bg-white/30 p-4 backdrop-blur-xl dark:border-white/10 dark:bg-white/5 md:flex-row md:items-center md:justify-between">
+              <div className="flex flex-col gap-4 rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.4em] text-muted-foreground">
                     <Dot className="h-5 w-5 text-green-500" />Synchronisation
@@ -610,7 +605,7 @@ const Dashboard = () => {
                       </Avatar>
                     ))}
                   </div>
-                  <Badge variant="outline" className="rounded-full border-white/40 bg-white/60 px-3 py-1 text-xs font-medium uppercase tracking-[0.3em] text-muted-foreground backdrop-blur-lg dark:bg-white/5">
+                  <Badge variant="outline" className="rounded-full border-[#C7D2FE] bg-[#EEF2FF] px-3 py-1 text-xs font-medium uppercase tracking-[0.3em] text-[#4F46E5]">
                     {activeMood}
                   </Badge>
                 </div>
@@ -618,8 +613,8 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="relative flex h-full flex-col overflow-hidden rounded-[28px] border-none bg-white/55 shadow-soft backdrop-blur-2xl dark:bg-white/10">
-            <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-accent/40 via-transparent to-transparent" />
+          <Card className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-soft">
+            <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#EEF2FF]/60 via-transparent to-transparent" />
             <CardHeader className="relative z-10 pb-2">
               <CardTitle className="text-lg font-semibold">Activité en temps réel</CardTitle>
               <CardDescription className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -633,8 +628,8 @@ const Dashboard = () => {
                   {activityFeed.map(activity => {
                     const user = collaborators.find(person => person.id === activity.userId);
                     return (
-                      <div key={activity.id} className="group flex items-start gap-3 rounded-2xl border border-white/40 bg-white/50 p-4 backdrop-blur-xl transition hover:border-primary/40 hover:shadow-glow dark:border-white/10 dark:bg-white/5">
-                        <div className={`relative h-10 w-10 rounded-2xl ${user?.accent ?? "bg-muted"}`}>
+                      <div key={activity.id} className="group flex items-start gap-3 rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4 transition hover:border-primary/30 hover:bg-[#EEF2FF]/30">
+                        <div className={`relative h-10 w-10 rounded-xl ${user?.accent ?? "bg-muted"}`}>
                           <Avatar className="h-10 w-10">
                             <AvatarImage src={user?.avatar} alt={user?.name} className="object-cover" />
                             <AvatarFallback>{user?.name.slice(0, 2)}</AvatarFallback>
@@ -660,12 +655,12 @@ const Dashboard = () => {
                   })}
                 </div>
               </ScrollArea>
-              <div className="flex items-center justify-between rounded-2xl border border-white/40 bg-white/60 px-5 py-4 backdrop-blur-xl text-sm text-muted-foreground shadow-inner dark:border-white/10 dark:bg-white/10">
+              <div className="flex items-center justify-between rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] px-5 py-4 text-sm text-muted-foreground">
                 <div>
                   <p className="font-semibold text-foreground">Synchronisation continue</p>
                   <p>Glisser-déposer actif, commentaires instantanés et réactions live.</p>
                 </div>
-                <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full border border-white/30 bg-white/60 text-primary shadow-soft hover:border-primary/40 hover:text-primary dark:bg-white/5" onClick={() => toast.success("Mode atelier activé") }>
+                <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full border border-[#E5E7EB] bg-white text-primary hover:border-primary/40 hover:text-primary" onClick={() => toast.success("Mode atelier activé") }>
                   <ChevronRight className="h-5 w-5" />
                 </Button>
               </div>
@@ -674,10 +669,10 @@ const Dashboard = () => {
         </section>
 
         {/* Filters */}
-        <section className="glass-effect flex flex-col gap-5 rounded-3xl border-white/40 p-6 shadow-soft">
+        <section className="flex flex-col gap-5 rounded-2xl border border-[#E5E7EB] bg-white p-6 shadow-soft">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex flex-1 flex-wrap items-center gap-3">
-              <div className="flex min-w-[260px] flex-1 items-center gap-2 rounded-2xl border border-white/20 bg-white/60 px-3 py-2 backdrop-blur-lg dark:bg-white/5">
+              <div className="flex min-w-[260px] flex-1 items-center gap-2 rounded-xl border border-[#E5E7EB] bg-[#F1F5F9] px-3 py-2">
                 <Search className="h-4 w-4 text-muted-foreground" />
                 <Input
                   value={searchQuery}
@@ -687,10 +682,10 @@ const Dashboard = () => {
                 />
               </div>
               <Select value={selectedTeam} onValueChange={setSelectedTeam}>
-                <SelectTrigger className="h-10 w-[210px] rounded-2xl border border-white/30 bg-white/60 text-sm font-medium backdrop-blur-lg transition hover:border-primary/40 dark:bg-white/10">
+                <SelectTrigger className="h-10 w-[210px] rounded-xl border border-[#E5E7EB] bg-white text-sm font-medium transition hover:border-primary/40">
                   <SelectValue placeholder="Sélectionner une équipe" />
                 </SelectTrigger>
-                <SelectContent className="backdrop-blur-xl">
+                <SelectContent>
                   {teams.map(team => (
                     <SelectItem key={team.id} value={team.id}>
                       {team.name}
@@ -701,18 +696,18 @@ const Dashboard = () => {
             </div>
             <div className="flex items-center gap-3">
               <ToggleGroup type="single" value={viewMode} onValueChange={value => value && setViewMode(value as "grid" | "list")}>
-                <ToggleGroupItem value="grid" className="h-10 w-10 rounded-2xl border border-white/30 bg-white/50 text-muted-foreground backdrop-blur-lg transition hover:border-primary/40 hover:text-primary data-[state=on]:border-primary/60 data-[state=on]:text-primary dark:bg-white/10">
+                <ToggleGroupItem value="grid" className="h-10 w-10 rounded-xl border border-[#E5E7EB] bg-[#F1F5F9] text-muted-foreground transition hover:border-primary/40 hover:text-primary data-[state=on]:border-primary/60 data-[state=on]:bg-[#EEF2FF] data-[state=on]:text-primary">
                   <LayoutGrid className="h-4 w-4" />
                 </ToggleGroupItem>
-                <ToggleGroupItem value="list" className="h-10 w-10 rounded-2xl border border-white/30 bg-white/50 text-muted-foreground backdrop-blur-lg transition hover:border-primary/40 hover:text-primary data-[state=on]:border-primary/60 data-[state=on]:text-primary dark:bg-white/10">
+                <ToggleGroupItem value="list" className="h-10 w-10 rounded-xl border border-[#E5E7EB] bg-[#F1F5F9] text-muted-foreground transition hover:border-primary/40 hover:text-primary data-[state=on]:border-primary/60 data-[state=on]:bg-[#EEF2FF] data-[state=on]:text-primary">
                   <List className="h-4 w-4" />
                 </ToggleGroupItem>
               </ToggleGroup>
-              <div className="flex items-center gap-2 rounded-full border border-white/30 bg-white/60 px-3 py-1.5 text-xs font-medium uppercase tracking-[0.3em] text-muted-foreground backdrop-blur-lg dark:bg-white/5">
+              <div className="flex items-center gap-2 rounded-full border border-[#E5E7EB] bg-[#F1F5F9] px-3 py-1.5 text-xs font-medium uppercase tracking-[0.3em] text-muted-foreground">
                 <Filter className="h-3.5 w-3.5" />
                 {filteredBoards.length} résultats
               </div>
-              <div className="flex items-center gap-2 rounded-full border border-white/30 bg-white/60 px-3 py-1.5 text-xs font-semibold text-muted-foreground backdrop-blur-lg dark:bg-white/5">
+              <div className="flex items-center gap-2 rounded-full border border-[#E5E7EB] bg-[#F1F5F9] px-3 py-1.5 text-xs font-semibold text-muted-foreground">
                 Favoris
                 <Switch checked={showFavoritesOnly} onCheckedChange={setShowFavoritesOnly} className="data-[state=checked]:bg-primary/70" />
               </div>
@@ -726,7 +721,7 @@ const Dashboard = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => toggleTagFilter(tag)}
-                className={`rounded-full border border-white/30 bg-white/60 px-4 py-1 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground backdrop-blur-lg transition hover:border-primary/50 hover:text-primary dark:bg-white/5 ${selectedBoardTags.includes(tag) ? "border-primary/60 text-primary" : ""}`}
+                className={`rounded-full border px-4 py-1 text-xs font-medium uppercase tracking-[0.2em] transition hover:border-primary/50 hover:text-primary ${selectedBoardTags.includes(tag) ? "border-primary/60 bg-[#EEF2FF] text-primary" : "border-[#E5E7EB] bg-white text-muted-foreground"}`}
               >
                 #{tag}
                 {selectedBoardTags.includes(tag) && <Check className="ml-2 h-3 w-3" />}
@@ -738,17 +733,17 @@ const Dashboard = () => {
         {/* Boards */}
         <section className="flex flex-col gap-6">
           {filteredBoards.length === 0 ? (
-            <div className="glass-effect flex flex-col items-center justify-center gap-4 rounded-3xl border-white/40 p-12 text-center shadow-soft">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-[#E5E7EB] bg-white p-12 text-center shadow-soft">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#EEF2FF] text-primary">
                 <Sparkles className="h-8 w-8" />
               </div>
               <div className="space-y-2">
                 <h3 className="text-xl font-semibold">Aucun tableau trouvé</h3>
-                <p className="text-sm text-muted-foreground">Essayez d'ajuster vos filtres ou créez un nouveau tableau somptueux.</p>
+                <p className="text-sm text-muted-foreground">Essayez d'ajuster vos filtres ou créez un nouveau tableau.</p>
               </div>
               <div className="flex gap-3">
-                <Button onClick={() => setIsCreateDialogOpen(true)} className="rounded-full bg-primary/80 px-6 text-primary-foreground hover:bg-primary">Créer un tableau</Button>
-                <Button variant="ghost" className="rounded-full border border-white/30 bg-white/60 px-6 backdrop-blur-lg hover:border-primary/40 hover:text-primary" onClick={() => setSelectedBoardTags([])}>
+                <Button onClick={() => setIsCreateDialogOpen(true)} className="rounded-full bg-primary px-6 text-primary-foreground hover:bg-primary/90">Créer un tableau</Button>
+                <Button variant="ghost" className="rounded-full border border-[#E5E7EB] bg-white px-6 hover:border-primary/40 hover:text-primary" onClick={() => setSelectedBoardTags([])}>
                   Réinitialiser
                 </Button>
               </div>
@@ -766,15 +761,14 @@ const Dashboard = () => {
                     onDragStart={() => handleDragStart(board.id)}
                     onDragOver={event => handleDragOver(event, board.id)}
                     onDragEnd={handleDragEnd}
-                    className={`group relative flex h-full flex-col overflow-hidden rounded-[26px] border border-white/30 bg-white/65 p-6 backdrop-blur-2xl shadow-soft transition duration-500 ease-in-out hover:-translate-y-1 hover:shadow-glow dark:border-white/10 dark:bg-white/10 ${draggingBoardId === board.id ? "ring-2 ring-primary/60" : ""}`}
+                    className={`group relative flex h-full flex-col overflow-hidden rounded-2xl border bg-white p-6 shadow-soft transition duration-300 ease-in-out hover:-translate-y-1 hover:shadow-md ${draggingBoardId === board.id ? "border-primary/60 ring-2 ring-primary/30" : "border-[#E5E7EB]"}`}
                   >
-                    <div className="absolute inset-0 opacity-0 transition group-hover:opacity-100" style={{ backgroundImage: "linear-gradient(140deg, hsla(37,79%,75%,0.32), transparent 50%), radial-gradient(120% 120% at 0% 0%, hsla(150,32%,46%,0.25), transparent 55%)" }} />
                     <div className="relative z-10 flex flex-col gap-5">
                       <div className="flex items-start justify-between">
                         <div className="flex flex-col gap-2">
                           <div className="flex items-center gap-2">
                             {team && (
-                              <Badge className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.3em] text-primary">
+                              <Badge className="rounded-full bg-[#EEF2FF] px-3 py-1 text-xs font-medium uppercase tracking-[0.3em] text-primary">
                                 {team.name}
                               </Badge>
                             )}
@@ -793,17 +787,17 @@ const Dashboard = () => {
                             variant="ghost"
                             size="icon"
                             onClick={() => handleToggleFavorite(board.id)}
-                            className={`h-9 w-9 rounded-full border border-white/40 bg-white/60 text-muted-foreground backdrop-blur-lg transition hover:border-primary/40 hover:text-primary dark:bg-white/10 ${board.isFavorite ? "text-amber-500" : ""}`}
+                            className={`h-9 w-9 rounded-full border border-[#E5E7EB] bg-[#F8FAFC] text-muted-foreground transition hover:border-primary/40 hover:text-primary ${board.isFavorite ? "text-amber-500" : ""}`}
                           >
                             <Star className={`h-4 w-4 ${board.isFavorite ? "fill-current" : ""}`} />
                           </Button>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full border border-white/40 bg-white/60 text-muted-foreground backdrop-blur-lg transition hover:border-primary/40 hover:text-primary dark:bg-white/10">
+                              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full border border-[#E5E7EB] bg-[#F8FAFC] text-muted-foreground transition hover:border-primary/40 hover:text-primary">
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48 rounded-2xl border border-white/30 bg-white/70 backdrop-blur-2xl dark:bg-white/10">
+                            <DropdownMenuContent align="end" className="w-48 rounded-2xl border border-[#E5E7EB] bg-white">
                               <DropdownMenuLabel className="text-xs font-medium uppercase tracking-[0.3em] text-muted-foreground">Actions</DropdownMenuLabel>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem onSelect={() => handleOpenBoard(board.id)} className="cursor-pointer rounded-xl text-sm font-medium">
@@ -834,13 +828,13 @@ const Dashboard = () => {
 
                       <div className="flex flex-wrap items-center gap-2">
                         {(board.tags ?? []).map(tag => (
-                          <Badge key={tag} className="rounded-full border border-white/40 bg-white/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground backdrop-blur-lg transition group-hover:border-primary/40 group-hover:text-primary dark:bg-white/10">
+                          <Badge key={tag} className="rounded-full border border-[#E5E7EB] bg-[#F1F5F9] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground transition group-hover:border-primary/30 group-hover:text-primary">
                             {tag}
                           </Badge>
                         ))}
                       </div>
 
-                      <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/30 bg-white/50 px-4 py-3 text-xs text-muted-foreground backdrop-blur-lg shadow-inner dark:bg-white/5">
+                      <div className="flex items-center justify-between gap-3 rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3 text-xs text-muted-foreground">
                         <div className="flex items-center gap-3">
                           <Users className="h-4 w-4 text-primary" />
                           <span>{boardCollaborators.length} collaborateur(s)</span>
@@ -857,12 +851,12 @@ const Dashboard = () => {
                               </Avatar>
                             ))}
                             {boardCollaborators.length > 3 && (
-                              <div className="flex h-8 w-8 items-center justify-center rounded-full border border-dashed border-white/50 bg-white/60 text-[11px] font-medium backdrop-blur-lg dark:bg-white/10">
+                              <div className="flex h-8 w-8 items-center justify-center rounded-full border border-dashed border-[#E5E7EB] bg-[#F1F5F9] text-[11px] font-medium">
                                 +{boardCollaborators.length - 3}
                               </div>
                             )}
                           </div>
-                          <Button size="sm" onClick={() => handleOpenBoard(board.id)} className="h-8 rounded-full bg-primary/80 px-4 text-xs font-semibold text-primary-foreground hover:bg-primary">
+                          <Button size="sm" onClick={() => handleOpenBoard(board.id)} className="h-8 rounded-full bg-primary px-4 text-xs font-semibold text-primary-foreground hover:bg-primary/90">
                             Ouvrir
                             <ArrowRight className="ml-1.5 h-3 w-3" />
                           </Button>
@@ -886,13 +880,13 @@ const Dashboard = () => {
                     onDragStart={() => handleDragStart(board.id)}
                     onDragOver={event => handleDragOver(event, board.id)}
                     onDragEnd={handleDragEnd}
-                    className={`group flex flex-col gap-4 rounded-3xl border border-white/30 bg-white/60 p-6 backdrop-blur-2xl shadow-soft transition duration-500 hover:-translate-y-1 hover:shadow-glow dark:border-white/10 dark:bg-white/10 ${draggingBoardId === board.id ? "ring-2 ring-primary/60" : ""}`}
+                    className={`group flex flex-col gap-4 rounded-2xl border bg-white p-6 shadow-soft transition duration-300 hover:-translate-y-1 hover:shadow-md ${draggingBoardId === board.id ? "border-primary/60 ring-2 ring-primary/30" : "border-[#E5E7EB]"}`}
                   >
                     <div className="flex flex-wrap items-center justify-between gap-4">
                       <div className="flex flex-col gap-2">
                         <div className="flex items-center gap-3">
                           {team && (
-                            <Badge className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.3em] text-primary">
+                            <Badge className="rounded-full bg-[#EEF2FF] px-3 py-1 text-xs font-medium uppercase tracking-[0.3em] text-primary">
                               {team.name}
                             </Badge>
                           )}
@@ -915,17 +909,17 @@ const Dashboard = () => {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleToggleFavorite(board.id)}
-                          className={`h-9 w-9 rounded-full border border-white/40 bg-white/60 text-muted-foreground backdrop-blur-lg transition hover:border-primary/40 hover:text-primary dark:bg-white/10 ${board.isFavorite ? "text-amber-500" : ""}`}
+                          className={`h-9 w-9 rounded-full border border-[#E5E7EB] bg-[#F8FAFC] text-muted-foreground transition hover:border-primary/40 hover:text-primary ${board.isFavorite ? "text-amber-500" : ""}`}
                         >
                           <Star className={`h-4 w-4 ${board.isFavorite ? "fill-current" : ""}`} />
                         </Button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full border border-white/40 bg-white/60 text-muted-foreground backdrop-blur-lg transition hover:border-primary/40 hover:text-primary dark:bg-white/10">
+                            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full border border-[#E5E7EB] bg-[#F8FAFC] text-muted-foreground transition hover:border-primary/40 hover:text-primary">
                               <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-48 rounded-2xl border border-white/30 bg-white/70 backdrop-blur-2xl dark:bg-white/10">
+                          <DropdownMenuContent align="end" className="w-48 rounded-2xl border border-[#E5E7EB] bg-white">
                             <DropdownMenuLabel className="text-xs font-medium uppercase tracking-[0.3em] text-muted-foreground">Actions</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onSelect={() => handleOpenBoard(board.id)} className="cursor-pointer rounded-xl text-sm font-medium">
@@ -956,7 +950,7 @@ const Dashboard = () => {
                     <div className="flex flex-wrap items-center justify-between gap-4">
                       <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                         {(board.tags ?? []).map(tag => (
-                          <Badge key={tag} className="rounded-full border border-white/40 bg-white/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground backdrop-blur-lg transition group-hover:border-primary/40 group-hover:text-primary dark:bg-white/10">
+                          <Badge key={tag} className="rounded-full border border-[#E5E7EB] bg-[#F1F5F9] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground transition group-hover:border-primary/30 group-hover:text-primary">
                             {tag}
                           </Badge>
                         ))}
@@ -970,15 +964,15 @@ const Dashboard = () => {
                             </Avatar>
                           ))}
                           {boardCollaborators.length > 4 && (
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full border border-dashed border-white/50 bg-white/60 text-[11px] font-medium backdrop-blur-lg dark:bg-white/10">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full border border-dashed border-[#E5E7EB] bg-[#F1F5F9] text-[11px] font-medium">
                               +{boardCollaborators.length - 4}
                             </div>
                           )}
                         </div>
-                        <div className="flex items-center gap-1 rounded-full border border-white/40 bg-white/60 px-3 py-1 text-xs text-muted-foreground backdrop-blur-lg dark:bg-white/10">
+                        <div className="flex items-center gap-1 rounded-full border border-[#E5E7EB] bg-[#F1F5F9] px-3 py-1 text-xs text-muted-foreground">
                           <Clock className="h-3.5 w-3.5" /> {board.lastModified.toLocaleDateString("fr-FR")}
                         </div>
-                        <Button size="sm" className="h-9 rounded-full bg-primary/80 px-5 text-xs font-semibold text-primary-foreground hover:bg-primary" onClick={() => handleOpenBoard(board.id)}>
+                        <Button size="sm" className="h-9 rounded-full bg-primary px-5 text-xs font-semibold text-primary-foreground hover:bg-primary/90" onClick={() => handleOpenBoard(board.id)}>
                           Accéder
                           <ArrowRight className="ml-1.5 h-3 w-3" />
                         </Button>
@@ -994,13 +988,13 @@ const Dashboard = () => {
 
       {/* Floating action button */}
       <div className="pointer-events-none fixed bottom-8 right-8 z-50 flex flex-col items-end gap-3">
-        <div className="pointer-events-auto rounded-2xl border border-white/30 bg-white/70 px-4 py-2 text-xs font-medium uppercase tracking-[0.3em] text-muted-foreground backdrop-blur-lg shadow-soft dark:bg-white/10">
+        <div className="pointer-events-auto rounded-xl border border-[#E5E7EB] bg-white px-4 py-2 text-xs font-medium uppercase tracking-[0.3em] text-muted-foreground shadow-soft">
           Créer instantanément
         </div>
         <Button
           size="icon"
           onClick={() => setIsCreateDialogOpen(true)}
-          className="pointer-events-auto h-14 w-14 rounded-full bg-primary/80 text-primary-foreground shadow-glow transition hover:scale-[1.03] hover:bg-primary"
+          className="pointer-events-auto h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-soft transition hover:scale-[1.03] hover:bg-primary/90"
         >
           <Plus className="h-6 w-6" />
         </Button>
@@ -1008,14 +1002,14 @@ const Dashboard = () => {
 
       {/* Create board dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="max-w-[520px] rounded-[28px] border border-white/30 bg-white/70 backdrop-blur-3xl dark:bg-white/10">
+        <DialogContent className="max-w-[520px] rounded-2xl border border-[#E5E7EB] bg-white">
           <DialogHeader className="space-y-2">
-            <Badge className="w-fit rounded-full border border-white/40 bg-white/60 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.35em] text-muted-foreground backdrop-blur-lg dark:bg-white/5">
+            <Badge className="w-fit rounded-full border border-[#C7D2FE] bg-[#EEF2FF] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.35em] text-[#4F46E5]">
               Nouveau tableau
             </Badge>
-            <DialogTitle className="text-2xl font-semibold text-foreground">Composer un espace ultra-premium</DialogTitle>
+            <DialogTitle className="text-2xl font-semibold text-foreground">Créer un espace collaboratif</DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
-              Paramétrez un espace collaboratif immersif, invitez votre équipe et activez les micro-interactions.
+              Paramétrez un espace collaboratif, invitez votre équipe et démarrez.
             </DialogDescription>
           </DialogHeader>
 
@@ -1026,7 +1020,7 @@ const Dashboard = () => {
                 value={newBoard.name}
                 onChange={event => setNewBoard(prev => ({ ...prev, name: event.target.value }))}
                 placeholder="Ex : Atelier expérience premium"
-                className="h-11 rounded-2xl border border-white/40 bg-white/70 placeholder:text-muted-foreground backdrop-blur-lg focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-white/10"
+                className="h-11 rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-primary/30 focus-visible:ring-offset-0"
               />
             </div>
             <div className="space-y-2">
@@ -1035,16 +1029,16 @@ const Dashboard = () => {
                 value={newBoard.description}
                 onChange={event => setNewBoard(prev => ({ ...prev, description: event.target.value }))}
                 placeholder="Décrivez l'univers de ce tableau..."
-                className="min-h-[100px] rounded-2xl border border-white/40 bg-white/70 placeholder:text-muted-foreground backdrop-blur-lg focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-white/10"
+                className="min-h-[100px] rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-primary/30 focus-visible:ring-offset-0"
               />
             </div>
             <div className="space-y-2">
               <Label className="text-sm font-semibold text-muted-foreground">Équipe</Label>
               <Select value={newBoard.teamId} onValueChange={value => setNewBoard(prev => ({ ...prev, teamId: value }))}>
-                <SelectTrigger className="h-11 rounded-2xl border border-white/40 bg-white/70 text-sm font-medium backdrop-blur-lg focus:ring-0 focus:ring-offset-0 dark:bg-white/10">
+                <SelectTrigger className="h-11 rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] text-sm font-medium focus:ring-1 focus:ring-primary/30 focus:ring-offset-0">
                   <SelectValue placeholder="Choisir une équipe" />
                 </SelectTrigger>
-                <SelectContent className="backdrop-blur-xl">
+                <SelectContent>
                   {teams
                     .filter(team => team.id !== "all")
                     .map(team => (
@@ -1068,15 +1062,15 @@ const Dashboard = () => {
                     }
                   }}
                   placeholder="Ajoutez un tag (premium, focus, live...)"
-                  className="h-10 flex-1 rounded-2xl border border-white/40 bg-white/70 placeholder:text-muted-foreground backdrop-blur-lg focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-white/10"
+                  className="h-10 flex-1 rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-primary/30 focus-visible:ring-offset-0"
                 />
-                <Button type="button" className="h-10 rounded-2xl bg-primary/80 px-4 text-xs font-semibold uppercase tracking-[0.3em] text-primary-foreground hover:bg-primary" onClick={handleAddTag}>
+                <Button type="button" className="h-10 rounded-xl bg-primary px-4 text-xs font-semibold uppercase tracking-[0.3em] text-primary-foreground hover:bg-primary/90" onClick={handleAddTag}>
                   Ajouter
                 </Button>
               </div>
               <div className="flex flex-wrap gap-2">
                 {newBoard.tags.map(tag => (
-                  <Badge key={tag} className="flex items-center gap-2 rounded-full border border-white/40 bg-white/70 px-4 py-1 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground backdrop-blur-lg dark:bg-white/10">
+                  <Badge key={tag} className="flex items-center gap-2 rounded-full border border-[#E5E7EB] bg-[#F1F5F9] px-4 py-1 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
                     #{tag}
                     <button type="button" onClick={() => handleRemoveTag(tag)} className="text-muted-foreground transition hover:text-red-500">
                       ×
@@ -1091,10 +1085,10 @@ const Dashboard = () => {
           </div>
 
           <DialogFooter className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-between">
-            <Button variant="ghost" className="h-11 w-full rounded-2xl border border-white/40 bg-white/70 text-sm font-semibold backdrop-blur-lg hover:border-primary/40 hover:text-primary dark:bg-white/10 sm:w-auto" onClick={() => setIsCreateDialogOpen(false)}>
+            <Button variant="ghost" className="h-11 w-full rounded-xl border border-[#E5E7EB] bg-white text-sm font-semibold hover:border-primary/40 hover:text-primary sm:w-auto" onClick={() => setIsCreateDialogOpen(false)}>
               Annuler
             </Button>
-            <Button className="h-11 w-full rounded-2xl bg-primary/80 px-6 text-sm font-semibold text-primary-foreground shadow-soft transition hover:bg-primary hover:shadow-glow sm:w-auto" onClick={handleCreateBoard}>
+            <Button className="h-11 w-full rounded-xl bg-primary px-6 text-sm font-semibold text-primary-foreground shadow-soft transition hover:bg-primary/90 sm:w-auto" onClick={handleCreateBoard}>
               Créer le tableau
             </Button>
           </DialogFooter>
@@ -1103,12 +1097,12 @@ const Dashboard = () => {
 
       {/* Create diagram dialog */}
       <Dialog open={isDiagramDialogOpen} onOpenChange={setIsDiagramDialogOpen}>
-        <DialogContent className="max-w-[520px] rounded-[28px] border border-white/30 bg-white/70 backdrop-blur-3xl dark:bg-white/10">
+        <DialogContent className="max-w-[520px] rounded-2xl border border-[#E5E7EB] bg-white">
           <DialogHeader className="space-y-2">
-            <Badge className="w-fit rounded-full border border-white/40 bg-white/60 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.35em] text-muted-foreground backdrop-blur-lg dark:bg-white/5">
+            <Badge className="w-fit rounded-full border border-[#C7D2FE] bg-[#EEF2FF] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.35em] text-[#4F46E5]">
               Nouveau diagramme
             </Badge>
-            <DialogTitle className="text-2xl font-semibold text-foreground">Créer un flow immersif</DialogTitle>
+            <DialogTitle className="text-2xl font-semibold text-foreground">Créer un flow collaboratif</DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
               Définissez les sections, étapes et interactions pour orchestrer votre prochain atelier.
             </DialogDescription>
@@ -1121,7 +1115,7 @@ const Dashboard = () => {
                 value={newBoard.name}
                 onChange={event => setNewBoard(prev => ({ ...prev, name: event.target.value }))}
                 placeholder="Ex : Parcours onboarding premium"
-                className="h-11 rounded-2xl border border-white/40 bg-white/70 placeholder:text-muted-foreground backdrop-blur-lg focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-white/10"
+                className="h-11 rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-primary/30 focus-visible:ring-offset-0"
               />
             </div>
             <div className="space-y-2">
@@ -1130,16 +1124,16 @@ const Dashboard = () => {
                 value={newBoard.description}
                 onChange={event => setNewBoard(prev => ({ ...prev, description: event.target.value }))}
                 placeholder="Décrivez les interactions clés, transitions, micro-interactions..."
-                className="min-h-[100px] rounded-2xl border border-white/40 bg-white/70 placeholder:text-muted-foreground backdrop-blur-lg focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-white/10"
+                className="min-h-[100px] rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-primary/30 focus-visible:ring-offset-0"
               />
             </div>
             <div className="space-y-2">
               <Label className="text-sm font-semibold text-muted-foreground">Équipe</Label>
               <Select value={newBoard.teamId} onValueChange={value => setNewBoard(prev => ({ ...prev, teamId: value }))}>
-                <SelectTrigger className="h-11 rounded-2xl border border-white/40 bg-white/70 text-sm font-medium backdrop-blur-lg focus:ring-0 focus:ring-offset-0 dark:bg-white/10">
+                <SelectTrigger className="h-11 rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] text-sm font-medium focus:ring-1 focus:ring-primary/30 focus:ring-offset-0">
                   <SelectValue placeholder="Choisir une équipe" />
                 </SelectTrigger>
-                <SelectContent className="backdrop-blur-xl">
+                <SelectContent>
                   {teams
                     .filter(team => team.id !== "all")
                     .map(team => (
@@ -1163,15 +1157,15 @@ const Dashboard = () => {
                     }
                   }}
                   placeholder="Ajoutez un tag (diagramme, parcours, live...)"
-                  className="h-10 flex-1 rounded-2xl border border-white/40 bg-white/70 placeholder:text-muted-foreground backdrop-blur-lg focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-white/10"
+                  className="h-10 flex-1 rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-primary/30 focus-visible:ring-offset-0"
                 />
-                <Button type="button" className="h-10 rounded-2xl bg-primary/80 px-4 text-xs font-semibold uppercase tracking-[0.3em] text-primary-foreground hover:bg-primary" onClick={handleAddTag}>
+                <Button type="button" className="h-10 rounded-xl bg-primary px-4 text-xs font-semibold uppercase tracking-[0.3em] text-primary-foreground hover:bg-primary/90" onClick={handleAddTag}>
                   Ajouter
                 </Button>
               </div>
               <div className="flex flex-wrap gap-2">
                 {newBoard.tags.map(tag => (
-                  <Badge key={tag} className="flex items-center gap-2 rounded-full border border-white/40 bg-white/70 px-4 py-1 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground backdrop-blur-lg dark:bg-white/10">
+                  <Badge key={tag} className="flex items-center gap-2 rounded-full border border-[#E5E7EB] bg-[#F1F5F9] px-4 py-1 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
                     #{tag}
                     <button type="button" onClick={() => handleRemoveTag(tag)} className="text-muted-foreground transition hover:text-red-500">
                       ×
@@ -1186,10 +1180,10 @@ const Dashboard = () => {
           </div>
 
           <DialogFooter className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-between">
-            <Button variant="ghost" className="h-11 w-full rounded-2xl border border-white/40 bg-white/70 text-sm font-semibold backdrop-blur-lg hover:border-primary/40 hover:text-primary dark:bg-white/10 sm:w-auto" onClick={() => setIsDiagramDialogOpen(false)}>
+            <Button variant="ghost" className="h-11 w-full rounded-xl border border-[#E5E7EB] bg-white text-sm font-semibold hover:border-primary/40 hover:text-primary sm:w-auto" onClick={() => setIsDiagramDialogOpen(false)}>
               Annuler
             </Button>
-            <Button className="h-11 w-full rounded-2xl bg-primary/80 px-6 text-sm font-semibold text-primary-foreground shadow-soft transition hover:bg-primary hover:shadow-glow sm:w-auto" onClick={handleCreateDiagram}>
+            <Button className="h-11 w-full rounded-xl bg-primary px-6 text-sm font-semibold text-primary-foreground shadow-soft transition hover:bg-primary/90 sm:w-auto" onClick={handleCreateDiagram}>
               Créer le diagramme
             </Button>
           </DialogFooter>
@@ -1212,7 +1206,7 @@ const Dashboard = () => {
 
       {/* Delete confirmation */}
       <AlertDialog open={Boolean(boardToDelete)} onOpenChange={() => setBoardToDelete(null)}>
-        <AlertDialogContent className="max-w-sm rounded-3xl border border-white/30 bg-white/70 backdrop-blur-3xl dark:bg-white/10">
+        <AlertDialogContent className="max-w-sm rounded-2xl border border-[#E5E7EB] bg-white">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-xl font-semibold">Supprimer ce tableau ?</AlertDialogTitle>
             <AlertDialogDescription className="text-sm text-muted-foreground">
@@ -1220,10 +1214,10 @@ const Dashboard = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-2xl border border-white/40 bg-white/70 px-4 py-2 text-sm font-medium backdrop-blur-lg hover:border-primary/40 hover:text-primary dark:bg-white/10">
+            <AlertDialogCancel className="rounded-xl border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-medium hover:border-primary/40 hover:text-primary">
               Annuler
             </AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteBoard} className="rounded-2xl bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground shadow-soft transition hover:brightness-110">
+            <AlertDialogAction onClick={handleDeleteBoard} className="rounded-xl bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground shadow-soft transition hover:brightness-110">
               Supprimer
             </AlertDialogAction>
           </AlertDialogFooter>
