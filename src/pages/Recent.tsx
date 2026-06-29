@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Clock, Edit, MoreVertical, Star, FileEdit, Download, Share2, Copy, Trash2, Search, LayoutGrid, List, Plus, Layout, Grid as GridIcon, X } from "lucide-react";
+import { PageTitle } from "@/contexts/PageHeaderContext";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -185,12 +186,8 @@ const Recent = () => {
 
   return (
     <div className="p-8">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <Clock className="h-6 w-6" />
-          <h2 className="text-2xl font-semibold">Ressources Récentes</h2>
-        </div>
-      </div>
+      <PageTitle title="Récents" />
+
 
       {/* Search and Filters */}
       <div className="mb-6 space-y-4">

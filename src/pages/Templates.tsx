@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Layout, Plus, Search, FileEdit, LayoutGrid, List, Star, X, Upload } from "lucide-react";
+import { PageTitle } from "@/contexts/PageHeaderContext";
 import { templates } from "@/components/Canvas/templates";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -117,9 +118,16 @@ const Templates = () => {
     navigate(`/canvas/${boardId}?template=${templateId}`);
   };
 
+  const headerAction = (
+    <Button size="sm" className="h-8 rounded-full bg-primary px-4 text-xs font-semibold text-primary-foreground hover:bg-primary/90" onClick={() => setIsCreateDialogOpen(true)}>
+      <FileEdit className="mr-1.5 h-3.5 w-3.5" /> Créer un template
+    </Button>
+  );
+
   return (
     <ScrollArea className="h-screen">
       <div className="p-8">
+        <PageTitle title="Templates" action={headerAction} />
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
@@ -219,16 +227,6 @@ const Templates = () => {
           </DialogContent>
         </Dialog>
 
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <Layout className="h-6 w-6" />
-            <h2 className="text-2xl font-semibold">Templates</h2>
-          </div>
-          <Button onClick={() => setIsCreateDialogOpen(true)} className="gap-2">
-            <FileEdit className="h-4 w-4" />
-            Créer un template
-          </Button>
-        </div>
 
         <div className="mb-6 space-y-4">
           <div className="flex items-center justify-between gap-4">

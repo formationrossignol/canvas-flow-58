@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { PageTitle } from "@/contexts/PageHeaderContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -170,16 +171,14 @@ const Teams = () => {
 
   return (
     <div className="p-8">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <Users className="h-6 w-6" />
-          <h2 className="text-2xl font-semibold">Gestion des équipes</h2>
-        </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Nouvelle Équipe
-        </Button>
-      </div>
+      <PageTitle
+        title="Équipes"
+        action={
+          <Button size="sm" className="h-8 rounded-full bg-primary px-4 text-xs font-semibold text-primary-foreground hover:bg-primary/90" onClick={() => setIsCreateDialogOpen(true)}>
+            <Plus className="mr-1.5 h-3.5 w-3.5" /> Nouvelle équipe
+          </Button>
+        }
+      />
 
       {teams.length === 0 ? (
         <Card className="text-center py-12">

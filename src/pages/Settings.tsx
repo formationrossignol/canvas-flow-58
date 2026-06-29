@@ -1,5 +1,6 @@
 import { useRef, type ChangeEvent } from "react";
 import { Settings as SettingsIcon, Check, ImagePlus, RefreshCw } from "lucide-react";
+import { PageTitle } from "@/contexts/PageHeaderContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -87,10 +88,7 @@ const Settings = () => {
 
   return (
     <div className="p-8">
-      <div className="flex items-center gap-3 mb-6">
-        <SettingsIcon className="h-6 w-6" />
-        <h2 className="text-2xl font-semibold">Paramètres</h2>
-      </div>
+      <PageTitle title="Paramètres" />
 
       <div className="space-y-6 max-w-2xl">
         <Card>
