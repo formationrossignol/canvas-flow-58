@@ -102,6 +102,8 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isPresentMode, setIsPresentMode] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [isAligning, setIsAligning] = useState(false);
+  const alignTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const isTextEditorVisible = selectedTool === 'text';
   const [textStyle, setTextStyle] = useState<{
     fontFamily?: string;
@@ -222,10 +224,11 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
     const bMinX = Math.min(...selEls.map(el => el.x));
     const bMaxX = Math.max(...selEls.map(el => el.x + el.width));
     const bMinY = Math.min(...selEls.map(el => el.y));
+    const paddingTop = allTags.length > 0 ? 84 : 48;
     const screenCx = canvasTransform.x + (bMinX + bMaxX) / 2 * canvasTransform.scale;
-    const screenTopY = canvasTransform.y + bMinY * canvasTransform.scale;
-    return { left: screenCx, top: Math.max(8, screenTopY - 44) };
-  }, [selection.selectedIds, elements, canvasTransform]);
+    const screenTopY = paddingTop + canvasTransform.y + bMinY * canvasTransform.scale;
+    return { left: screenCx, top: Math.max(paddingTop + 8, screenTopY - 44) };
+  }, [selection.selectedIds, elements, canvasTransform, allTags]);
 
   const templateAppliedRef = useRef(false);
 
@@ -470,13 +473,21 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
   }, [selection.selectedIds, elements, addToHistory, selectMultiple]);
 
   const handleApplyTemplate = useCallback((templateElements: CanvasElement[]) => {
-    setElements(templateElements);
-    setConnections([]);
-    setDrawingStrokes([]);
-    addToHistory(templateElements);
+    const offset = elements.length > 0 ? 60 : 0;
+    const newEls = templateElements.map(el => ({
+      ...el,
+      id: generateId(),
+      x: el.x + offset,
+      y: el.y + offset,
+    }));
+    setElements(prev => {
+      const next = [...prev, ...newEls];
+      addToHistory(next);
+      return next;
+    });
     clearSelection();
-    toast.success("Template appliqué au tableau");
-  }, [clearSelection, addToHistory]);
+    toast.success("Template ajouté au tableau");
+  }, [elements.length, clearSelection, addToHistory]);
 
   const handleImportElements = useCallback((importedElements: CanvasElement[]) => {
     setElements(importedElements);
@@ -922,6 +933,9 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       addToHistory(next);
       return next;
     });
+    setIsAligning(true);
+    clearTimeout(alignTimeoutRef.current);
+    alignTimeoutRef.current = setTimeout(() => setIsAligning(false), 300);
   }, [selection.selectedIds, elements, addToHistory]);
 
   const handleDistribute = useCallback((axis: 'h' | 'v') => {
@@ -950,6 +964,9 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
       addToHistory(next);
       return next;
     });
+    setIsAligning(true);
+    clearTimeout(alignTimeoutRef.current);
+    alignTimeoutRef.current = setTimeout(() => setIsAligning(false), 300);
   }, [selection.selectedIds, elements, addToHistory]);
 
   const bgPatterns: Record<string, React.CSSProperties> = {
@@ -1244,6 +1261,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
               onMoveSelected={handleMoveSelected}
               onDragEnd={handleDragEnd}
               onContextMenu={handleElementContextMenu}
+              isAligning={isAligning}
             />
           ))}
 
@@ -1260,6 +1278,7 @@ export const Canvas = ({ boardId, templateId }: CanvasProps) => {
             onResizeEnd={handleResizeEnd}
             canvasTransform={canvasTransform}
             containerRef={containerRef}
+            containerPaddingTop={allTags.length > 0 ? 84 : 48}
           />
         )
       )}

@@ -18,6 +18,7 @@ interface CanvasObjectProps {
   onMoveSelected: (dx: number, dy: number) => void;
   onDragEnd: () => void;
   onContextMenu?: (e: React.MouseEvent, element: CanvasElement) => void;
+  isAligning?: boolean;
 }
 
 const DRAG_THRESHOLD = 4;
@@ -35,6 +36,7 @@ export const CanvasObject = ({
   onMoveSelected,
   onDragEnd,
   onContextMenu,
+  isAligning,
 }: CanvasObjectProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -187,69 +189,47 @@ export const CanvasObject = ({
     onUpdate(element.id, { comments: updatedComments });
   }, [element.comments, element.id, onUpdate, getCurrentUserId]);
 
-  const getElementStyle = (): React.CSSProperties => {
-    const baseStyle: React.CSSProperties = {
-      position: 'absolute',
-      left: element.x,
-      top: element.y,
-      width: element.width,
-      height: element.height,
-      backgroundColor: element.color,
-      cursor: element.locked ? 'not-allowed' : (isDragging ? 'grabbing' : 'grab'),
-      opacity: element.locked ? (element.opacity || 1) * 0.7 : (element.opacity || 1),
-      zIndex: isDragging ? 1000 : (element.zIndex || 1),
-    };
+  const getRootStyle = (): React.CSSProperties => ({
+    position: 'absolute',
+    left: element.x,
+    top: element.y,
+    width: element.width,
+    height: element.height,
+    cursor: element.locked ? 'not-allowed' : (isDragging ? 'grabbing' : 'grab'),
+    zIndex: isDragging ? 1000 : (element.zIndex || 1),
+    transition: isAligning && !isDragging ? 'left 0.25s ease, top 0.25s ease' : undefined,
+  });
 
+  const getShapeStyle = (): React.CSSProperties => {
+    const opacity = element.locked ? (element.opacity || 1) * 0.7 : (element.opacity || 1);
+    const base: React.CSSProperties = {
+      position: 'absolute',
+      inset: 0,
+      backgroundColor: element.color,
+      opacity,
+    };
     switch (element.type) {
       case 'sticky':
-        return {
-          ...baseStyle,
-          borderRadius: '8px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.08)',
-          border: '1px solid rgba(255,255,255,0.3)',
-        };
+        return { ...base, borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.08)', border: '1px solid rgba(255,255,255,0.3)' };
       case 'rectangle':
-        return {
-          ...baseStyle,
-          borderRadius: element.borderRadius || 8,
-          border: '2px solid rgba(0,0,0,0.1)',
-        };
+        return { ...base, borderRadius: element.borderRadius || 8, border: '2px solid rgba(0,0,0,0.1)' };
       case 'circle':
-        return {
-          ...baseStyle,
-          borderRadius: '50%',
-          border: '2px solid rgba(0,0,0,0.1)',
-        };
+        return { ...base, borderRadius: '50%', border: '2px solid rgba(0,0,0,0.1)' };
       case 'triangle':
       case 'hexagon':
       case 'pentagon':
       case 'star':
       case 'diamond':
       case 'heart':
-        return { ...baseStyle, backgroundColor: 'transparent', border: 'none' };
+        return { ...base, backgroundColor: 'transparent', border: 'none' };
       case 'text':
-        return {
-          ...baseStyle,
-          backgroundColor: 'transparent',
-          border: '1px dashed rgba(0,0,0,0.2)',
-        };
+        return { ...base, backgroundColor: 'transparent', border: '1px dashed rgba(0,0,0,0.2)' };
       case 'image':
-        return {
-          ...baseStyle,
-          backgroundColor: 'transparent',
-          borderRadius: 8,
-          overflow: 'hidden',
-        };
+        return { ...base, backgroundColor: 'transparent', borderRadius: 8, overflow: 'hidden' };
       case 'comment':
-        return {
-          ...baseStyle,
-          backgroundColor: '#FFFFFF',
-          borderRadius: 12,
-          border: '2px solid #E2E8F0',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-        };
+        return { ...base, backgroundColor: '#FFFFFF', borderRadius: 12, border: '2px solid #E2E8F0', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' };
       default:
-        return baseStyle;
+        return base;
     }
   };
 
@@ -449,14 +429,18 @@ export const CanvasObject = ({
     <>
       <div
         ref={elementRef}
-        style={getElementStyle()}
+        style={getRootStyle()}
         onMouseDown={handleMouseDown}
         onDoubleClick={handleDoubleClick}
         onContextMenu={onContextMenu ? (e) => onContextMenu(e, element) : undefined}
         className="group animate-scale-in"
       >
-        {renderContent()}
+        {/* Shape layer — opacity applied here only */}
+        <div style={getShapeStyle()}>
+          {renderContent()}
+        </div>
 
+        {/* UI overlays — always full opacity */}
         {isSelected && (
           <div className="absolute inset-0 border-2 border-primary rounded-lg pointer-events-none" />
         )}

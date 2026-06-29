@@ -9,6 +9,7 @@ interface ResizeHandlesProps {
   onResizeEnd: () => void;
   canvasTransform: { x: number; y: number; scale: number };
   containerRef: React.RefObject<HTMLDivElement>;
+  containerPaddingTop: number;
 }
 
 // Handle is rendered in screen space (position: fixed), always 10×10px.
@@ -22,6 +23,7 @@ export const ResizeHandles = ({
   onResizeEnd,
   canvasTransform,
   containerRef,
+  containerPaddingTop,
 }: ResizeHandlesProps) => {
   const [isResizing, setIsResizing] = useState(false);
   const [resizeHandle, setResizeHandle] = useState<HandlePosition | null>(null);
@@ -129,9 +131,9 @@ export const ResizeHandles = ({
 
   const { x: tx, y: ty, scale } = canvasTransform;
 
-  // Element corners in screen coordinates
+  // Element corners in screen coordinates (ty is canvas pan; paddingTop = canvas-content natural top offset)
   const sx = containerRect.left + tx + element.x * scale;
-  const sy = containerRect.top  + ty + element.y * scale;
+  const sy = containerRect.top  + containerPaddingTop + ty + element.y * scale;
   const sw = element.width  * scale;
   const sh = element.height * scale;
 
